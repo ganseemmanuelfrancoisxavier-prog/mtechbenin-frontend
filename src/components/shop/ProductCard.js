@@ -104,11 +104,6 @@ export default function ProductCard({ product, featuredCta = false }) {
           <span className="font-display font-black text-apple-black text-[17px] tracking-tight">
             {formatPrice(product.price)}
           </span>
-          {product.comparePrice && (
-            <span className="text-apple-mid text-[13px] line-through">
-              {formatPrice(product.comparePrice)}
-            </span>
-          )}
         </div>
 
         <span
