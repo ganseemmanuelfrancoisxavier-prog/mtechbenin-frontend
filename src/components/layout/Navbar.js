@@ -72,7 +72,7 @@ export default function Navbar() {
     const focusable = menuPanelRef.current?.querySelectorAll(
       'a[href], button:not([disabled]), input:not([disabled])',
     );
-    focusable?.[0]?.focus();
+    menuPanelRef.current?.focus();
 
     const trapFocus = (event) => {
       if (event.key !== "Tab") return;
@@ -282,7 +282,7 @@ export default function Navbar() {
               className="fixed inset-x-0 bottom-0 top-[56px] z-50 overflow-y-auto bg-black/35 backdrop-blur-[2px] lg:hidden"
             >
               <button type="button" aria-label="Fermer le menu" onClick={() => setMenuOpen(false)} className="absolute inset-0 h-full w-full" />
-              <div role="dialog" aria-modal="true" aria-label="Menu de navigation" ref={menuPanelRef} className="relative ml-auto max-h-full w-full max-w-lg overflow-y-auto border-t border-black/[0.06] bg-white/95 px-4 pb-6 pt-5 shadow-2xl shadow-black/10 backdrop-blur-2xl sm:px-6">
+              <div role="dialog" aria-modal="true" aria-label="Menu de navigation" ref={menuPanelRef} tabIndex={-1} className="relative ml-auto max-h-full w-full max-w-lg overflow-y-auto border-t border-black/[0.06] bg-white/95 px-4 pb-6 pt-5 shadow-2xl shadow-black/10 backdrop-blur-2xl sm:px-6">
                 <div className="mb-5 px-1">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                     Découvrir
