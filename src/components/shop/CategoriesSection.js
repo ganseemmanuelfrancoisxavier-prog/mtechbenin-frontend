@@ -164,7 +164,7 @@ function CategoryRevealCard({ item, index, scrollDirection }) {
     >
       <Link
         href={href}
-        className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-[0_18px_24px_-20px_rgba(0,0,0,0.42)]"
+        className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
       >
         <span className="mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.04]">
           <Icon className="h-5 w-5 text-apple-black" strokeWidth={1.6} />
