@@ -6,6 +6,8 @@ const useProductStore = create(
   persist(
     (set, get) => ({
       products: [],
+      featuredProducts: [],
+      _featuredLastFetch: null,
       _hasHydrated: false,
       _lastFetch: null,
       loading: false,
@@ -60,6 +62,38 @@ const useProductStore = create(
         } catch (err) {
           console.error("Erreur chargement produits API", err.message);
           set({ loading: false, error: err.message || "Erreur de chargement" });
+        }
+      },
+
+      // La page d'accueil ne rapatrie que les produits mis en avant. Le
+      // catalogue complet reste chargé à la demande sur ses propres pages.
+      fetchFeaturedProducts: async (force = false) => {
+        const now = Date.now();
+        if (!force && get()._featuredLastFetch && now - get()._featuredLastFetch < 5 * 60 * 1000) return;
+        try {
+          const data = await productsApi.getAll({ limit: 8, active: "true", featured: "true" });
+          const normalized = (data.products || []).filter((p) => p.active !== false).map((p) => ({
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            image: Array.isArray(p.images) ? p.images[0] : p.images,
+            images: Array.isArray(p.images) ? p.images : [p.images].filter(Boolean),
+            price: p.price,
+            comparePrice: p.comparePrice || null,
+            status: p.status || "En stock",
+            category: p.categorySlug,
+            active: p.active,
+            featured: p.featured,
+            description: p.description || "",
+            specs: Array.isArray(p.specs) ? p.specs : [],
+            salesCount: p.salesCount || 0,
+            hasRequiredVariants: p.hasRequiredVariants || false,
+            stock: p.stock || 0,
+            videoUrl: p.videoUrl || null,
+          }));
+          set({ featuredProducts: normalized, _featuredLastFetch: now });
+        } catch (err) {
+          console.error("Erreur chargement produits mis en avant", err.message);
         }
       },
 

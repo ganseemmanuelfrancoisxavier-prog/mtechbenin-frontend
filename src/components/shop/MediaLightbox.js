@@ -4,10 +4,12 @@ import { useEffect, useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import { urlVideoJouable } from "@/lib/media";
+import { urlVideoJouable, afficheVideo } from "@/lib/media";
+import useVisibleVideo from "@/hooks/useVisibleVideo";
 
 export default function MediaLightbox({ items, index, onClose, onNavigate }) {
   const current = items?.[index];
+  const video = useVisibleVideo({ enabled: current?.type === "video", identity: current?.url });
   const panneauRef = useRef(null);
   // Le panneau est monté dans `document.body`, pas là où il est écrit. Sans
   // cela, un parent portant `backdrop-filter` (nos `glass-card`) devient le
@@ -143,9 +145,13 @@ export default function MediaLightbox({ items, index, onClose, onNavigate }) {
           {current.type === "video" ? (
             <video
               key={current.url}
-              src={urlVideoJouable(current.url)}
+              ref={video.ref}
+              src={video.selected ? urlVideoJouable(current.url) : undefined}
+              poster={afficheVideo(current.url)}
               controls
-              autoPlay
+              muted
+              autoPlay={video.selected && !video.reducedMotion}
+              preload="none"
               playsInline
               className="w-full max-h-[80vh] rounded-2xl bg-black"
             />

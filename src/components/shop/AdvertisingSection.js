@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import useAdStore from "@/store/adStore";
 import { urlVideoJouable, afficheVideo } from "@/lib/media";
+import useVisibleVideo from "@/hooks/useVisibleVideo";
 
 // Temps d'affichage d'une annonce en image. Une annonce en vidéo, elle, dure
 // le temps de sa vidéo — voir le minuteur plus bas.
@@ -19,34 +20,29 @@ export default function AdvertisingSection() {
   const [index, setIndex] = useState(0);
   const [survole, setSurvole] = useState(false);
   const [focalise, setFocalise] = useState(false);
+  const [sectionVisible, setSectionVisible] = useState(false);
   const conteneurRef = useRef(null);
   const videoWrapRef = useRef(null);
-  const videoRef = useRef(null);
   // Comme dans ClientGallery : un téléphone ne décode qu'un nombre limité de
   // vidéos à la fois, et les lancer sans condition de visibilité en fait
   // échouer certaines — elles restent noires, ou s'arrêtent quand le
   // navigateur libère un décodeur. On ne joue donc que si la section est
   // réellement à l'écran.
-  const [videoVisible, setVideoVisible] = useState(false);
+  const activeAd = ads[index % (ads.length || 1)];
 
   useEffect(() => {
     fetchAds();
   }, []);
 
-  // Dépend de `ads.length` : tant qu'aucune annonce n'est chargée, ce
-  // composant rend `null` (voir plus bas) et `videoWrapRef.current` est donc
-  // encore vide au premier passage. Un tableau de dépendances figé à `[]`
-  // manquerait alors définitivement l'observation, puisque cet effet ne
-  // rejouerait jamais une fois le conteneur réellement monté.
   useEffect(() => {
-    const cible = videoWrapRef.current;
-    if (!cible) return undefined;
-    const obs = new IntersectionObserver(
-      ([e]) => setVideoVisible(e.isIntersecting),
+    const target = videoWrapRef.current;
+    if (!target) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setSectionVisible(entry.isIntersecting),
       { threshold: 0 },
     );
-    obs.observe(cible);
-    return () => obs.disconnect();
+    observer.observe(target);
+    return () => observer.disconnect();
   }, [ads.length]);
 
   // Un carrousel qui défile seul est une trappe pour qui lit lentement ou
@@ -57,27 +53,14 @@ export default function AdvertisingSection() {
   // Déclaré AVANT l'effet de lecture, qui s'en sert dans ses dépendances : un
   // `const` lu plus haut que sa déclaration lève une erreur au rendu.
   const enPause = survole || focalise;
+  const video = useVisibleVideo({
+    enabled: activeAd?.type === "video",
+    shouldPlay: !enPause,
+    identity: activeAd?.id ?? index,
+  });
 
-  // Joue la vidéo courante uniquement quand la section est visible, la met en
-  // pause sinon. Placé au-dessus du garde `ads.length === 0` comme les autres
-  // Hooks : on relit `ads`/`index` directement plutôt que la variable
-  // `courante`, qui n'est calculée qu'après ce garde.
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    const actuelle = ads[index % (ads.length || 1)];
-    if (!actuelle || actuelle.type !== "video") return;
-    // La vidéo se met aussi en pause au survol et au focus. Sans cela, elle
-    // continuerait de tourner sous les yeux du visiteur pendant qu'il lit, et
-    // sa fin de lecture ferait sauter l'annonce au moment précis où il a
-    // demandé qu'on l'attende.
-    if (videoVisible && !enPause) {
-      if (v.paused) v.play().catch(() => {});
-    } else if (!v.paused) {
-      v.pause();
-    }
-  }, [ads, index, videoVisible, enPause]);
-
+  // L'observateur vidéo reste actif même avant le garde `ads.length === 0` :
+  // l'annonce peut être chargée après le premier rendu.
   const avancer = () => setIndex((i) => (i + 1) % (ads.length || 1));
 
   // Une image s'affiche un temps fixe ; une vidéo, elle, va jusqu'au bout —
@@ -92,7 +75,7 @@ export default function AdvertisingSection() {
   const couranteEstVideo = ads[index % (ads.length || 1)]?.type === "video";
 
   useEffect(() => {
-    if (ads.length <= 1 || enPause) return undefined;
+    if (ads.length <= 1 || enPause || !sectionVisible) return undefined;
 
     // Filet de sécurité pour les vidéos. `onEnded` peut ne jamais se produire :
     // fichier illisible, hébergeur qui refuse de servir le média, décodeur
@@ -109,7 +92,7 @@ export default function AdvertisingSection() {
       delai,
     );
     return () => clearTimeout(t);
-  }, [ads.length, enPause, index, couranteEstVideo]);
+  }, [ads.length, enPause, index, couranteEstVideo, sectionVisible]);
 
   // Aucune annonce active : la section disparaît entièrement. Pas de titre
   // orphelin ni de bloc vide sur la page d'accueil.
@@ -145,12 +128,13 @@ export default function AdvertisingSection() {
     >
       {courante.type === "video" ? (
         <video
-          ref={videoRef}
-          src={urlVideoJouable(courante.url)}
+          ref={video.ref}
+          src={video.selected ? urlVideoJouable(courante.url) : undefined}
           // Image d'attente pendant le chargement : sans elle, le visiteur
           // voit un rectangle noir le temps que la vidéo se décode.
           poster={afficheVideo(courante.url)}
           muted
+          autoPlay={video.selected && !video.reducedMotion && !enPause}
           // On ne boucle que s'il n'y a rien d'autre à montrer. Dès qu'une
           // deuxième annonce existe, boucler empêcherait `onEnded` de se
           // produire et le carrousel ne tournerait plus jamais.
@@ -160,7 +144,7 @@ export default function AdvertisingSection() {
           // on passe à la suivante au lieu d'attendre le plafond.
           onError={ads.length > 1 ? avancer : undefined}
           playsInline
-          preload="metadata"
+          preload="none"
           className="absolute inset-0 w-full h-full object-cover"
         />
       ) : (

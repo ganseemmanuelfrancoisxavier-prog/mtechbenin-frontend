@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,8 @@ import { getService } from "@/lib/abonnements";
 import { formatPrice, getDiscount, libelleDuree } from "@/lib/format";
 import useCartStore from "@/store/cartStore";
 import useAbonnementStore from "@/store/abonnementStore";
-import { urlVideoJouable } from "@/lib/media";
+import { urlVideoJouable, afficheVideo } from "@/lib/media";
+import useVisibleVideo from "@/hooks/useVisibleVideo";
 
 // La description d'une formule arrive sous deux formes : une liste depuis la
 // base (l'admin la saisit ligne Ã  ligne dans le panel), ou une chaÃ®ne unique
@@ -65,7 +66,6 @@ export default function AbonnementDetail({ slug }) {
   const [durationMultiplier, setDurationMultiplier] = useState(1);
   const [openFaq, setOpenFaq] = useState(null);
   const [added, setAdded] = useState(false);
-  const videoRef = useRef(null);
 
   useEffect(() => {
     setMounted(true);
@@ -109,11 +109,12 @@ export default function AbonnementDetail({ slug }) {
   const mediaMuted = storeService?.mediaMuted !== false;
   const isVideo = mediaType === "video" && mediaUrl;
   const isImage = mediaType === "image" && mediaUrl;
+  const video = useVisibleVideo({ enabled: Boolean(isVideo), identity: mediaUrl });
   const bg = serviceBg[slug] || defaultBg;
 
   useEffect(() => {
-    if (videoRef.current) videoRef.current.muted = mediaMuted;
-  }, [mediaMuted]);
+    if (video.ref.current) video.ref.current.muted = mediaMuted;
+  }, [mediaMuted, video.ref]);
 
   useEffect(() => {
     setDurationMultiplier(1);
@@ -300,12 +301,14 @@ export default function AbonnementDetail({ slug }) {
             )}
             {isVideo && (
               <video
-                ref={videoRef}
-                src={urlVideoJouable(mediaUrl)}
-                autoPlay
+                ref={video.ref}
+                src={video.selected ? urlVideoJouable(mediaUrl) : undefined}
+                poster={afficheVideo(mediaUrl)}
+                autoPlay={video.selected && !video.reducedMotion}
                 loop
                 playsInline
                 muted={mediaMuted}
+                preload="none"
                 className="absolute inset-0 w-full h-full object-cover"
               />
             )}
@@ -334,429 +337,92 @@ export default function AbonnementDetail({ slug }) {
             <div className="relative z-10 p-8">
               <h1 className="font-display font-black text-4xl text-white mb-2 tracking-tight">
                 {service.name}
-              </h1>
-              <p className="text-white/60 text-[14px]">{service.tagline}</p>
-            </div>
-          </div>
+              ;ÓÎm¢G§²ÚîÆ­yİ\Ëˆ‹ˆK—NÂ‚™[˜İ[ÛˆÙ\šXÙPØ\™
+ÈÙ\šXÙKÛ•ÙÙÛS]]KØ\™™YˆJHÂˆÛÛœİ\ÕšY[ÈHÙ\šXÙK›YYXU\HOOHšY[Èˆ	‰ˆÙ\šXÙK›YYXU\›ÂˆÛÛœİÈš^ˆZ[”šXÙKİY™š^NˆİY™š^Tš^HHš^\\
+Ù\šXÙK™›Ü›][\ÊNÂ‚ˆÛÛœİ\ÓXZ[[˜[˜ÙHHÙ\šXÙKœÙ\šXÙTİ]\ÈOOH›XZ[[˜[˜ÙHÂˆÛÛœİ\ĞÛÛZ[™ÔÛÛÛˆHÙ\šXÙKœÙ\šXÙTİ]\ÈOOH˜ÛÛZ[™×ÜÛÛÛˆÂˆÛÛœİ\Õ[˜]˜Z[X›HH\ÓXZ[[˜[˜ÙH\ĞÛÛZ[™ÔÛÛÛÂˆÛÛœİšY[ÈH\ÙUš\ÚX›UšY[ÊÈ[˜X›Yˆ›ÛÛX[Š\ÕšY[È	‰ˆZ\Õ[˜]˜Z[X›JKY[]NˆÙ\šXÙK›YYXU\›JNÂ‚ˆ™]\›ˆ
+ˆ[šÂˆ™Y^ØØ\™™YŸBˆ™Y^Ú\Õ[˜]˜Z[X›HÈˆÈˆˆØX›Û›™[Y[ËÉÜÙ\šXÙKœÛYßXBˆÛÛXÚÏ^Ú\Õ[˜]˜Z[X›HÈ
+JHOˆKœ™]™[Y˜][
 
-          {/* Features */}
-          {service.features?.length > 0 && (
-            <div className="glass-card rounded-3xl p-6">
-              <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-4">
-                Ce qui est inclus
-              </p>
-              <ul className="space-y-3">
-                {service.features.map((f) => (
-                  <li
-                    key={f}
-                    className="flex items-center gap-3 text-[13px] text-apple-mid"
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full ${service.lightColor || "bg-gray-50"} flex items-center justify-center flex-shrink-0`}
-                    >
-                      <Check
-                        className={`w-3 h-3 ${service.textColor || "text-gray-600"}`}
-                        strokeWidth={2.5}
-                      />
-                    </div>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+Hˆ[™Yš[™YBˆÛ\ÜÓ˜[YO^ØÜ›İ\Û\ÜËXØ\™›İ[™YLŞİ™\™›İËZY[ˆ˜[œÚ][Û‹X[\˜][Û‹LÌ™[]]™H	Âˆ\Õ[˜]˜Z[X›HÈ˜İ\œÛÜ‹[›İX[İÙYÜXÚ]KNˆˆšİ™\‹]˜[œÛ]K^KLH‚ˆXBˆ‚ˆ]ˆÛ\ÜÓ˜[YOHœ™[]]™HMİ™\™›İËZY[ˆ‚ˆ]‚ˆÛ\ÜÓ˜[YO^ØXœÛÛ]H[œÙ]L™ËYÜ˜YY[]ËXœˆ	ÜÙ\šXÙP™ÖÜÙ\šXÙKœÛY×HÙ\šXÙK˜ÛÛÜˆY˜][™ßXBˆÏ‚ˆÜÙ\šXÙK›YYXU\HOOHš[XYÙHˆ	‰ˆÙ\šXÙK›YYXU\›	‰ˆ
+ˆ[XYÙBˆÜ˜Ï^ÜÙ\šXÙK›YYXU\›Bˆ[^ÜÙ\šXÙK›˜[Y_Bˆš[ˆÛ\ÜÓ˜[YOH›Øš™XİXÛİ™\ˆ‚ˆÚ^™\ÏHŠX^]ÚYˆ
+HLË
+X^]ÚYˆL
+HLË]È‚ˆÏ‚ˆ
+_BˆÚ\ÕšY[È	‰ˆ
+ˆšY[Âˆ™Y^İšY[Ëœ™YŸBˆÜ˜Ï^İšY[ËœÙ[XİYÈ\›šY[Ò›İXX›JÙ\šXÙK›YYXU\›
+Hˆ[™Yš[™YBˆÜİ\^ØY™šXÚUšY[ÊÙ\šXÙK›YYXU\›
+_Bˆ]]Ô^O^İšY[ËœÙ[XİY	‰ˆ]šY[Ëœ™YXÙY[İ[ÛŸBˆÛÜˆ^\Ò[›[™Bˆ]]Y^ÜÙ\šXÙK›YYXS]]YOOH˜[Ù_Bˆ™[ØYH››Û™H‚ˆÛ\ÜÓ˜[YOH˜XœÛÛ]H[œÙ]LËY[Y[Øš™XİXÛİ™\ˆ‚ˆÏ‚ˆ
+_Bˆ]ˆÛ\ÜÓ˜[YOH˜XœÛÛ]H[œÙ]L™ËYÜ˜YY[]Ë]œ›ÛKX›XÚËÍLË]˜[œÜ\™[ˆÏ‚‚ˆÚ\ÓXZ[[˜[˜ÙH	‰ˆ
+ˆ]ˆÛ\ÜÓ˜[YOH˜XœÛÛ]HÜLÈYLÈšYÚLL‹LŒ‚ˆ]ˆÛ\ÜÓ˜[YOH™›^][\ËXÙ[\ˆØ\LKHLÈKLKH›İ[™Y^^VÌL\H›Û\Ù[ZX›Û^[Ü˜[™ÙKMŒ™Ë[Ü˜[™ÙKMLÎL˜XÚÙ›ÜX›\‹\ÛH[˜Ø]H‚ˆÜ™[˜ÚÛ\ÜÓ˜[YOHËLÈLÈ›^\Úš[šËLˆÏ‚ˆÜ[ˆÛ\ÜÓ˜[YOH[˜Ø]H‚ˆÜÙ\šXÙK›XZ[[˜[˜ÙSY\ÜØYÙH‘[ˆXZ[[˜[˜ÙHŸBˆÜÜ[‚ˆÙ]‚ˆÙ]‚ˆ
+_BˆÚ\ĞÛÛZ[™ÔÛÛÛˆ	‰ˆ
+ˆ]ˆÛ\ÜÓ˜[YOH˜XœÛÛ]HÜLÈYLÈšYÚLL‹LŒ‚ˆ]ˆÛ\ÜÓ˜[YOH™›^][\ËXÙ[\ˆØ\LKHLÈKLKH›İ[™Y^^VÌL\H›Û\Ù[ZX›Û^X›YKMŒ™ËX›YKMLÎL˜XÚÙ›ÜX›\‹\ÛH[˜Ø]H‚ˆÛØÚÈÛ\ÜÓ˜[YOHËLÈLÈ›^\Úš[šËLˆÏ‚ˆÜ[ˆÛ\ÜÓ˜[YOH[˜Ø]H‚ˆÜÙ\šXÙK˜ÛÛZ[™ÔÛÛÛ“Y\ÜØYÙHšY[0í\ÜÛšX›HŸBˆÜÜ[‚ˆÙ]‚ˆÙ]‚ˆ
+_B‚ˆ]ˆÛ\ÜÓ˜[YOH˜XœÛÛ]H›İÛKMYMHšYÚLL‹LL‚ˆÈÛ\ÜÓ˜[YOH™›ÛY\Ü^H›ÛX›XÚÈ^]Ú]H^^˜XÚÚ[™Ë]YÚ‚ˆÜÙ\šXÙK›˜[Y_BˆÚÏ‚ˆÛ\ÜÓ˜[YOH^]Ú]KÍMH^VÌLœH]LH[™KXÛ[\LH‚ˆÜÙ\šXÙKYÛ[™_BˆÜ‚ˆÙ]‚‚ˆÚ\ÕšY[È	‰ˆ
+ˆ]Û‚ˆÛÛXÚÏ^ÊJHOˆÂˆKœ™]™[Y˜][
 
-          {/* FAQ */}
-          {service.faq?.length > 0 && (
-            <div className="glass-card rounded-3xl p-6">
-              <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-4">
-                Questions frÃ©quentes
-              </p>
-              <div className="space-y-1.5">
-                {service.faq.map((item, i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl overflow-hidden"
-                    style={{
-                      background: "rgba(0,0,0,0.02)",
-                      border: "1px solid rgba(0,0,0,0.05)",
-                    }}
-                  >
-                    <button
-                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      className="w-full flex items-center justify-between px-4 py-3.5 text-left text-[13px] font-medium text-apple-black hover:bg-black/[0.02] transition-colors"
-                    >
-                      {item.q}
-                      {openFaq === i ? (
-                        <ChevronUp className="w-4 h-4 text-apple-mid flex-shrink-0" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-apple-mid flex-shrink-0" />
-                      )}
-                    </button>
-                    {openFaq === i && (
-                      <div className="px-4 pb-4 text-[13px] text-apple-mid leading-relaxed border-t border-black/[0.04]">
-                        <div className="pt-3">{item.a}</div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+NÂˆKœİÜ›ÜYØ][ÛŠ
+NÂˆÛ•ÙÙÛS]]JÙ\šXÙKœÛYÊNÂˆ_BˆÛ\ÜÓ˜[YOH˜XœÛÛ]HÜLÈšYÚLÈ‹LŒËNN›İ[™YY[›^][\ËXÙ[\ˆ\İYKXÙ[\ˆ˜[œÚ][Û‹X[\˜][Û‹LŒ‚ˆİ[O^ŞÂˆ˜XÚÙÜ›İ[™ˆœ™Ø˜J
+H‹ˆ˜XÚÙ›Üš[\ˆ˜›\Š
+H‹ˆ›Ü™\ˆŒ\ÛÛY™Ø˜JMKMKMKŒMJH‹ˆ_Bˆ‚ˆÜÙ\šXÙK›YYXS]]YOOH˜[ÙHÈ
+ˆ›Û[YVÛ\ÜÓ˜[YOHËLËHLËH^]Ú]KÎˆÏ‚ˆ
+Hˆ
+ˆ›Û[YLˆÛ\ÜÓ˜[YOHËLËHLËH^]Ú]HˆÏ‚ˆ
+_BˆØ]Û‚ˆ
+_BˆÙ]‚‚ˆ]ˆÛ\ÜÓ˜[YOHœMH‚ˆ]ˆÛ\ÜÓ˜[YOH›X‹M‚ˆÚ\ÓXZ[[˜[˜ÙHÈ
+ˆ]ˆÛ\ÜÓ˜[YOH™›^][\ËXÙ[\ˆØ\LˆKLH‚ˆÜ™[˜ÚÛ\ÜÓ˜[YOHËMM^[Ü˜[™ÙKMˆÏ‚ˆÛ\ÜÓ˜[YOH^[Ü˜[™ÙKML^VÌLÜH›Û\Ù[ZX›Û‚ˆ[\Ü˜Z\™[Y[[™\ÜÛšX›BˆÜ‚ˆÙ]‚ˆ
+Hˆ\ĞÛÛZ[™ÔÛÛÛˆÈ
+ˆ]ˆÛ\ÜÓ˜[YOH™›^][\ËXÙ[\ˆØ\LˆKLH‚ˆÛØÚÈÛ\ÜÓ˜[YOHËMM^X›YKMˆÏ‚ˆÛ\ÜÓ˜[YOH^X›YKML^VÌLÜH›Û\Ù[ZX›Û‚ˆ\ÜÛšX›H›ØÚZ[™[Y[ˆÜ‚ˆÙ]‚ˆ
+Hˆ
+ˆ‚ˆÛ\ÜÓ˜[YOH^VÌL\H^X\K[ZYX‹LH›Û[YY][H‚ˆ0à\\ˆBˆÜ‚ˆÛ\ÜÓ˜[YOH™›ÛY\Ü^H›ÛX›XÚÈ^VÌN\H^X\KX›XÚÈ˜XÚÚ[™Ë]YÚ‚ˆÛZ[”šXÙHOOH[È›Ü›X]šXÙJZ[”šXÙJHˆ¸ %ŸBˆÜ[ˆÛ\ÜÓ˜[YOH^X\K[ZY›Û[›Ü›X[^VÌLÜH‚ˆÜİY™š^Tš^BˆÜÜ[‚ˆÜ‚ˆÏ‚ˆ
+_BˆÙ]‚‚ˆ[Û\ÜÓ˜[YOHœÜXÙK^KLKHX‹MH‚ˆÜÙ\šXÙK™™X]\™\ÏËœÛXÙJÊK›X\
 
-        {/* â”€â”€ Droite â€” Formules â”€â”€ */}
-        <div className="space-y-4">
-          <div>
-            <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-2">
-              Formules
-            </p>
-            <h2 className="font-display font-black text-2xl text-apple-black tracking-tight">
-              Choisissez votre durÃ©e
-            </h2>
-          </div>
+ŠHOˆ
+ˆBˆÙ^O^ÙŸBˆÛ\ÜÓ˜[YOH™›^][\Ë\İ\Ø\Lˆ^VÌLœH^X\K[ZY‚ˆ‚ˆÚXÚÂˆÛ\ÜÓ˜[YO^ØËLËHLËH	ÜÙ\šXÙK^ÛÛÜˆ^X\K[ZYŸH›^\Úš[šËL]LXBˆİ›ÚÙUÚY^Ì‹_BˆÏ‚ˆÙŸBˆÛO‚ˆ
+J_Bˆİ[‚‚ˆ]‚ˆÛ\ÜÓ˜[YO^Ø›^][\ËXÙ[\ˆ\İYKX™]ÙY[ˆ^VÌLœH›Û\Ù[ZX›Û˜[œÚ][Û‹XÛÛÜœÈ	Âˆ\Õ[˜]˜Z[X›BˆÈ^X\K[ZYÍ‚ˆˆ^X\K[ZYÜ›İ\Zİ™\^X\KX›XÚÈ‚ˆXBˆ‚ˆÚ\Õ[˜]˜Z[X›HÈšY[0í\ÜÛšX›Hˆˆ•›Ú\ˆ\È›Ü›][\ÈŸBˆÚ]œ›Û”šYÚÛ\ÜÓ˜[YOHËLËHLËHÜ›İ\Zİ™\˜[œÛ]K^LH˜[œÚ][Û‹]˜[œÙ›Ü›HˆÏ‚ˆÙ]‚ˆÙ]‚ˆÓ[šÏ‚ˆ
+NÂŸB‚™^ÜY˜][[˜İ[ÛˆX›Û›™[Y[ÒXŠ
+HÂˆÛÛœİÛ[İ[YÙ][İ[YHH\ÙTİ]J˜[ÙJNÂˆÛÛœİØ\™™YœÈH\ÙT™YŠßJNÂ‚ˆÛÛœİÈÙ]Xİ]™TÙ\šXÙ\Ë™]ÚÙ\šXÙ\ÈHH\ÙPX›Û›™[Y[İÜ™J
+NÂ‚ˆ\ÙQY™™Xİ
 
-          {service.formules?.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-apple-mid text-[13px]">
-                Aucune formule disponible pour ce service.
-              </p>
-            </div>
-          ) : (
-            service.formules?.map((formule) => {
-              const discount = getDiscount(formule.price, formule.comparePrice);
-              const isSelected = selectedFormule === formule.id;
-              const lignes = lignesDescription(formule.description);
-              const label = formule.label || formule.name;
-              // Voir `libelleDuree` : les deux formes de `duration` (nombre
-              // depuis l'API, chaÃ®ne dÃ©jÃ  libellÃ©e depuis le catalogue de
-              // repli) et le cas Â« Ã  vie Â» y sont traitÃ©s en un seul endroit.
-              const dureeLisible = libelleDuree(formule);
-              return (
-                <button
-                  key={formule.id}
-                  onClick={() => setSelectedFormule(formule.id)}
-                  className={`w-full text-left rounded-3xl p-5 transition-all duration-200 ${isSelected ? "glass-card shadow-premium" : "hover:bg-black/[0.02]"}`}
-                  style={{
-                    background: isSelected ? undefined : "rgba(0,0,0,0.02)",
-                    border: isSelected
-                      ? "2px solid rgba(29,29,31,0.15)"
-                      : "2px solid transparent",
-                  }}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 flex-shrink-0 transition-all ${isSelected ? "border-apple-black" : "border-apple-mid/40"}`}
-                      >
-                        {isSelected && (
-                          <div className="w-2.5 h-2.5 rounded-full bg-apple-black" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                          <span className="font-bold text-apple-black text-[13px]">
-                            {label}
-                          </span>
-                          <span className="text-[11px] bg-black/[0.05] text-apple-mid px-2 py-0.5 rounded-full">
-{dureeLisible}
-                          </span>
-                          {formule.popular && (
-                            <span className="badge-promo">Populaire</span>
-                          )}
-                        </div>
-                        {/* La description ne vit plus ici : elle s'ouvre dans
-                            la bande, sous l'en-tete. Affichee sur chaque carte,
-                            elle transformait la liste des formules en mur de
-                            texte gris, et noyait justement l'argument de
-                            vente. Un indice discret suffit a signaler qu'il y a
-                            quelque chose a voir. */}
-                        {lignes.length > 0 && !isSelected && (
-                          <p className="mt-0.5 text-[11px] text-apple-mid/70">
-                            {lignes.length} avantage{lignes.length > 1 ? "s" : ""}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right flex-shrink-0 ml-3">
-                      <div className="font-display font-black text-[18px] text-apple-black tracking-tight">
-                        {formatPrice(formule.price)}
-                      </div>
-                      {formule.comparePrice && (
-                        <div className="flex items-center gap-1.5 justify-end mt-0.5">
-                          <span className="text-[11px] text-apple-mid line-through">
-                            {formatPrice(formule.comparePrice)}
-                          </span>
-                          {discount && (
-                            <span className="badge-promo">{discount}</span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Bande de detail â€” prolonge la carte vers le bas.
-                      Meme grammaire d'ouverture que FaqAccordion (height 0 vers
-                      auto, courbe [0.4, 0, 0.2, 1]) pour que le site n'ait qu'un
-                      seul vocabulaire d'animation. Ce qui la distingue tient a
-                      deux details : le filet se trace de gauche a droite au lieu
-                      d'apparaitre, et les lignes entrent l'une apres l'autre. */}
-                  <AnimatePresence initial={false}>
-                    {isSelected && lignes.length > 0 && (
-                      <motion.div
-                        key="detail"
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={
-                          reduireMouvement
-                            ? { duration: 0 }
-                            : { duration: 0.28, ease: [0.4, 0, 0.2, 1] }
-                        }
-                        className="overflow-hidden"
-                      >
-                        {/* `pl-8` aligne la bande sur le libelle : le rond de
-                            selection fait 20 px, l'ecart 12 px. */}
-                        <div className="pt-4 pl-8">
-                          <motion.div
-                            aria-hidden="true"
-                            className="h-px mb-3.5 origin-left"
-                            style={{
-                              background:
-                                "linear-gradient(to right, rgba(29,29,31,0.16), rgba(29,29,31,0))",
-                            }}
-                            initial={{ scaleX: 0 }}
-                            animate={{ scaleX: 1 }}
-                            transition={
-                              reduireMouvement
-                                ? { duration: 0 }
-                                : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
-                            }
-                          />
-                          <motion.ul
-                            className="space-y-2"
-                            initial="repos"
-                            animate="entre"
-                            variants={{
-                              entre: {
-                                transition: {
-                                  delayChildren: reduireMouvement ? 0 : 0.08,
-                                  staggerChildren: reduireMouvement ? 0 : 0.05,
-                                },
-                              },
-                            }}
-                          >
-                            {lignes.map((ligne, i) => (
-                              <motion.li
-                                key={i}
-                                variants={{
-                                  repos: { opacity: 0, y: 6 },
-                                  entre: {
-                                    opacity: 1,
-                                    y: 0,
-                                    transition: {
-                                      duration: reduireMouvement ? 0 : 0.32,
-                                      ease: [0.4, 0, 0.2, 1],
-                                    },
-                                  },
-                                }}
-                                className="flex items-start gap-2.5 text-[13px] leading-[1.65] text-apple-mid"
-                              >
-                                <Check
-                                  aria-hidden="true"
-                                  className="w-3.5 h-3.5 mt-[3px] flex-shrink-0 text-apple-black/45"
-                                  strokeWidth={2.5}
-                                />
-                                <span>{ligne}</span>
-                              </motion.li>
-                            ))}
-                          </motion.ul>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </button>
-              );
-            })
-          )}
+HOˆÂˆÙ][İ[Y
+YJNÂˆ™]ÚÙ\šXÙ\Ê
+NÂˆK×JNÂ‚ˆÛÛœİÙ\šXÙ\ÈH[İ[YÈÙ]Xİ]™TÙ\šXÙ\Ê
+K›X\
 
-          {/* SÃ©lecteur de durÃ©e â€” masquÃ© sur une formule Ã  vie, oÃ¹ il n'a
-              rien Ã  rÃ©gler : le multiplicateur y est neutralisÃ© de toute
-              faÃ§on, et l'afficher inviterait Ã  payer deux fois le mÃªme accÃ¨s
-              dÃ©finitif. */}
-          {selectedFormule && !formuleAVie && (
-            <div
-              className="rounded-3xl p-5"
-              style={{
-                background: "rgba(0,0,0,0.02)",
-                border: "1px solid rgba(0,0,0,0.07)",
-              }}
-            >
-              <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-3">
-                Nombre de mois
-              </p>
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-display font-black text-[28px] text-apple-black">
-                    {getTotalMonths()}
-                  </span>
-                  <span className="text-[13px] text-apple-mid ml-1.5">
-                    mois au total
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setDurationMultiplier((m) => Math.max(1, m - 1))}
-                    disabled={durationMultiplier <= 1}
-                    className="w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                    style={{
-                      background: "rgba(0,0,0,0.06)",
-                      border: "1px solid rgba(0,0,0,0.08)",
-                    }}
-                  >
-                    <Minus className="w-4 h-4 text-apple-black" />
-                  </button>
-                  <span className="font-display font-black text-[22px] text-apple-black w-7 text-center select-none">
-                    {durationMultiplier}
-                  </span>
-                  <button
-                    onClick={() => setDurationMultiplier((m) => Math.min(12, m + 1))}
-                    disabled={durationMultiplier >= 12}
-                    className="w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                    style={{
-                      background: "rgba(29,29,31,0.92)",
-                      color: "#fff",
-                    }}
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              {durationMultiplier > 1 && (
-                <div className="mt-3 pt-3 border-t border-black/[0.05] flex items-center justify-between">
-                  <span className="text-[12px] text-apple-mid">
-                    {durationMultiplier} Ã— {formatPrice(getFormule()?.price || 0)}
-                  </span>
-                  <span className="font-display font-black text-[18px] text-apple-black">
-                    {formatPrice(getTotalPrice())}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
+ÜÊHOˆ
+Âˆ‹‹œÜËˆÙ\šXÙTİ]\ÎˆÜËœÙ\šXÙTİ]\È˜Xİ]™H‹ˆXZ[[˜[˜ÙSY\ÜØYÙN‚ˆÜË›XZ[[˜[˜ÙSY\ÜØYÙHÙHÙ\šXÙH\İ[ˆXZ[[˜[˜ÙKˆ‹ˆÛÛZ[™ÔÛÛÛ“Y\ÜØYÙN‚ˆÜË˜ÛÛZ[™ÔÛÛÛ“Y\ÜØYÙHÙHÙ\šXÙHÙ\˜HšY[0í\ÜÛšX›Kˆ‹ˆJJBˆˆİ]XÔÙ\šXÙ\Âˆ™š[\Š
+ÊHOˆË˜]˜Z[X›JBˆ›X\
 
-          {/* Ce que le selecteur de duree affichait pour les autres formules :
-              ce qui est achete, et pour combien. Le retirer sans rien mettre
-              a la place laissait un blanc entre les formules et les boutons,
-              et le total ne se lisait plus que sur la carte selectionnee. */}
-          {selectedFormule && formuleAVie && (
-            <div
-              className="rounded-3xl p-5 flex items-center justify-between"
-              style={{
-                background: "rgba(0,0,0,0.02)",
-                border: "1px solid rgba(0,0,0,0.07)",
-              }}
-            >
-              <div>
-                <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1">
-                  DurÃ©e
-                </p>
-                <span className="font-display font-black text-[22px] text-apple-black">
-                  Ã€ vie
-                </span>
-                <span className="text-[13px] text-apple-mid ml-2">
-                  sans renouvellement
-                </span>
-              </div>
-              <span className="font-display font-black text-[18px] text-apple-black">
-                {formatPrice(getTotalPrice())}
-              </span>
-            </div>
-          )}
+ÊHOˆ
+È‹‹œËÙ\šXÙTİ]\Îˆ˜Xİ]™HˆJJNÂ‚ˆÛÛœİÈ[™UÙÙÛS]]HHH\ÙS[Øš[P]Y[Ñ›Øİ\ÊÈÙ\šXÙ\ËØ\™™YœË[İ[YJNÂ‚ˆÛÛœİXİ]™PÛİ[HÙ\šXÙ\Ë™š[\Šˆ
+ÊHOˆËœÙ\šXÙTİ]\ÈOOH˜Xİ]™H‹ˆ
+K›[™İÂ‚ˆ™]\›ˆ
+ˆ]ˆÛ\ÜÓ˜[YOH›Z[‹Z\ØÜ™Y[ˆ‚ˆËÊˆ\›È
+‹ßBˆ]ˆÛ\ÜÓ˜[YOHœ™[]]™H™ËVÈÌLLWHKLMHİ™\™›İËZY[ˆ‚ˆ]ˆÛ\ÜÓ˜[YOH˜XœÛÛ]H[œÙ]LÚ[\‹Y]™[Ë[›Û™H‚ˆ]ˆÛ\ÜÓ˜[YOH˜XœÛÛ]H]ÜMYLKÍËVÍLHVÍLH™Ë]Ú]KÖÌŒ—H›İ[™YY[›\‹LŞˆÏ‚ˆ]ˆÛ\ÜÓ˜[YOH˜XœÛÛ]HX›İÛKMšYÚLKÍËVÍHVÍH™Ë]Ú]KÖÌŒMWH›İ[™YY[›\‹LŞˆÏ‚ˆÙ]‚ˆ]ˆÛ\ÜÓ˜[YOH›X^]ËM^X]]È^XÙ[\ˆ™[]]™H‹LL‚ˆ]‚ˆÛ\ÜÓ˜[YOHš[›[™KY›^][\ËXÙ[\ˆØ\Lˆ›İ[™YY[MKLKHX‹Mˆ‚ˆİ[O^ŞÂˆ˜XÚÙÜ›İ[™ˆœ™Ø˜JMKMKMKŒŠH‹ˆ›Ü™\ˆŒ\ÛÛY™Ø˜JMKMKMKŒ
+H‹ˆ_Bˆ‚ˆÜ[ˆÛ\ÜÓ˜[YOHËLKHLKH™ËXİH›İ[™YY[[š[X]K\[ÙHˆÏ‚ˆÜ[ˆÛ\ÜÓ˜[YOH^]Ú]KÍL^VÌL\H›Û\Ù[ZX›Û˜XÚÚ[™Ë]ÚY\İ\\˜Ø\ÙH‚ˆÙ\šXÙHYÚ][ˆÜÜ[‚ˆÙ]‚ˆHÛ\ÜÓ˜[YOH™›ÛY\Ü^H›ÛX›XÚÈ^MY^M^]Ú]HX‹MH˜XÚÚ[™Ë]YÚ‚ˆX›Û›™[Y[ÂˆœˆÏ‚ˆÜ[ˆÛ\ÜÓ˜[YOH^]Ú]KÍ‘YÚ]]^ÜÜ[‚ˆÚO‚ˆÛ\ÜÓ˜[YOH^]Ú]KÍ^VÌM\HY^[ÈX^]Ë^^X]]ÈX‹LLXY[™Ë\™[^Y‚ˆ™]›^ÜİYK\H]\ÚXÈ]\È[˜ÛÜ™H8 %]HYZ[]\ˆš^[‚ˆYœš\]YK‚ˆÜ‚ˆ]ˆÛ\ÜÓ˜[YOH™›^›^]Ü˜\\İYKXÙ[\ˆØ\L‹H‚ˆÖÂˆXİ]˜][Ûˆ[[pêYX]H‹ˆ”ZY[Y[[Øš[H[Û™^H‹ˆ”İ\ÜÚ‹ÍÈ‹ˆ”š^[X˜]X›\È‹ˆK›X\
 
-          {/* CTAs */}
-          <div className="flex gap-2.5 pt-2">
-            <button
-              onClick={handleBuyNow}
-              disabled={!selectedFormule}
-              className="flex-1 flex items-center justify-center py-4 rounded-2xl text-[13px] font-semibold transition-all duration-200 disabled:opacity-35 disabled:cursor-not-allowed"
-              style={{
-                background: selectedFormule
-                  ? "rgba(29,29,31,0.92)"
-                  : "rgba(0,0,0,0.06)",
-                backdropFilter: "blur(16px)",
-                color: selectedFormule ? "#FFFFFF" : "#6E6E73",
-                border: "1px solid rgba(255,255,255,0.07)",
-                boxShadow: selectedFormule
-                  ? "0 2px 14px rgba(0,0,0,0.22)"
-                  : "none",
-              }}
-            >
-              Commander
-            </button>
-            <button
-              onClick={handleAddToCart}
-              disabled={!selectedFormule}
-              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-[13px] font-semibold transition-all duration-200 disabled:opacity-35 disabled:cursor-not-allowed"
-              style={
-                added
-                  ? {
-                      background: "rgba(52,199,89,0.12)",
-                      color: "#1A7F37",
-                      border: "1px solid rgba(52,199,89,0.22)",
-                    }
-                  : selectedFormule
-                    ? {
-                        background: "rgba(255,255,255,0.22)",
-                        backdropFilter: "blur(24px) saturate(200%)",
-                        WebkitBackdropFilter: "blur(24px) saturate(200%)",
-                        border: "1px solid rgba(255,255,255,0.50)",
-                        color: "#1D1D1F",
-                        boxShadow:
-                          "0 2px 16px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.65)",
-                      }
-                    : { background: "rgba(0,0,0,0.04)", color: "#6E6E73" }
-              }
-            >
-              {added ? (
-                <>
-                  <Check className="w-4 h-4" /> AjoutÃ©
-                </>
-              ) : !selectedFormule ? (
-                "SÃ©lectionner"
-              ) : (
-                <>
-                  <ArrowRight className="w-4 h-4" /> Panier
-                </>
-              )}
-            </button>
-          </div>
+ŠHOˆ
+ˆ]‚ˆÙ^O^ÙŸBˆÛ\ÜÓ˜[YOH™›^][\ËXÙ[\ˆØ\LˆMKLˆ›İ[™YY[^VÌLÜH‚ˆİ[O^ŞÂˆ˜XÚÙÜ›İ[™ˆœ™Ø˜JMKMKMKŒJH‹ˆ›Ü™\ˆŒ\ÛÛY™Ø˜JMKMKMKŒÊH‹ˆ_Bˆ‚ˆÚXÚÂˆÛ\ÜÓ˜[YOHËLËHLËH^YÜ™Y[‹M‚ˆİ›ÚÙUÚY^Ì‹_BˆÏ‚ˆÜ[ˆÛ\ÜÓ˜[YOH^]Ú]KÍŒ›Û[YY][HÙŸOÜÜ[‚ˆÙ]‚ˆ
+J_BˆÙ]‚ˆÙ]‚ˆÙ]‚‚ˆËÊˆÜš[HÙ\šXÙ\È
+‹ßBˆ]ˆÛ\ÜÓ˜[YOH›X^]ËMŞ^X]]ÈMHKLŒ‚ˆ]ˆÛ\ÜÓ˜[YOH›X‹LLˆ‚ˆÛ\ÜÓ˜[YOH^VÌL\H›Û\Ù[ZX›Û^X\K[ZY\\˜Ø\ÙH˜XÚÚ[™Ë]ÚY\İX‹Lˆ‚ˆ›ÜÈÙ\šXÙ\ÂˆÜ‚ˆ]ˆÛ\ÜÓ˜[YOH™›^][\ËY[™\İYKX™]ÙY[ˆ‚ˆˆÛ\ÜÓ˜[YOH™›ÛY\Ü^H›ÛX›XÚÈ^LŞY^M^X\KX›XÚÈ˜XÚÚ[™Ë]YÚ‚ˆÚÚ\Ú\ÜÙ^ˆ›İ™HÙ\šXÙBˆÚ‚ˆÛ\ÜÓ˜[YOH^X\K[ZY^VÌLÜHY[ˆY˜›ØÚÈ‚ˆØXİ]™PÛİ[HÙ\šXÙ^ØXİ]™PÛİ[ˆHÈœÈˆˆˆŸH\ÜÛšX›BˆØXİ]™PÛİ[ˆHÈœÈˆˆˆŸBˆÜ‚ˆÙ]‚ˆÙ]‚‚ˆÜÙ\šXÙ\Ë›[™İOOHÈ
+ˆ]ˆÛ\ÜÓ˜[YOH^XÙ[\ˆKLŒ‚ˆÛ\ÜÓ˜[YOH^X\K[ZY^[ÈÚ\™Ù[Y[\ÈÙ\šXÙ\Ë‹‹Ü‚ˆÙ]‚ˆ
+Hˆ
+ˆ]ˆÛ\ÜÓ˜[YOH™ÜšYÜšYXÛÛËLHÛN™ÜšYXÛÛËLˆÎ™ÜšYXÛÛËMØ\M‚ˆÜÙ\šXÙ\Ë›X\
 
-          {/* AccÃ¨s au code de vÃ©rification.
-              La page /mon-code n'Ã©tait atteignable que par l'adresse Ã©crite
-              dans le message et l'e-mail de livraison â€” envoyÃ©s une seule
-              fois, Ã  l'activation. Un client ayant achetÃ© avant l'existence de
-              cette page, ou ayant perdu le message, n'avait aucun moyen de la
-              retrouver. C'est ici qu'il vient chercher de l'aide sur son
-              abonnement : c'est donc ici que le lien doit vivre. */}
-          <Link
-            href="/mon-code"
-            className="block rounded-3xl p-4 transition hover:opacity-70"
-            style={{
-              background: "rgba(0,0,0,0.02)",
-              border: "1px solid rgba(0,0,0,0.05)",
-            }}
-          >
-            <p className="text-[13px] font-semibold text-apple-black mb-0.5">
-              Besoin de votre code de vÃ©rification ?
-            </p>
-            <p className="text-[12px] text-apple-mid">
-              {service?.name || "Ce service"} vous demande un code Ã  la
-              connexion ? Indiquez votre numÃ©ro et nous vous l&apos;envoyons.
-            </p>
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
+Ù\šXÙJHOˆ
+ˆÙ\šXÙPØ\™ˆÙ^O^ÜÙ\šXÙKœÛYßBˆØ\™™Y^Ê[
+HOˆÈØ\™™YœË˜İ\œ™[ÜÙ\šXÙKœÛY×HH[È_BˆÙ\šXÙO^ÜÙ\šXÙ_BˆÛ•ÙÙÛS]]O^Ú[™UÙÙÛS]]_BˆÏ‚ˆ
+J_BˆÙ]‚ˆ
+_B‚ˆËÊˆÛÛ[Y[0éØHX\˜ÚH
+‹ßBˆ]ˆÛ\ÜÓ˜[YOH›]LŒÛ\ÜËXØ\™›İ[™YLŞNYœLLˆ‚ˆ]ˆÛ\ÜÓ˜[YOH^XÙ[\ˆX‹LLˆ‚ˆÛ\ÜÓ˜[YOH^VÌL\H›Û\Ù[ZX›Û^X\K[ZY\\˜Ø\ÙH˜XÚÚ[™Ë]ÚY\İX‹Lˆ‚ˆ›ØÙ\Üİ\ÂˆÜ‚ˆˆÛ\ÜÓ˜[YOH™›ÛY\Ü^H›ÛX›XÚÈ^LŞ^X\KX›XÚÈ˜XÚÚ[™Ë]YÚ‚ˆÛÛ[Y[0éØHX\˜ÚHÂˆÚ‚ˆÙ]‚ˆ]ˆÛ\ÜÓ˜[YOH™ÜšYÜšYXÛÛËLHY™ÜšYXÛÛËLÈØ\LL‚ˆÜİ\Ë›X\
+
+][KJHOˆ
+ˆ]ˆÙ^O^Ú][Kœİ\HÛ\ÜÓ˜[YOH™›^Ø\MH‚ˆ]ˆÛ\ÜÓ˜[YOH™›^›^XÛÛ][\ËXÙ[\ˆØ\Lˆ›^\Úš[šËL‚ˆ]ˆÛ\ÜÓ˜[YOHËNHNH›İ[™YL™ËX\KX›XÚÈ›^][\ËXÙ[\ˆ\İYKXÙ[\ˆ‚ˆÜ[ˆÛ\ÜÓ˜[YOH™›ÛY\Ü^H›ÛX›XÚÈ^]Ú]H^VÌLÜH‚ˆÚ][Kœİ\BˆÜÜ[‚ˆÙ]‚ˆÚHİ\Ë›[™İHH	‰ˆ
+ˆ]ˆÛ\ÜÓ˜[YOH™›^LHË\™ËX›XÚËÖÌŒ—HY[ˆY˜›ØÚÈˆÏ‚ˆ
+_BˆÙ]‚ˆ]ˆÛ\ÜÓ˜[YOHœ‹M‚ˆÈÛ\ÜÓ˜[YOH™›ÛY\Ü^H›ÛX›Û^VÌMÜH^X\KX›XÚÈX‹Lˆ˜XÚÚ[™Ë]YÚ‚ˆÚ][K]_BˆÚÏ‚ˆÛ\ÜÓ˜[YOH^X\K[ZY^VÌLÜHXY[™Ë\™[^Y‚ˆÚ][K™\ØßBˆÜ‚ˆÙ]‚ˆÙ]‚ˆ
+J_BˆÙ]‚ˆÙ]‚‚ˆËÊˆØ\˜[Y\È
+‹ßBˆ]ˆÛ\ÜÓ˜[YOH›]NÜšYÜšYXÛÛËLHY™ÜšYXÛÛËLÈØ\LÈ‚ˆÖÂˆÂˆ[[ÚšNˆ¸¦¨H‹ˆ]NˆXİ]˜][Ûˆ˜\YH‹ˆ\ØÎˆ“[Ú[œÈHHZ[]\È\°êÈZY[Y[‹ˆKˆÂˆ[[ÚšNˆ¼'å$ˆ‹ˆ]Nˆ”ZY[Y[ğêXİ\š\ğêH‹ˆ\ØÎˆ“Uˆ[Ó[Ë[Ûİˆ[Û™^KØ]™H‹ˆKˆÂˆ[[ÚšNˆ¼'ä«‹ˆ]Nˆ”İ\ÜÚ‹ÍÈ‹ˆ\ØÎˆ‘\ÜÛšX›HšXHÚ]Ğ\‹ˆKˆK›X\
+
+ÊHOˆ
+ˆ]‚ˆÙ^O^ÙË]_BˆÛ\ÜÓ˜[YOH™›^][\Ë\İ\Ø\MMH›İ[™YLŞ‚ˆİ[O^ŞÂˆ˜XÚÙÜ›İ[™ˆœ™Ø˜JŒŠH‹ˆ›Ü™\ˆŒ\ÛÛY™Ø˜JŒJH‹ˆ_Bˆ‚ˆÜ[ˆÛ\ÜÓ˜[YOH^L›^\Úš[šËLÙË™[[Úš_OÜÜ[‚ˆ]‚ˆÛ\ÜÓ˜[YOH™›Û\Ù[ZX›Û^X\KX›XÚÈ^VÌLÜHX‹LH‚ˆÙË]_BˆÜ‚ˆÛ\ÜÓ˜[YOH^X\K[ZY^VÌLœHÙË™\ØßOÜ‚ˆÙ]‚ˆÙ]‚ˆ
+J_BˆÙ]‚ˆÙ]‚ˆÙ]‚ˆ
+NÂŸB

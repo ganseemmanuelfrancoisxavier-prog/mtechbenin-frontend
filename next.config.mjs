@@ -26,12 +26,18 @@ const pwaConfig = withPWA({
     },
     // ── Images Cloudinary ─────────────────────────────────────────────────
     {
-      urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+      urlPattern: /^https:\/\/res\.cloudinary\.com\/.*\/image\/upload\/.*$/i,
       handler: "CacheFirst",
       options: {
         cacheName: "cloudinary-images",
         expiration: { maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60 },
       },
+    },
+    // Les vidéos peuvent peser plusieurs dizaines de mégaoctets. Le cache
+    // applicatif ne doit pas les conserver en entier sur les appareils mobiles.
+    {
+      urlPattern: /^https:\/\/res\.cloudinary\.com\/.*\/video\/upload\/.*$/i,
+      handler: "NetworkOnly",
     },
     // ── Fonts Google ──────────────────────────────────────────────────────
     {
