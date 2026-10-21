@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ArrowUpRight, Wrench } from "lucide-react";
 import useSettingsStore from "@/store/settingsStore";
-import useCategoryStore from "@/store/categoryStore";
-import { categories as staticCategories } from "@/lib/categories";
 
 export default function Footer() {
   const [mounted, setMounted] = useState(false);
 
-  const { getActiveCategories, fetchCategories } = useCategoryStore();
   const {
     shopName,
     shopSlogan,
@@ -23,12 +21,7 @@ export default function Footer() {
 
   useEffect(() => {
     setMounted(true);
-    fetchCategories(); // ← charge les catégories depuis l'API
   }, []);
-
-  const activeCategories = mounted
-    ? getActiveCategories()
-    : staticCategories.filter((c) => c.active);
 
   const socials = [
     { label: "Facebook", href: mounted ? shopFacebook : "#" },
@@ -36,28 +29,37 @@ export default function Footer() {
     { label: "TikTok", href: mounted ? shopTiktok : "#" },
   ];
 
-  const shopLinks = [
-    { label: "Tous les produits", href: "/catalogue" },
-    ...activeCategories.map((c) => ({
-      label: c.label || c.name,
-      href: `/catalogue/${c.slug}`,
-    })),
-    { label: "Abonnements", href: "/abonnements" },
-  ];
 
   return (
     <footer className="mt-16 w-full border-t border-white/10 bg-[#080808] pt-14 pb-8 text-white">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-8 gap-y-10 px-5 md:grid-cols-4 md:gap-10">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-8 gap-y-10 px-5 md:grid-cols-3 md:gap-10">
         {/* Colonne 1 — Infos boutique */}
         <div className="col-span-2 md:col-span-1">
           <span className="font-display text-lg font-black tracking-tight text-white">
-            {mounted ? shopName : "MTECHBENIN"}
+            MTECHBENIN
           </span>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/60">
             {mounted
               ? shopSlogan
               : "Votre boutique tech de confiance au Bénin."}
           </p>
+          <Link
+            href="/reparation"
+            className="group mt-5 flex max-w-xs items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4 transition-all hover:-translate-y-0.5 hover:bg-white/[0.1]"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
+              <Wrench className="h-5 w-5" strokeWidth={1.8} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
+                Nouveau service
+              </span>
+              <span className="mt-1 block text-[13px] font-bold leading-snug text-white">
+                Réparation et entretien d’appareils
+              </span>
+            </span>
+            <ArrowUpRight className="h-4 w-4 shrink-0 text-white/55 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </Link>
           <div className="flex gap-4 mt-5">
             {socials.map((s) => (
               <a
@@ -102,7 +104,6 @@ export default function Footer() {
 
         {/* Colonnes liens */}
         {[
-          { title: "Boutique", links: shopLinks },
           {
             title: "Légal",
             links: [

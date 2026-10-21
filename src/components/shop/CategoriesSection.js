@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   ChevronRight,
   Headphones,
@@ -125,6 +126,7 @@ const emojiToIcon = {
 };
 
 const DefaultIcon = Package;
+const CATEGORIES_AFFICHÉES = 6;
 
 export default function CategoriesSection() {
   const [mounted, setMounted] = useState(false);
@@ -156,6 +158,8 @@ export default function CategoriesSection() {
     },
   ].sort((a, b) => a.label.localeCompare(b.label, "fr", { sensitivity: "base" }));
 
+  const visibleItems = allItems.slice(0, CATEGORIES_AFFICHÉES);
+
   return (
     <section className="max-w-7xl mx-auto px-5 pt-20 pb-[50px]">
       <div className="flex items-end justify-between mb-10">
@@ -164,15 +168,9 @@ export default function CategoriesSection() {
             Catégories
           </p>
           <h2 className="font-display font-black text-3xl md:text-4xl text-apple-black tracking-tight">
-            Notre Catalogue
+            Notre univers
           </h2>
         </div>
-        <Link
-          href="/catalogue"
-          className="hidden md:flex items-center gap-1 text-[13px] font-medium text-apple-mid hover:text-apple-black transition-colors duration-200"
-        >
-          Tout voir <ChevronRight className="w-3.5 h-3.5" />
-        </Link>
       </div>
 
       {!mounted ? (
@@ -190,21 +188,44 @@ export default function CategoriesSection() {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {allItems.map(({ slug, label, Icon, href }) => (
-            <Link
+          {visibleItems.map(({ slug, label, Icon, href }, index) => (
+            <motion.div
               key={slug}
-              href={href}
-              className="group relative glass-card rounded-3xl p-5 flex flex-col items-center text-center hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+              initial={{ opacity: 0, y: 22, scale: 0.97 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: false, amount: 0.2 }}
+              transition={{
+                duration: 0.55,
+                delay: index * 0.07,
+                ease: [0.22, 1, 0.36, 1],
+              }}
             >
-              <div className="absolute inset-0 bg-black/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
-              <div className="relative w-12 h-12 rounded-2xl bg-black/[0.04] group-hover:bg-black/[0.07] flex items-center justify-center mb-3.5 transition-all duration-300">
-                <Icon className="w-5 h-5 text-apple-black" strokeWidth={1.6} />
-              </div>
-              <h3 className="font-semibold text-apple-black text-[13px] leading-tight">
-                {label}
-              </h3>
-            </Link>
+              <Link
+                href={href}
+                className="group relative glass-card rounded-3xl p-5 flex min-h-[118px] flex-col items-center justify-center text-center hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-black/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
+                <div className="relative w-12 h-12 rounded-2xl bg-black/[0.04] group-hover:bg-black/[0.07] flex items-center justify-center mb-3.5 transition-all duration-300">
+                  <Icon className="w-5 h-5 text-apple-black" strokeWidth={1.6} />
+                </div>
+                <h3 className="font-semibold text-apple-black text-[13px] leading-tight">
+                  {label}
+                </h3>
+              </Link>
+            </motion.div>
           ))}
+        </div>
+      )}
+
+      {mounted && (
+        <div className="mt-8 flex justify-center">
+          <Link
+            href="/catalogue"
+            className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-black/10 bg-white px-6 py-3 text-[13px] font-semibold text-apple-black shadow-sm transition-all hover:-translate-y-0.5 hover:border-black/20 hover:shadow-md"
+          >
+            Voir plus de catégories
+            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
         </div>
       )}
     </section>

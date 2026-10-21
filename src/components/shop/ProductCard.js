@@ -118,7 +118,7 @@ export default function ProductCard({ product }) {
           {status}
         </span>
 
-        <h3 className="font-medium text-apple-black text-[13px] leading-snug mb-2.5 flex-1">
+        <h3 className="min-h-[2.5rem] text-left font-bold text-apple-black text-[13px] leading-snug mb-2.5 flex-1 line-clamp-2">
           {product.name}
         </h3>
 
