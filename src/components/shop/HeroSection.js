@@ -236,25 +236,6 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Pas de flèches latérales : la navigation se fait par les points
-          ci-dessous, et le défilement automatique enchaîne les diapositives. */}
-
-      {/* Dots */}
-      {slides.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className={`transition-all duration-300 rounded-full ${
-                i === safeIndex
-                  ? "w-6 h-1.5 bg-white"
-                  : "w-1.5 h-1.5 bg-white/30 hover:bg-white/50"
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </section>
   );
 }
