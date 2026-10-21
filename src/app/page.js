@@ -6,6 +6,7 @@ import SubscriptionsSection from "@/components/shop/SubscriptionsSection";
 import ClientGallery from "@/components/shop/ClientGallery";
 import SocialProofSection from "@/components/shop/SocialProofSection";
 import AdvertisingSection from "@/components/shop/AdvertisingSection";
+import StatisticsSection from "@/components/shop/StatisticsSection";
 
 export default function HomePage() {
   return (
@@ -15,6 +16,7 @@ export default function HomePage() {
       <FeaturedProducts />
       <SubscriptionsSection />
       <AdvertisingSection />
+      <StatisticsSection />
       <ClientGallery />
       <SocialProofSection />
     </ShopLayout>

@@ -3,7 +3,20 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingCart, Search, X, Menu, ArrowRight } from "lucide-react";
+import {
+  ShoppingCart,
+  Search,
+  X,
+  Menu,
+  ArrowRight,
+  Home,
+  LayoutGrid,
+  PackageSearch,
+  Wrench,
+  Tv,
+  Headphones,
+  CircleHelp,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import useCartStore from "@/store/cartStore";
@@ -12,6 +25,17 @@ import useSettingsStore from "@/store/settingsStore";
 import CartDrawer from "@/components/shop/CartDrawer";
 import { categories as staticCategories } from "@/lib/categories";
 import useScrollThreshold from "@/hooks/useScrollThreshold";
+
+const menuActions = [
+  { label: "Accueil", href: "/", icon: Home },
+  { label: "Catalogue", href: "/catalogue", icon: LayoutGrid },
+  { label: "Suivre ma commande", href: "/suivi", icon: PackageSearch },
+  { label: "Réparation", href: "/reparation", icon: Wrench },
+  { label: "Abonnements", href: "/abonnements", icon: Tv },
+  { label: "Mon panier", href: "/panier", icon: ShoppingCart },
+  { label: "Contact", href: "/contact", icon: Headphones },
+  { label: "Aide & FAQ", href: "/faq", icon: CircleHelp },
+];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -125,6 +149,11 @@ export default function Navbar() {
         { name: "Réparation", href: "/reparation" },
         { name: "Suivi commande", href: "/suivi" },
       ];
+
+  const menuCategories = navCategories.filter(
+    (category) =>
+      !["/abonnements", "/reparation", "/suivi"].includes(category.href),
+  );
 
   const isActive = (href) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -374,21 +403,63 @@ export default function Navbar() {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setSearchOpen(true);
-                  }}
-                  className="mb-5 flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-100/80 px-4 py-3.5 text-left text-sm text-neutral-500 transition hover:border-neutral-300 hover:bg-neutral-100"
-                >
-                  <Search className="h-5 w-5" strokeWidth={1.8} />
-                  <span className="flex-1">Rechercher un produit...</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
+                <form onSubmit={handleSearch} className="relative mb-5">
+                  <Search
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400"
+                    strokeWidth={1.8}
+                  />
+                  <input
+                    ref={searchInputRef}
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Rechercher un produit..."
+                    aria-label="Rechercher un produit depuis le menu"
+                    autoComplete="off"
+                    className="h-[52px] w-full rounded-2xl border border-neutral-200 bg-neutral-100/80 pl-12 pr-12 text-base text-neutral-950 outline-none transition-colors placeholder:text-neutral-400 focus:border-neutral-400 focus:bg-white focus:ring-4 focus:ring-black/[0.04]"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        searchInputRef.current?.focus();
+                      }}
+                      aria-label="Effacer la recherche"
+                      className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-950"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </form>
 
+                <p className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+                  Accès rapide
+                </p>
+                <div className="mb-6 grid grid-cols-2 gap-2">
+                  {menuActions.map(({ label, href, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setMenuOpen(false)}
+                      className={`flex min-h-14 items-center gap-2.5 rounded-2xl border px-3 py-3 text-[13px] transition-colors ${
+                        isActive(href)
+                          ? "border-neutral-300 bg-neutral-100 font-semibold text-neutral-950"
+                          : "border-neutral-200/70 bg-white font-medium text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0 text-neutral-500" strokeWidth={1.8} />
+                      <span>{label}</span>
+                    </Link>
+                  ))}
+                </div>
+
+                <p className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+                  Catégories
+                </p>
                 <div className="space-y-2">
-                  {navCategories.map((category, index) => {
+                  {menuCategories.map((category, index) => {
                     const active = isActive(category.href);
 
                     return (
