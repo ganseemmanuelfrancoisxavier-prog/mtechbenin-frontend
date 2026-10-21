@@ -55,7 +55,6 @@ import {
 } from "lucide-react";
 import useCategoryStore from "@/store/categoryStore";
 import { categories as staticCategories } from "@/lib/categories";
-import CategoryGrid3D from "./CategoryGrid3D";
 
 // Correspondance emoji admin → icône Lucide
 const emojiToIcon = {
@@ -201,7 +200,20 @@ export default function CategoriesSection() {
           ))}
         </div>
       ) : (
-        <CategoryGrid3D items={visibleItems} />
+        <div className="grid grid-cols-2 gap-4">
+          {visibleItems.map(({ slug, label, Icon, href }) => (
+            <Link
+              key={slug}
+              href={href}
+              className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-sm"
+            >
+              <span className="mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.04]">
+                <Icon className="h-5 w-5 text-apple-black" strokeWidth={1.6} />
+              </span>
+              <span className="text-[13px] font-semibold leading-tight text-apple-black">{label}</span>
+            </Link>
+          ))}
+        </div>
       )}
 
       {mounted && (
