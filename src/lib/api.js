@@ -1,15 +1,28 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+// In production requests stay same-origin and pass through the Next rewrite,
+// so the HttpOnly refresh cookie works without exposing an API key in the bundle.
+const API_URL = process.env.NODE_ENV === "development"
+  ? process.env.API_SERVER_URL || process.env.NEXT_PUBLIC_API_URL || "https://mtechbenin-backend-xp3i.onrender.com"
+  : "";
+const ACCESS_TOKEN_KEY = "mtechbenin_admin_access_token";
 
-// ── Clé d'accès admin ─────────────────────────────────────────────────────────
-// Priorité : variable d'env NEXT_PUBLIC_ADMIN_API_KEY (doit correspondre à
-// ADMIN_API_KEY côté backend) → sinon cookie admin-token (rétrocompatibilité)
-function getAdminKey() {
-  if (process.env.NEXT_PUBLIC_ADMIN_API_KEY) {
-    return process.env.NEXT_PUBLIC_ADMIN_API_KEY;
+function getAccessToken() {
+  if (typeof window === "undefined") return null;
+  return window.sessionStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
+async function refreshAccessToken() {
+  const response = await fetch(`${API_URL}/api/auth/refresh`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!response.ok) return null;
+  const data = await response.json();
+  if (data.accessToken && typeof window !== "undefined") {
+    window.sessionStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
+    return data.accessToken;
   }
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(/(?:^|;\s*)admin-token=([^;]*)/);
-  return match ? decodeURIComponent(match[1]) : null;
+  return null;
 }
 
 // ── Construit une query string propre (ignore les valeurs undefined/null) ─────
@@ -25,14 +38,20 @@ function buildQuery(params = {}) {
 
 // ── Fetch centralisé avec header admin auto ───────────────────────────────────
 async function apiFetch(endpoint, options = {}) {
-  const adminKey = getAdminKey();
-  const headers = {
-    "Content-Type": "application/json",
-    ...(adminKey ? { "x-admin-key": adminKey } : {}),
-    ...options.headers,
-  };
+  const { skipAuth = false, retried = false, ...fetchOptions } = options;
+  const headers = { "Content-Type": "application/json", ...fetchOptions.headers };
+  const token = !skipAuth && getAccessToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
+  const res = await fetch(`${API_URL}${endpoint}`, {
+    ...fetchOptions,
+    credentials: "include",
+    headers,
+  });
+  if (res.status === 401 && !skipAuth && !retried && typeof document !== "undefined" && document.cookie.includes("mtechbenin_admin_auth=true")) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) return apiFetch(endpoint, { ...fetchOptions, headers: fetchOptions.headers, retried: true });
+  }
   const data = await res.json();
   if (!res.ok) {
     // On conserve le corps de la réponse sur l'erreur (ex : `produits` renvoyé
@@ -47,12 +66,14 @@ async function apiFetch(endpoint, options = {}) {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const authApi = {
-  // Vérifie le mot de passe contre le backend (bcrypt côté serveur)
+  // Échange le mot de passe contre un jeton court; le mot de passe n'est jamais conservé.
   login: (password) =>
     apiFetch("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ password }),
+      skipAuth: true,
     }),
+  logout: () => apiFetch("/api/auth/logout", { method: "POST" }),
 };
 
 // ── Commandes ─────────────────────────────────────────────────────────────────
