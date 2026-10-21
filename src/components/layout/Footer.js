@@ -35,17 +35,10 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-8 gap-y-10 px-5 md:grid-cols-3 md:gap-10">
         {/* Colonne 1 — Infos boutique */}
         <div className="col-span-2 md:col-span-1">
-          <span className="font-display text-lg font-black tracking-tight text-white">
-            MTECHBENIN
-          </span>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/60">
-            {mounted
-              ? shopSlogan
-              : "Votre boutique tech de confiance au Bénin."}
-          </p>
+
           <Link
             href="/reparation"
-            className="group mt-5 flex max-w-xs items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4 transition-all hover:-translate-y-0.5 hover:bg-white/[0.1]"
+            className="group mb-5 flex max-w-xs items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4 transition-all hover:-translate-y-0.5 hover:bg-white/[0.1]"
           >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
               <Wrench className="h-5 w-5" strokeWidth={1.8} />
@@ -60,6 +53,14 @@ export default function Footer() {
             </span>
             <ArrowUpRight className="h-4 w-4 shrink-0 text-white/55 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
+          <span className="font-display text-lg font-black tracking-tight text-white">
+            MTECHBENIN
+          </span>
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/60">
+            {mounted
+              ? shopSlogan
+              : "Votre boutique tech de confiance au Bénin."}
+          </p>
           <div className="flex gap-4 mt-5">
             {socials.map((s) => (
               <a

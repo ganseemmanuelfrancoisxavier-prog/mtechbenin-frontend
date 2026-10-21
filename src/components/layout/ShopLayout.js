@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import BackToTop from "./BackToTop";
 
 export default function ShopLayout({ children }) {
   const pathname = usePathname();
@@ -22,7 +21,6 @@ export default function ShopLayout({ children }) {
         {children}
       </motion.main>
       <Footer />
-      <BackToTop />
     </div>
   );
 }

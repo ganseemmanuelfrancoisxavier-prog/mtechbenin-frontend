@@ -126,7 +126,7 @@ const emojiToIcon = {
 };
 
 const DefaultIcon = Package;
-const CATEGORIES_AFFICHÉES = 6;
+const CATEGORIES_AFFICHÉES = 8;
 
 export default function CategoriesSection() {
   const [mounted, setMounted] = useState(false);
@@ -143,7 +143,9 @@ export default function CategoriesSection() {
 
   const allItems = [
     ...activeCategories
-      .filter((cat) => cat.slug !== "abonnements")
+      .filter((cat) => cat.slug !== "abonnements" &&
+          cat.slug !== "reparation" &&
+          cat.slug !== "suivi")
       .map((cat) => ({
         slug: cat.slug,
         label: cat.label || cat.name,
@@ -155,6 +157,18 @@ export default function CategoriesSection() {
       label: "Abonnements",
       Icon: Tv,
       href: "/abonnements",
+    },
+    {
+      slug: "reparation",
+      label: "Réparation",
+      Icon: Wrench,
+      href: "/reparation",
+    },
+    {
+      slug: "suivi",
+      label: "Suivi commande",
+      Icon: Package,
+      href: "/suivi",
     },
   ].sort((a, b) => a.label.localeCompare(b.label, "fr", { sensitivity: "base" }));
 
