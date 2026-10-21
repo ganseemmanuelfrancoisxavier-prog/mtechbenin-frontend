@@ -581,7 +581,7 @@
 
 .catalogue-card-float {
   transform-style: preserve-3d;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.2), 0 4px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 18px 24px -20px rgba(0, 0, 0, 0.42);
   animation: catalogue-card-float 7s ease-in-out infinite;
 }
 
@@ -614,12 +614,11 @@
     z-index: 2;
     transform: perspective(1000px) rotateX(3deg) rotateY(-3deg) translateY(-5px) scale(1.015);
     border-color: rgba(0, 0, 0, 0.12);
-    box-shadow: 0 24px 52px rgba(0, 0, 0, 0.24), 0 10px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 22px 28px -18px rgba(0, 0, 0, 0.5);
   }
 
   .catalogue-card-float:hover .catalogue-card-depth {
     transform: translateZ(20px);
-    filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.12));
   }
 
   .catalogue-card-float:hover .catalogue-card-image {
