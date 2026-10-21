@@ -587,3 +587,14 @@
     transition: none;
   }
 }
+
+
+@media (max-width: 767px),
+  (hover: none) and (pointer: coarse),
+  (orientation: landscape) and (max-height: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
