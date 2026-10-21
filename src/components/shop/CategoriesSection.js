@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   ChevronRight,
   Headphones,
@@ -201,17 +202,24 @@ export default function CategoriesSection() {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">
-          {visibleItems.map(({ slug, label, Icon, href }) => (
-            <Link
+          {visibleItems.map(({ slug, label, Icon, href }, index) => (
+            <motion.div
               key={slug}
-              href={href}
-              className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-sm"
+              initial={{ opacity: 0, y: -22, scale: 0.97 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: false, amount: 0.2 }}
+              transition={{ duration: 0.8, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
             >
-              <span className="mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.04]">
-                <Icon className="h-5 w-5 text-apple-black" strokeWidth={1.6} />
-              </span>
-              <span className="text-[13px] font-semibold leading-tight text-apple-black">{label}</span>
-            </Link>
+              <Link
+                href={href}
+                className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-sm"
+              >
+                <span className="mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.04]">
+                  <Icon className="h-5 w-5 text-apple-black" strokeWidth={1.6} />
+                </span>
+                <span className="text-[13px] font-semibold leading-tight text-apple-black">{label}</span>
+              </Link>
+            </motion.div>
           ))}
         </div>
       )}
