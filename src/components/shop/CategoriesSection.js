@@ -208,11 +208,11 @@ export default function CategoriesSection() {
               initial={{ opacity: 0, y: -22, scale: 0.97 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: false, amount: 0.2 }}
-              transition={{ duration: 0.8, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 1, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
             >
               <Link
                 href={href}
-                className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-sm"
+                className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
               >
                 <span className="mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.04]">
                   <Icon className="h-5 w-5 text-apple-black" strokeWidth={1.6} />
