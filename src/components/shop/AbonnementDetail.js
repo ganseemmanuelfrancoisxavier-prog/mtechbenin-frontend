@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,8 @@ import { getService } from "@/lib/abonnements";
 import { formatPrice, getDiscount, libelleDuree } from "@/lib/format";
 import useCartStore from "@/store/cartStore";
 import useAbonnementStore from "@/store/abonnementStore";
-import { urlVideoJouable } from "@/lib/media";
+import { urlVideoJouable, afficheVideo } from "@/lib/media";
+import useVisibleVideo from "@/hooks/useVisibleVideo";
 
 // La description d'une formule arrive sous deux formes : une liste depuis la
 // base (l'admin la saisit ligne à ligne dans le panel), ou une chaîne unique
@@ -65,7 +66,6 @@ export default function AbonnementDetail({ slug }) {
   const [durationMultiplier, setDurationMultiplier] = useState(1);
   const [openFaq, setOpenFaq] = useState(null);
   const [added, setAdded] = useState(false);
-  const videoRef = useRef(null);
 
   useEffect(() => {
     setMounted(true);
@@ -109,11 +109,12 @@ export default function AbonnementDetail({ slug }) {
   const mediaMuted = storeService?.mediaMuted !== false;
   const isVideo = mediaType === "video" && mediaUrl;
   const isImage = mediaType === "image" && mediaUrl;
+  const video = useVisibleVideo({ enabled: Boolean(isVideo), identity: mediaUrl });
   const bg = serviceBg[slug] || defaultBg;
 
   useEffect(() => {
-    if (videoRef.current) videoRef.current.muted = mediaMuted;
-  }, [mediaMuted]);
+    if (video.ref.current) video.ref.current.muted = mediaMuted;
+  }, [mediaMuted, video.ref]);
 
   useEffect(() => {
     setDurationMultiplier(1);
@@ -300,12 +301,14 @@ export default function AbonnementDetail({ slug }) {
             )}
             {isVideo && (
               <video
-                ref={videoRef}
-                src={urlVideoJouable(mediaUrl)}
-                autoPlay
+                ref={video.ref}
+                src={video.selected ? urlVideoJouable(mediaUrl) : undefined}
+                poster={afficheVideo(mediaUrl)}
+                autoPlay={video.selected && !video.reducedMotion}
                 loop
                 playsInline
                 muted={mediaMuted}
+                preload="none"
                 className="absolute inset-0 w-full h-full object-cover"
               />
             )}

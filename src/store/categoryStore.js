@@ -14,6 +14,7 @@ const categoriesApi = {
     }),
   delete: (id) => apiFetch(`/api/categories/${id}`, { method: "DELETE" }),
 };
+let categoriesFetchPromise = null;
 
 const useCategoryStore = create(
   persist(
@@ -25,26 +26,31 @@ const useCategoryStore = create(
       setHasHydrated: (state) => set({ _hasHydrated: state }),
 
       fetchCategories: async () => {
-        try {
-          const now = Date.now();
-          if (get()._lastFetch && now - get()._lastFetch < 5 * 60 * 1000)
-            return;
-          const data = await categoriesApi.getAll();
-          if (data.categories?.length > 0) {
-            const normalized = data.categories.map((c) => ({
-              id: c.id,
-              slug: c.slug,
-              name: c.name,
-              label: c.label || c.name,
-              icon: c.icon || "📦",
-              sortOrder: c.sortOrder || 0,
-              active: c.active,
-            }));
-            set({ categories: normalized, _lastFetch: now });
+        const now = Date.now();
+        if (get()._lastFetch && now - get()._lastFetch < 5 * 60 * 1000) return;
+        if (categoriesFetchPromise) return categoriesFetchPromise;
+        categoriesFetchPromise = (async () => {
+          try {
+            const data = await categoriesApi.getAll();
+            if (data.categories?.length > 0) {
+              const normalized = data.categories.map((c) => ({
+                id: c.id,
+                slug: c.slug,
+                name: c.name,
+                label: c.label || c.name,
+                icon: c.icon || "📦",
+                sortOrder: c.sortOrder || 0,
+                active: c.active,
+              }));
+              set({ categories: normalized, _lastFetch: now });
+            }
+          } catch (err) {
+            console.error("Erreur fetchCategories", err.message);
+          } finally {
+            categoriesFetchPromise = null;
           }
-        } catch (err) {
-          console.error("Erreur fetchCategories", err.message);
-        }
+        })();
+        return categoriesFetchPromise;
       },
 
       addCategory: async (category) => {

@@ -19,6 +19,7 @@ const withDefaults = (services) =>
     category: s.category || "family",
     totalPlaces: s.totalPlaces !== undefined ? s.totalPlaces : 0,
   }));
+let servicesFetchPromise = null;
 
 const useAbonnementStore = create(
   persist(
@@ -31,13 +32,13 @@ const useAbonnementStore = create(
 
       // ── Charge les services depuis l'API ──────────────────────────────────
       fetchServices: async () => {
-        try {
-          const now = Date.now();
-          if (get()._lastFetch && now - get()._lastFetch < 5 * 60 * 1000)
-            return;
-
-          const data = await apiFetch("/api/subscriptions");
-          if (data.services && data.services.length > 0) {
+        const now = Date.now();
+        if (get()._lastFetch && now - get()._lastFetch < 5 * 60 * 1000) return;
+        if (servicesFetchPromise) return servicesFetchPromise;
+        servicesFetchPromise = (async () => {
+          try {
+            const data = await apiFetch("/api/subscriptions");
+            if (data.services && data.services.length > 0) {
             const normalized = data.services.map((s) => ({
               // Champs API
               id: s.id,
@@ -85,10 +86,14 @@ const useAbonnementStore = create(
             }));
             set({ services: normalized, _lastFetch: now });
           }
-        } catch (err) {
-          console.error("Erreur chargement services API", err.message);
-          // Garde les services locaux en fallback
-        }
+          } catch (err) {
+            console.error("Erreur chargement services API", err.message);
+            // Garde les services locaux en fallback
+          } finally {
+            servicesFetchPromise = null;
+          }
+        })();
+        return servicesFetchPromise;
       },
 
       // ── Visibilité ────────────────────────────────────────────────────────

@@ -16,7 +16,8 @@ import { formatPrice, prixDepart } from "@/lib/format";
 import useAbonnementStore from "@/store/abonnementStore";
 import { services as staticServices } from "@/lib/abonnements";
 import { useMobileAudioFocus } from "@/hooks/useMobileAudioFocus";
-import { urlVideoJouable } from "@/lib/media";
+import { urlVideoJouable, afficheVideo } from "@/lib/media";
+import useVisibleVideo from "@/hooks/useVisibleVideo";
 
 const serviceBg = {
   netflix: "from-[#831010] via-[#E50914] to-[#1a0000]",
@@ -49,20 +50,13 @@ const steps = [
 ];
 
 function ServiceCard({ service, onToggleMute, cardRef }) {
-  const videoRef = useRef(null);
   const isVideo = service.mediaType === "video" && service.mediaUrl;
   const { prix: minPrice, suffixe: suffixePrix } = prixDepart(service.formules);
 
   const isMaintenance = service.serviceStatus === "maintenance";
   const isComingSoon = service.serviceStatus === "coming_soon";
   const isUnavailable = isMaintenance || isComingSoon;
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = service.mediaMuted !== false;
-    if (video.paused) video.play().catch(() => {});
-  }, [service.mediaMuted]);
+  const video = useVisibleVideo({ enabled: Boolean(isVideo && !isUnavailable), identity: service.mediaUrl });
 
   return (
     <Link
@@ -88,12 +82,14 @@ function ServiceCard({ service, onToggleMute, cardRef }) {
         )}
         {isVideo && (
           <video
-            ref={videoRef}
-            src={urlVideoJouable(service.mediaUrl)}
-            autoPlay
+            ref={video.ref}
+            src={video.selected ? urlVideoJouable(service.mediaUrl) : undefined}
+            poster={afficheVideo(service.mediaUrl)}
+            autoPlay={video.selected && !video.reducedMotion}
             loop
             playsInline
             muted={service.mediaMuted !== false}
+            preload="none"
             className="absolute inset-0 w-full h-full object-cover"
           />
         )}

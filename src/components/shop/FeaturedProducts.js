@@ -5,29 +5,18 @@ import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import ProductCard from "./ProductCard";
 import useProductStore from "@/store/productStore";
-import useCategoryStore from "@/store/categoryStore";
-import { categories as staticCategories } from "@/lib/categories";
 
 export default function FeaturedProducts() {
   const [mounted, setMounted] = useState(false);
 
-  const { products, fetchProducts } = useProductStore();
-  const { getActiveCategories, fetchCategories } = useCategoryStore();
+  const { featuredProducts, fetchFeaturedProducts } = useProductStore();
 
   useEffect(() => {
     setMounted(true);
-    fetchProducts(); // ← charge depuis l'API
-    fetchCategories(); // ← charge depuis l'API
+    fetchFeaturedProducts();
   }, []);
 
-  const activeCategories = mounted
-    ? getActiveCategories()
-    : staticCategories.filter((c) => c.active);
-
-  // Produits featured depuis le store (déjà chargés depuis l'API)
-  const featured = mounted
-    ? products.filter((p) => p.active && p.featured)
-    : products.filter((p) => p.active && p.featured);
+  const featured = featuredProducts.filter((p) => p.active && p.featured);
 
   // Skeleton pendant le chargement
   if (!mounted) {

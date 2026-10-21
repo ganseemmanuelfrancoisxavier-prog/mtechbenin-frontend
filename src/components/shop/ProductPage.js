@@ -28,7 +28,8 @@ import useProductStore from "@/store/productStore";
 import useReviewStore from "@/store/reviewStore";
 import ReviewPhotoPicker from "./ReviewPhotoPicker";
 import ReviewPhotos from "./ReviewPhotos";
-import { urlVideoJouable } from "@/lib/media";
+import { urlVideoJouable, afficheVideo } from "@/lib/media";
+import useVisibleVideo from "@/hooks/useVisibleVideo";
 
 // ── Normalise images depuis l'API (JSON string ou array) ─────────────────────
 function parseImages(raw) {
@@ -86,7 +87,7 @@ export default function ProductPage({ slug }) {
   const addItem = useCartStore((state) => state.addItem);
   const buyNow = useCartStore((state) => state.buyNow);
 
-  const { products, fetchProducts } = useProductStore();
+  const { products } = useProductStore();
   const {
     reviews,
     fetchReviewsBySlug,
@@ -148,7 +149,6 @@ export default function ProductPage({ slug }) {
 
   useEffect(() => {
     setMounted(true);
-    fetchProducts(); // charge les produits depuis l'API
     fetchReviewsBySlug(slug); // charge les avis de ce produit depuis l'API
   }, [slug]);
 
@@ -158,20 +158,26 @@ export default function ProductPage({ slug }) {
   }, [slug, fetchDetail]);
 
   const storeProduct = products.find((p) => p.slug === slug);
+  const baseProduct = storeProduct || productDetail;
 
   // Normalise le produit
-  const product = storeProduct
+  const product = baseProduct
     ? {
-        ...storeProduct,
-        images: parseImages(storeProduct.images),
-        specs: parseSpecs(storeProduct.specs),
-        status: getStatus(storeProduct),
-        videoUrl: storeProduct.videoUrl || null,
+        ...baseProduct,
+        images: parseImages(baseProduct.images),
+        specs: parseSpecs(baseProduct.specs),
+        status: getStatus(baseProduct),
+        videoUrl: baseProduct.videoUrl || null,
       }
     : null;
 
   const productReviews = mounted ? getReviewsByProduct(slug) : [];
   const avgRating = mounted ? getAverageRating(slug) : 0;
+  const videoUrl = productDetail?.videoUrl ?? product?.videoUrl;
+  const productVideo = useVisibleVideo({
+    enabled: Boolean(product && videoUrl && activeImage === product.images.length),
+    identity: videoUrl,
+  });
 
   const handleSubmitReview = async () => {
     if (!reviewForm.name || !reviewForm.text || photoEnCours) return;
@@ -202,7 +208,7 @@ export default function ProductPage({ slug }) {
     return (
       <div className="max-w-7xl mx-auto px-5 py-20 text-center">
         <p className="text-apple-mid text-xl mb-6">
-          {products.length === 0 ? "Chargement..." : "Produit introuvable"}
+          {!detailErreur ? "Chargement..." : "Produit introuvable"}
         </p>
         <Link href="/catalogue" className="btn-glass text-sm px-6 py-3">
           Retour au catalogue
@@ -214,8 +220,6 @@ export default function ProductPage({ slug }) {
 
   // productDetail is always fresh (fetched on every page load).
   // Use its videoUrl in priority over the store cache which can be up to 5 min stale.
-  const videoUrl = productDetail?.videoUrl ?? product.videoUrl;
-
   // Galerie unifiée : les photos, puis la vidéo à la fin s'il y en a une —
   // activeImage indexe ce tableau, balayable comme les photos.
   const media = [
@@ -372,11 +376,14 @@ export default function ProductPage({ slug }) {
             {media[safeActiveImage].type === "video" ? (
               <video
                 key={media[safeActiveImage].url}
-                src={media[safeActiveImage].url}
-                autoPlay
+                ref={productVideo.ref}
+                src={productVideo.selected ? urlVideoJouable(media[safeActiveImage].url) : undefined}
+                poster={afficheVideo(media[safeActiveImage].url)}
+                autoPlay={productVideo.selected && !productVideo.reducedMotion}
                 loop
                 playsInline
                 muted={videoMuted}
+                preload="none"
                 className="pointer-events-none absolute inset-0 w-full h-full object-cover"
               />
             ) : (
@@ -438,15 +445,11 @@ export default function ProductPage({ slug }) {
                 >
                   {m.type === "video" ? (
                     <>
-                      {/* `#t=0.1` demande la vignette à 0,1 s : sans ça, Safari
-                          et iOS affichent un cadre gris au lieu de la première
-                          image. On ne l'ajoute que si l'URL n'a pas déjà une
-                          ancre, sinon le fragment devient invalide et ignoré. */}
                       <video
-                        src={(() => { const u = urlVideoJouable(m.url); return u.includes("#") ? u : `${u}#t=0.1`; })()}
+                        poster={afficheVideo(m.url)}
                         muted
                         playsInline
-                        preload="metadata"
+                        preload="none"
                         className="w-full h-full object-cover"
                       />
                       <span className="absolute inset-0 flex items-center justify-center bg-black/25">

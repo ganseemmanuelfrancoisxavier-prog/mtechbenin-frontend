@@ -6,6 +6,7 @@ import { Volume2, VolumeX, Play } from "lucide-react";
 import useClientMediaStore from "@/store/clientMediaStore";
 import MediaLightbox from "./MediaLightbox";
 import { urlVideoJouable, afficheVideo } from "@/lib/media";
+import useVisibleVideo from "@/hooks/useVisibleVideo";
 
 // Vitesse du défilement automatique, en pixels par seconde. Assez lent pour
 // qu'on puisse regarder une photo sans la poursuivre.
@@ -17,57 +18,17 @@ const REPRISE_MS = 2500;
 const SEUIL_GLISSEMENT = 6;
 
 function VideoTile({ media, muted, suspendu }) {
-  const videoRef = useRef(null);
-  const contenantRef = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  // Un téléphone ne décode qu'un nombre limité de vidéos à la fois. Toutes les
-  // lancer d'un coup en fait échouer une partie — certaines restent noires,
-  // d'autres s'arrêtent quand le navigateur libère un décodeur. On ne joue donc
-  // que ce qui est à l'écran, ce qui économise aussi les données mobiles.
-  //
-  // L'observation porte sur le contenant, jamais sur la balise `<video>` : sa
-  // hauteur dépend de métadonnées pas encore chargées, et un élément de hauteur
-  // nulle n'est jamais considéré comme visible — la vidéo ne démarrerait alors
-  // jamais.
-  useEffect(() => {
-    const cible = contenantRef.current;
-    if (!cible) return undefined;
-    const obs = new IntersectionObserver(
-      ([e]) => setVisible(e.isIntersecting),
-      {
-        // Marge horizontale : le carrousel défile de côté, pas vers le bas.
-        rootMargin: "0px 300px",
-        threshold: 0,
-      },
-    );
-    obs.observe(cible);
-    return () => obs.disconnect();
-  }, []);
-
-  // `suspendu` couvre la visionneuse plein écran : les vignettes sont alors
-  // cachées derrière elle, mais l'observateur les croit toujours à l'écran.
-  // Les laisser tourner mobilise des décodeurs et de la batterie pour rien.
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = muted;
-    if (visible && !suspendu) {
-      if (v.paused) v.play().catch(() => {});
-    } else if (!v.paused) {
-      v.pause();
-    }
-  }, [muted, visible, suspendu]);
+  const video = useVisibleVideo({ enabled: !suspendu, identity: media.url });
 
   return (
-    <div ref={contenantRef} className="absolute inset-0">
+    <div className="absolute inset-0">
       <video
-        ref={videoRef}
-        src={urlVideoJouable(media.url)}
+        ref={video.ref}
+        src={video.selected ? urlVideoJouable(media.url) : undefined}
         // Première image servie par Cloudinary : la tuile montre quelque chose
         // immédiatement, même avant le moindre octet de vidéo.
         poster={afficheVideo(media.url)}
-        preload="metadata"
+        preload="none"
         loop
         playsInline
         muted={muted}
@@ -150,6 +111,8 @@ function Tuile({ media, muted, suspendu, onOuvrir, onBasculerSon }) {
 export default function ClientGallery() {
   const { medias, fetchMedias } = useClientMediaStore();
   const [mounted, setMounted] = useState(false);
+  const [inViewport, setInViewport] = useState(false);
+  const [tabVisible, setTabVisible] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState(null);
   // Le son démarre coupé : les navigateurs bloquent la lecture auto sonore.
   const [soundOnId, setSoundOnId] = useState(null);
@@ -166,6 +129,23 @@ export default function ClientGallery() {
   useEffect(() => {
     setMounted(true);
     fetchMedias();
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || medias.length === 0 || !railRef.current) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInViewport(entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(railRef.current);
+    return () => observer.disconnect();
+  }, [mounted, medias.length]);
+
+  useEffect(() => {
+    const update = () => setTabVisible(!document.hidden);
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
   }, []);
 
   // Trois copies au minimum : on navigue toujours dans celle du milieu, ce qui
@@ -193,7 +173,7 @@ export default function ClientGallery() {
   }, [medias.length]);
 
   useEffect(() => {
-    if (!mounted || medias.length === 0) return undefined;
+    if (!mounted || medias.length === 0 || !inViewport || !tabVisible) return undefined;
     mesurerPeriode();
     window.addEventListener("resize", mesurerPeriode);
     return () => window.removeEventListener("resize", mesurerPeriode);
@@ -216,7 +196,7 @@ export default function ClientGallery() {
 
   // Défilement automatique.
   useEffect(() => {
-    if (!mounted || medias.length === 0) return undefined;
+    if (!mounted || medias.length === 0 || !inViewport || !tabVisible) return undefined;
     const rail = railRef.current;
     if (!rail) return undefined;
 
@@ -263,7 +243,7 @@ export default function ClientGallery() {
 
     raf = requestAnimationFrame(avancer);
     return () => cancelAnimationFrame(raf);
-  }, [mounted, medias.length, lightboxIndex, reboucler]);
+  }, [mounted, medias.length, lightboxIndex, reboucler, inViewport, tabVisible]);
 
   // Toute manipulation suspend l'automatique et reboucle aussi, pour que le
   // défilement manuel soit infini dans les deux sens.

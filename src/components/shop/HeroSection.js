@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
@@ -10,12 +10,12 @@ import useHeroStore from "@/store/heroStore";
 import { categories as staticCategories } from "@/lib/categories";
 import { services as staticServices } from "@/lib/abonnements";
 import { urlVideoJouable, afficheVideo } from "@/lib/media";
+import useVisibleVideo from "@/hooks/useVisibleVideo";
 
 export default function HeroSection() {
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const videoRef = useRef(null);
 
   const { getActiveCategories, fetchCategories } = useCategoryStore();
   const { getActiveServices, fetchServices } = useAbonnementStore();
@@ -64,6 +64,11 @@ export default function HeroSection() {
         }));
 
   const safeIndex = slides.length === 0 ? 0 : current % slides.length;
+  const activeSlide = slides[safeIndex];
+  const heroVideo = useVisibleVideo({
+    enabled: mounted && activeSlide?.type === "video",
+    identity: activeSlide?.id ?? safeIndex,
+  });
 
   const goNext = useCallback(() => {
     if (isAnimating || slides.length <= 1) return;
@@ -77,47 +82,6 @@ export default function HeroSection() {
     const timer = setInterval(goNext, 8000);
     return () => clearInterval(timer);
   }, [goNext, slides.length]);
-
-  // La vidéo du hero DOIT se lancer seule. Trois choses s'y opposaient.
-  //
-  // 1. React pose `muted` comme PROPRIÉTÉ, jamais comme attribut : le HTML
-  //    rendu ne porte pas `muted`. Safari iOS, lui, décide d'autoriser la
-  //    lecture automatique en lisant l'ATTRIBUT — sans lui il considère que la
-  //    vidéo a du son, refuse de la lancer, et affiche sa propre surcouche de
-  //    lecture. C'est le bouton que voyaient les visiteurs.
-  //
-  // 2. Le premier `play()` tombe souvent pendant le chargement de la source et
-  //    se fait rejeter (`AbortError : interrupted by a new load request`).
-  //    L'échec partait dans un `catch` vide et la vidéo restait en pause pour
-  //    de bon. On retente donc sur `canplay`, quand la source est prête.
-  //
-  // 3. Le `<video>` n'était pas recréé d'un slide à l'autre (voir `key` plus
-  //    bas) : `currentTime` était conservé, et une vidéo plus courte que la
-  //    précédente démarrait au-delà de sa fin — donc à l'arrêt.
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.muted = true;
-    video.setAttribute("muted", "");
-
-    let abandonne = false;
-    const lancer = () => {
-      if (abandonne || !videoRef.current) return;
-      const promesse = videoRef.current.play();
-      // `play()` ne rend une promesse que sur les navigateurs récents.
-      if (promesse && typeof promesse.catch === "function") {
-        promesse.catch(() => {});
-      }
-    };
-
-    lancer();
-    video.addEventListener("canplay", lancer);
-    return () => {
-      abandonne = true;
-      video.removeEventListener("canplay", lancer);
-    };
-  }, [safeIndex]);
 
   // Skeleton pendant le chargement initial
   if (!mounted) {
@@ -174,16 +138,16 @@ export default function HeroSection() {
             // un élément neuf, dont le drapeau de lecture automatique est
             // remis à zéro.
             key={slide.id ?? safeIndex}
-            ref={videoRef}
-            src={urlVideoJouable(slide.url)}
+            ref={heroVideo.ref}
+            src={heroVideo.selected ? urlVideoJouable(slide.url) : undefined}
             // Première image servie en JPEG par Cloudinary : sans elle, le
             // hero reste noir le temps que la vidéo se décode.
             poster={afficheVideo(slide.url)}
-            autoPlay
+            autoPlay={heroVideo.selected && !heroVideo.reducedMotion}
             muted
             loop
             playsInline
-            preload="auto"
+            preload="none"
             className="absolute inset-0 w-full h-full object-cover"
           />
         )}

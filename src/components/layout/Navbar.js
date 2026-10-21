@@ -11,12 +11,13 @@ import useCategoryStore from "@/store/categoryStore";
 import useSettingsStore from "@/store/settingsStore";
 import CartDrawer from "@/components/shop/CartDrawer";
 import { categories as staticCategories } from "@/lib/categories";
+import useScrollThreshold from "@/hooks/useScrollThreshold";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = useScrollThreshold(8);
   const [cartOpen, setCartOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -39,15 +40,6 @@ export default function Navbar() {
     setSearchOpen(false);
     setSearchQuery("");
   }, [pathname]);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 8);
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     if (!searchOpen) return;

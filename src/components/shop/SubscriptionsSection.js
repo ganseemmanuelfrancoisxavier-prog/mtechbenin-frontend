@@ -15,7 +15,8 @@ import { formatPrice, prixDepart } from "@/lib/format";
 import useAbonnementStore from "@/store/abonnementStore";
 import { services as staticServices } from "@/lib/abonnements";
 import { useMobileAudioFocus } from "@/hooks/useMobileAudioFocus";
-import { urlVideoJouable } from "@/lib/media";
+import { urlVideoJouable, afficheVideo } from "@/lib/media";
+import useVisibleVideo from "@/hooks/useVisibleVideo";
 
 const serviceBg = {
   netflix: "from-[#831010] via-[#E50914] to-[#1a0000]",
@@ -30,7 +31,6 @@ const serviceBg = {
 const defaultBg = "from-[#1a1a2e] via-[#16213E] to-[#0f0f0f]";
 
 function ServiceCard({ service, onToggleMute, cardRef }) {
-  const videoRef = useRef(null);
   const isVideo = service.mediaType === "video" && service.mediaUrl;
 
   const formules = service.formules || service.plans || [];
@@ -41,14 +41,7 @@ function ServiceCard({ service, onToggleMute, cardRef }) {
   const isMaintenance = service.serviceStatus === "maintenance";
   const isComingSoon = service.serviceStatus === "coming_soon";
   const isUnavailable = isMaintenance || isComingSoon;
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = service.mediaMuted !== false;
-    // Si l'autoplay a été bloqué, tenter de relancer la lecture (muette)
-    if (video.paused) video.play().catch(() => {});
-  }, [service.mediaMuted]);
+  const video = useVisibleVideo({ enabled: Boolean(isVideo && !isUnavailable), identity: service.mediaUrl });
 
   /*
    * Le contenu est stocké dans une variable JSX (pas un composant inline).
@@ -75,12 +68,14 @@ function ServiceCard({ service, onToggleMute, cardRef }) {
 
       {isVideo && (
         <video
-          ref={videoRef}
-          src={urlVideoJouable(service.mediaUrl)}
-          autoPlay
+          ref={video.ref}
+          src={video.selected ? urlVideoJouable(service.mediaUrl) : undefined}
+          autoPlay={video.selected && !video.reducedMotion}
           loop
           playsInline
           muted={service.mediaMuted !== false}
+          poster={afficheVideo(service.mediaUrl)}
+          preload="none"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ transform: "scale(1.005)", transformOrigin: "center" }}
         />
