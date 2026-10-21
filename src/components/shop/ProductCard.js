@@ -64,7 +64,7 @@ export default function ProductCard({ product }) {
     <Link
       ref={cardRef}
       href={`/produit/${product.slug}`}
-      className="product-card-reveal group relative glass-card rounded-3xl overflow-hidden hover:-translate-y-1 transition-all duration-300 flex flex-col"
+      className="product-card-reveal catalogue-card-float group relative glass-card rounded-3xl overflow-hidden transition-all duration-300 flex flex-col"
     >
       {/* Image */}
       <div className="relative bg-neutral-100 aspect-square overflow-hidden">
@@ -72,7 +72,7 @@ export default function ProductCard({ product }) {
           src={image}
           alt={product.name}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          className="catalogue-card-depth catalogue-card-image object-cover transition-transform duration-500"
           sizes="(max-width: 768px) 50vw, 25vw"
         />
 
@@ -105,7 +105,7 @@ export default function ProductCard({ product }) {
       </div>
 
       {/* Infos */}
-      <div className="p-4 flex flex-col flex-1">
+      <div className="catalogue-card-depth p-4 flex flex-col flex-1">
         <span
           className={`self-start text-[11px] font-medium mb-2 ${
             status === "En stock"
