@@ -28,18 +28,17 @@ import useScrollThreshold from "@/hooks/useScrollThreshold";
 
 const menuActions = [
   { label: "Accueil", href: "/", icon: Home },
-  { label: "Catalogue", href: "/catalogue", icon: LayoutGrid },
+  { label: "Tous nos produits", href: "/catalogue", icon: LayoutGrid },
   { label: "Suivre ma commande", href: "/suivi", icon: PackageSearch },
-  { label: "Réparation", href: "/reparation", icon: Wrench },
+  { label: "Service de réparation", href: "/reparation", icon: Wrench },
   { label: "Abonnements", href: "/abonnements", icon: Tv },
   { label: "Mon panier", href: "/panier", icon: ShoppingCart },
-  { label: "Contact", href: "/contact", icon: Headphones },
+  { label: "Contacter le support", href: "/contact", icon: Headphones },
   { label: "Aide & FAQ", href: "/faq", icon: CircleHelp },
 ];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const scrolled = useScrollThreshold(8);
   const [cartOpen, setCartOpen] = useState(false);
@@ -63,19 +62,8 @@ export default function Navbar() {
 
   useEffect(() => {
     setMenuOpen(false);
-    setSearchOpen(false);
     setSearchQuery("");
   }, [pathname]);
-
-  useEffect(() => {
-    if (!searchOpen) return;
-
-    const timer = window.setTimeout(() => {
-      searchInputRef.current?.focus();
-    }, 180);
-
-    return () => window.clearTimeout(timer);
-  }, [searchOpen]);
 
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -113,7 +101,6 @@ export default function Navbar() {
   useEffect(() => {
     const handleEscape = (event) => {
       if (event.key === "Escape") {
-        setSearchOpen(false);
         setSearchQuery("");
         setMenuOpen(false);
       }
@@ -158,18 +145,8 @@ export default function Navbar() {
   const isActive = (href) =>
     pathname === href || pathname.startsWith(`${href}/`);
 
-  const handleToggleSearch = () => {
-    setSearchOpen((previous) => {
-      if (previous) setSearchQuery("");
-      return !previous;
-    });
-
-    setMenuOpen(false);
-  };
-
   const handleToggleMenu = () => {
     setMenuOpen((previous) => !previous);
-    setSearchOpen(false);
     setSearchQuery("");
   };
 
@@ -183,7 +160,6 @@ export default function Navbar() {
       return;
     }
 
-    setSearchOpen(false);
     setMenuOpen(false);
     router.push(`/recherche?q=${encodeURIComponent(query)}`);
   };
@@ -203,7 +179,7 @@ export default function Navbar() {
             aria-label="Accueil MTECHBENIN"
             onClick={() => {
               setMenuOpen(false);
-              setSearchOpen(false);
+
             }}
             className="shrink-0"
           >
@@ -233,38 +209,11 @@ export default function Navbar() {
 
           <div className="flex shrink-0 items-center gap-1">
             <button
-              ref={menuButtonRef}
-              type="button"
-              onClick={handleToggleSearch}
-              aria-label={searchOpen ? "Fermer la recherche" : "Rechercher"}
-              aria-expanded={searchOpen}
-              aria-controls="header-search-panel"
-              className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 transition hover:bg-black/[0.05] hover:text-neutral-950"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.span
-                  key={searchOpen ? "close-search" : "open-search"}
-                  initial={{ opacity: 0, scale: 0.8, rotate: -15 }}
-                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, rotate: 15 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex"
-                >
-                  {searchOpen ? (
-                    <X className="h-5 w-5" strokeWidth={1.8} />
-                  ) : (
-                    <Search className="h-5 w-5" strokeWidth={1.8} />
-                  )}
-                </motion.span>
-              </AnimatePresence>
-            </button>
-
-            <button
               type="button"
               onClick={() => {
                 setCartOpen(true);
                 setMenuOpen(false);
-                setSearchOpen(false);
+
               }}
               aria-label={`Ouvrir le panier, ${totalItems} article(s)`}
               className="relative flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 transition hover:bg-black/[0.05] hover:text-neutral-950"
@@ -292,6 +241,7 @@ export default function Navbar() {
             </button>
 
             <button
+              ref={menuButtonRef}
               type="button"
               onClick={handleToggleMenu}
               aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
@@ -318,64 +268,6 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-
-        {/* Recherche animée */}
-        <AnimatePresence initial={false}>
-          {searchOpen && (
-            <motion.div
-              key="search-panel"
-              id="header-search-panel"
-              initial={{ opacity: 0, height: 0, y: -5 }}
-              animate={{ opacity: 1, height: "auto", y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -5 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden border-t border-black/[0.05] bg-white/95 backdrop-blur-2xl"
-            >
-              <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6 sm:py-7">
-                <p className="mb-3 text-center text-xs font-medium uppercase tracking-[0.18em] text-neutral-400">
-                  Recherche MTECHBENIN
-                </p>
-
-                <form onSubmit={handleSearch} className="relative">
-                  <Search
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400"
-                    strokeWidth={1.8}
-                  />
-
-                  <input
-                    ref={searchInputRef}
-                    type="search"
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder="Que recherchez-vous ?"
-                    aria-label="Rechercher un produit"
-                    autoComplete="off"
-                    className="h-[52px] w-full rounded-2xl border border-neutral-200 bg-neutral-100/80 pl-12 pr-12 text-base text-neutral-950 outline-none transition-all placeholder:text-neutral-400 hover:border-neutral-300 focus:border-neutral-400 focus:bg-white focus:ring-4 focus:ring-black/[0.04]"
-                  />
-
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearchQuery("");
-                        searchInputRef.current?.focus();
-                      }}
-                      aria-label="Effacer la recherche"
-                      className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-950"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </form>
-
-                <p className="mt-3 text-center text-xs text-neutral-400">
-                  Produits, accessoires et services
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Menu mobile */}
         <AnimatePresence initial={false}>
