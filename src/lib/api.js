@@ -476,6 +476,11 @@ export const contactsApi = {
 
 // ── Upload Cloudinary ─────────────────────────────────────────────────────────
 export const uploadApi = {
+  createSignature: (folder = "mtechbenin/products", resourceType = "image") =>
+    apiFetch("/api/upload/signature", {
+      method: "POST",
+      body: JSON.stringify({ folder, resourceType }),
+    }),
   upload: (base64, folder = "mtechbenin/products") =>
     apiFetch("/api/upload", {
       method: "POST",
