@@ -35,9 +35,6 @@ export default function SocialProofSection() {
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
           Avis publiés
         </p>
-        <h2 className="font-display font-black text-3xl md:text-4xl text-apple-black tracking-tight">
-          Ils parlent de nous
-        </h2>
       </div>
 
       {/* Avis */}
@@ -46,7 +43,7 @@ export default function SocialProofSection() {
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="glass-card relative flex flex-col gap-4 overflow-hidden rounded-3xl p-6"
+              className="glass-card relative flex flex-col gap-4 overflow-hidden rounded-3xl p-6 shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
             >
               <Quote
                 className="absolute right-4 top-4 h-8 w-8 text-black/[0.04]"
