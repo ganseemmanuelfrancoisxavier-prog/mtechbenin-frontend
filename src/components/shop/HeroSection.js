@@ -79,6 +79,10 @@ export default function HeroSection() {
 
   useEffect(() => {
     if (slides.length <= 1) return;
+    const reducedMotion = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    )?.matches;
+    if (reducedMotion) return;
     const timer = setInterval(goNext, 8000);
     return () => clearInterval(timer);
   }, [goNext, slides.length]);
@@ -86,7 +90,7 @@ export default function HeroSection() {
   // Skeleton pendant le chargement initial
   if (!mounted) {
     return (
-      <section className="relative w-full min-h-[92vh] md:min-h-[85vh] flex items-center overflow-hidden bg-gradient-to-br from-[#0A0A0A] via-[#1a1a2e] to-[#0f3460]">
+      <section className="relative flex min-h-[clamp(520px,calc(100svh-56px),800px)] w-full items-center overflow-hidden bg-gradient-to-br from-[#0A0A0A] via-[#1a1a2e] to-[#0f3460]">
         <div className="relative z-10 max-w-7xl mx-auto px-5 w-full py-20">
           <div className="animate-pulse space-y-4">
             <div className="h-5 bg-white/10 rounded-full w-32" />
@@ -108,7 +112,7 @@ export default function HeroSection() {
   const slide = slides[safeIndex];
 
   return (
-    <section className="relative w-full min-h-[92vh] md:min-h-[85vh] flex items-center overflow-hidden">
+    <section className="relative flex min-h-[clamp(520px,calc(100svh-56px),800px)] w-full items-center overflow-hidden">
       {/* Fond */}
       <div
         className={`absolute inset-0 transition-all duration-700 ${
@@ -152,7 +156,7 @@ export default function HeroSection() {
           />
         )}
         {(slide.type === "image" || slide.type === "video") && (
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-black/10 md:bg-black/35" />
         )}
       </div>
 
@@ -163,7 +167,7 @@ export default function HeroSection() {
       </div>
 
       {/* Contenu */}
-      <div className="relative z-10 max-w-7xl mx-auto px-5 w-full py-20">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 md:py-20">
         <div
           className={`transition-all duration-500 ${isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
         >
@@ -184,11 +188,11 @@ export default function HeroSection() {
           )}
 
           <h1 className="font-display font-black text-white leading-none mb-2 tracking-tight">
-            <span className="block text-5xl md:text-7xl lg:text-8xl">
+            <span className="block max-w-5xl break-words text-[clamp(2.8rem,8vw,6.5rem)] leading-[0.96]">
               {slide.title}
             </span>
             {slide.subtitle && (
-              <span className="block text-3xl md:text-5xl lg:text-6xl text-white/50 mt-1">
+              <span className="mt-2 block text-[clamp(1.8rem,5vw,4.5rem)] leading-[1.02] text-white/70">
                 {slide.subtitle}
               </span>
             )}
