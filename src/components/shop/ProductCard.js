@@ -29,7 +29,7 @@ function getProductStatus(product) {
   return "En stock";
 }
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, featuredCta = false }) {
   const [liked, setLiked] = useState(false);
   const cardRef = useRef(null);
 
@@ -133,8 +133,14 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        <span className="mt-auto border-t border-black/[0.06] pt-3 text-[12px] font-medium text-neutral-500">
-          {isRupture ? "Indisponible" : hasOptions ? "Voir les options" : "Voir le produit"}
+        <span
+          className={`mt-auto flex w-full items-center justify-center rounded-2xl py-2.5 text-[12px] font-semibold ${
+            featuredCta && !isRupture
+              ? "bg-black text-white"
+              : "border-t border-black/[0.06] pt-3 text-neutral-500"
+          }`}
+        >
+          {isRupture ? "Indisponible" : featuredCta ? "Commander" : hasOptions ? "Voir les options" : "Voir le produit"}
         </span>
       </div>
     </Link>
