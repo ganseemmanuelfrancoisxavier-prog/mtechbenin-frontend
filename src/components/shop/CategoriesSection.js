@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
+  ChevronLeft,
   ChevronRight,
   Headphones,
   Speaker,
@@ -130,7 +131,18 @@ const CATEGORIES_AFFICHÉES = 8;
 
 export default function CategoriesSection() {
   const [mounted, setMounted] = useState(false);
+  const carouselRef = useRef(null);
+  const reduceMotion = useReducedMotion();
   const { getActiveCategories, fetchCategories } = useCategoryStore();
+
+  const scrollCarousel = (direction) => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    carousel.scrollBy({
+      left: direction * carousel.clientWidth * 0.8,
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -185,6 +197,16 @@ export default function CategoriesSection() {
             Notre univers
           </h2>
         </div>
+        {mounted && visibleItems.length > 2 && (
+          <div className="hidden sm:flex items-center gap-2">
+            <button type="button" aria-label="Défiler les univers vers la gauche" onClick={() => scrollCarousel(-1)} className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-apple-black shadow-sm transition hover:bg-black/[0.04]">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button type="button" aria-label="Défiler les univers vers la droite" onClick={() => scrollCarousel(1)} className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-apple-black shadow-sm transition hover:bg-black/[0.04]">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {!mounted ? (
@@ -201,30 +223,22 @@ export default function CategoriesSection() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div ref={carouselRef} className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-5 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Carrousel des univers">
           {visibleItems.map(({ slug, label, Icon, href }, index) => (
             <motion.div
               key={slug}
-              initial={{ opacity: 0, y: 22, scale: 0.97 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: false, amount: 0.2 }}
-              transition={{
-                duration: 0.55,
-                delay: index * 0.07,
-                ease: [0.22, 1, 0.36, 1],
-              }}
+              initial={reduceMotion ? false : { opacity: 0, x: 42 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.48, delay: reduceMotion ? 0 : index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+              className="w-[42%] shrink-0 snap-start sm:w-[30%] lg:w-[23%]"
             >
-              <Link
-                href={href}
-                className="catalogue-card-float group relative glass-card rounded-3xl p-5 flex min-h-[118px] flex-col items-center justify-center text-center transition-all duration-300 overflow-hidden"
-              >
+              <Link href={href} className="catalogue-card-float group relative glass-card rounded-3xl p-5 flex min-h-[118px] h-full flex-col items-center justify-center text-center transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-black/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
                 <div className="catalogue-card-depth relative w-12 h-12 rounded-2xl bg-black/[0.04] group-hover:bg-black/[0.07] flex items-center justify-center mb-3.5 transition-all duration-300">
                   <Icon className="w-5 h-5 text-apple-black" strokeWidth={1.6} />
                 </div>
-                <h3 className="catalogue-card-depth font-semibold text-apple-black text-[13px] leading-tight">
-                  {label}
-                </h3>
+                <h3 className="catalogue-card-depth font-semibold text-apple-black text-[13px] leading-tight">{label}</h3>
               </Link>
             </motion.div>
           ))}
