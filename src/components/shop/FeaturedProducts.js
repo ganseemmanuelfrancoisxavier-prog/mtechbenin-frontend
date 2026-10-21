@@ -81,7 +81,7 @@ export default function FeaturedProducts() {
               ease: [0.22, 1, 0.36, 1],
             }}
           >
-            <ProductCard product={product} />
+            <ProductCard product={product} featuredCta />
           </motion.div>
         ))}
       </div>
