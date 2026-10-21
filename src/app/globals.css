@@ -561,3 +561,29 @@
 .global-blur {
   filter: blur(50px);
 }
+
+/* Cards reveal once as they enter the viewport; only opacity/transform animate. */
+.product-card-reveal {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition: opacity 420ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.product-card-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.product-card-reveal:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card-reveal,
+  .product-card-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
