@@ -72,7 +72,7 @@ export default function FeaturedProducts() {
         {featured.map((product, index) => (
           <motion.div
             key={product.id}
-            initial={{ opacity: 0, y: 22, scale: 0.97 }}
+            initial={{ opacity: 0, y: -22, scale: 0.97 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: false, amount: 0.2 }}
             transition={{
