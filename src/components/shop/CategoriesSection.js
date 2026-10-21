@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useAnimationControls, useInView } from "framer-motion";
 import {
   ChevronRight,
   Headphones,
@@ -128,13 +128,79 @@ const emojiToIcon = {
 const DefaultIcon = Package;
 const CATEGORIES_AFFICHÉES = 8;
 
+function CategoryRevealCard({ item, index, scrollDirection }) {
+  const cardRef = useRef(null);
+  const isInView = useInView(cardRef, { once: false, amount: 0.2 });
+  const controls = useAnimationControls();
+
+  useEffect(() => {
+    if (isInView) {
+      if (scrollDirection.current === "down") {
+        controls.start({
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          transition: {
+            duration: 1,
+            delay: index * 0.07,
+            ease: [0.22, 1, 0.36, 1],
+          },
+        });
+      } else {
+        controls.set({ opacity: 1, y: 0, scale: 1 });
+      }
+    } else if (scrollDirection.current === "up") {
+      controls.set({ opacity: 0, y: -22, scale: 0.97 });
+    }
+  }, [controls, index, isInView, scrollDirection]);
+
+  const { label, Icon, href } = item;
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: -22, scale: 0.97 }}
+      animate={controls}
+    >
+      <Link
+        href={href}
+        className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-[0_18px_24px_-20px_rgba(0,0,0,0.42)]"
+      >
+        <span className="mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.04]">
+          <Icon className="h-5 w-5 text-apple-black" strokeWidth={1.6} />
+        </span>
+        <span className="text-[13px] font-semibold leading-tight text-apple-black">
+          {label}
+        </span>
+      </Link>
+    </motion.div>
+  );
+}
+
 export default function CategoriesSection() {
   const [mounted, setMounted] = useState(false);
+  const scrollDirection = useRef("none");
+  const previousScrollY = useRef(0);
   const { getActiveCategories, fetchCategories } = useCategoryStore();
 
   useEffect(() => {
     setMounted(true);
     fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    previousScrollY.current = window.scrollY;
+    const updateScrollDirection = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY !== previousScrollY.current) {
+        scrollDirection.current =
+          currentScrollY > previousScrollY.current ? "down" : "up";
+        previousScrollY.current = currentScrollY;
+      }
+    };
+
+    window.addEventListener("scroll", updateScrollDirection, { passive: true });
+    return () => window.removeEventListener("scroll", updateScrollDirection);
   }, []);
 
   const activeCategories = mounted
@@ -202,24 +268,13 @@ export default function CategoriesSection() {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">
-          {visibleItems.map(({ slug, label, Icon, href }, index) => (
-            <motion.div
-              key={slug}
-              initial={{ opacity: 0, y: -22, scale: 0.97 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 1, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <Link
-                href={href}
-                className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
-              >
-                <span className="mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.04]">
-                  <Icon className="h-5 w-5 text-apple-black" strokeWidth={1.6} />
-                </span>
-                <span className="text-[13px] font-semibold leading-tight text-apple-black">{label}</span>
-              </Link>
-            </motion.div>
+          {visibleItems.map((item, index) => (
+            <CategoryRevealCard
+              key={item.slug}
+              item={item}
+              index={index}
+              scrollDirection={scrollDirection}
+            />
           ))}
         </div>
       )}
