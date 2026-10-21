@@ -209,7 +209,7 @@ export default function CategoriesSection() {
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: false, amount: 0.2 }}
               transition={{
-                duration: 0.55,
+                duration: 0.8,
                 delay: index * 0.07,
                 ease: [0.22, 1, 0.36, 1],
               }}
