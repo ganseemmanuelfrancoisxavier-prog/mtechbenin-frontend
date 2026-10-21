@@ -64,7 +64,7 @@ export default function ProductCard({ product, featuredCta = false }) {
     <Link
       ref={cardRef}
       href={`/produit/${product.slug}`}
-      className="product-card-reveal catalogue-card-float group relative glass-card rounded-3xl overflow-hidden transition-all duration-300 flex flex-col shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
+      className="product-card-reveal catalogue-card-float group relative glass-card rounded-3xl overflow-hidden transition-all duration-300 flex flex-col"
     >
       {/* Image */}
       <div className="relative bg-neutral-100 aspect-square overflow-hidden">
