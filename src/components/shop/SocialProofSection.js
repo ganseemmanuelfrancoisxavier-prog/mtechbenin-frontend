@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Star, Quote, ArrowRight } from "lucide-react";
+import { Star, Quote, ArrowRight, ArrowUpRight, Wrench } from "lucide-react";
 import useReviewStore from "@/store/reviewStore";
 import ReviewPhotos from "./ReviewPhotos";
 
@@ -166,6 +166,25 @@ export default function SocialProofSection() {
           </Link>
         </div>
       )}
+      <div className="mt-12 flex justify-center">
+        <Link
+          href="/reparation"
+          className="group flex w-full max-w-xl items-center gap-4 rounded-3xl border border-black/[0.06] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-black/[0.05] text-apple-black">
+            <Wrench className="h-5 w-5" strokeWidth={1.8} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-apple-mid">
+              Nouveau service
+            </span>
+            <span className="mt-1 block text-sm font-bold leading-snug text-apple-black sm:text-base">
+              Réparation et entretien d’appareils
+            </span>
+          </span>
+          <ArrowUpRight className="h-4 w-4 shrink-0 text-apple-mid transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </Link>
+      </div>
     </section>
   );
 }

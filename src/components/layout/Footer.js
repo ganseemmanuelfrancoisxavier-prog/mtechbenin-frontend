@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Wrench } from "lucide-react";
 import useSettingsStore from "@/store/settingsStore";
 
 export default function Footer() {
@@ -36,23 +35,6 @@ export default function Footer() {
         {/* Colonne 1 — Infos boutique */}
         <div className="col-span-2 md:col-span-1">
 
-          <Link
-            href="/reparation"
-            className="group mb-5 flex max-w-xs items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4 transition-all hover:-translate-y-0.5 hover:bg-white/[0.1]"
-          >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
-              <Wrench className="h-5 w-5" strokeWidth={1.8} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
-                Nouveau service
-              </span>
-              <span className="mt-1 block text-[13px] font-bold leading-snug text-white">
-                Réparation et entretien d’appareils
-              </span>
-            </span>
-            <ArrowUpRight className="h-4 w-4 shrink-0 text-white/55 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
           <span className="font-display text-lg font-black tracking-tight text-white">
             MTECHBENIN
           </span>
