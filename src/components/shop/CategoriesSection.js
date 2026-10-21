@@ -205,7 +205,7 @@ export default function CategoriesSection() {
           {visibleItems.map(({ slug, label, Icon, href }, index) => (
             <motion.div
               key={slug}
-              initial={{ opacity: 0, y: 22, scale: 0.97 }}
+              initial={{ opacity: 0, y: -22, scale: 0.97 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: false, amount: 0.2 }}
               transition={{
