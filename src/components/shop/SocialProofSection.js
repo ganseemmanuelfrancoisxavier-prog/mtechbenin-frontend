@@ -1,86 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Star, Quote, ArrowRight } from "lucide-react";
 import useReviewStore from "@/store/reviewStore";
 import ReviewPhotos from "./ReviewPhotos";
-
-const stats = [
-  { value: 53712, suffix: "+", label: "Clients satisfaits" },
-  { value: 126328, suffix: "+", label: "Commandes livrées" },
-  { value: 4.8, suffix: "/5", label: "Note moyenne" },
-  { value: 7, suffix: " ans", label: "D'expertise" },
-];
-
-const fallbackReviews = [
-  {
-    id: 1,
-    name: "Koffi Mensah",
-    city: "Cotonou",
-    initial: "K",
-    rating: 5,
-    text: "Livraison ultra rapide ! J'ai reçu mes AirPods Pro en moins de 2h. Qualité au rendez-vous, je recommande vivement MTECHBENIN.",
-    productName: "AirPods Pro 2ème génération",
-  },
-  {
-    id: 2,
-    name: "Aïcha Dossou",
-    city: "Abomey-Calavi",
-    initial: "A",
-    rating: 5,
-    text: "Mon abonnement Netflix a été activé en 5 minutes après le paiement. Service impeccable, prix imbattables au Bénin !",
-    productName: "Netflix Premium",
-  },
-  {
-    id: 3,
-    name: "Rodrigue Agossou",
-    city: "Cotonou",
-    initial: "R",
-    rating: 5,
-    text: "La JBL Boombox est authentique, son incroyable. Le vendeur est très réactif sur WhatsApp. Client fidèle depuis 2 ans.",
-    productName: "JBL Boombox 3ème génération",
-  },
-];
-
-function AnimatedCounter({ value, suffix }) {
-  const [count, setCount] = useState(0);
-  const [started, setStarted] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !started) setStarted(true);
-      },
-      { threshold: 0.5 },
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [started]);
-
-  useEffect(() => {
-    if (!started) return;
-    const steps = 60;
-    const increment = value / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= value) {
-        setCount(value);
-        clearInterval(timer);
-      } else setCount(Math.floor(current * 10) / 10);
-    }, 1500 / steps);
-    return () => clearInterval(timer);
-  }, [started, value]);
-
-  return (
-    <span ref={ref}>
-      {Number.isInteger(value) ? Math.floor(count) : count.toFixed(1)}
-      {suffix}
-    </span>
-  );
-}
 
 export default function SocialProofSection() {
   const [mounted, setMounted] = useState(false);
@@ -94,40 +18,22 @@ export default function SocialProofSection() {
 
   const featured = mounted ? getFeaturedReviews() : [];
 
-  const reviews =
-    featured.length > 0
-      ? featured.map((r) => ({
-          ...r,
-          initial: r.name?.charAt(0) || "?",
-          productName: r.productName || "",
-        }))
-      : fallbackReviews;
+  const reviews = featured.map((review) => ({
+    ...review,
+    initial: review.name?.charAt(0) || "?",
+    productName: review.productName || "",
+  }));
 
   // On n'invite à « voir plus » que s'il reste réellement des avis à découvrir
   // au-delà de ceux affichés ici. `mounted` évite un écart d'hydratation.
   const resteAVoir = mounted && totalApprouves > reviews.length;
 
   return (
-    <section className="max-w-7xl mx-auto px-5 pt-8 pb-[65px]">
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-24">
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="glass-card rounded-3xl p-6 text-center"
-          >
-            <div className="font-display font-black text-3xl md:text-4xl text-apple-black mb-1.5 tracking-tight">
-              <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-            </div>
-            <p className="text-apple-mid text-[13px]">{stat.label}</p>
-          </div>
-        ))}
-      </div>
-
+    <section className="mx-auto max-w-7xl px-5 pt-8 pb-16">
       {/* Header avis */}
       <div className="mb-10">
-        <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-2">
-          Témoignages
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+          Avis publiés
         </p>
         <h2 className="font-display font-black text-3xl md:text-4xl text-apple-black tracking-tight">
           Ils parlent de nous
@@ -135,54 +41,62 @@ export default function SocialProofSection() {
       </div>
 
       {/* Avis */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {reviews.map((review) => (
-          <div
-            key={review.id}
-            className="glass-card rounded-3xl p-6 flex flex-col gap-4 relative overflow-hidden"
-          >
-            <Quote
-              className="absolute top-4 right-4 w-8 h-8 text-black/[0.04]"
-              strokeWidth={1}
-            />
-            {/* Cinq étoiles fixes dont on ne change que le remplissage :
-                boucler sur `review.rating` dessinait autant d'étoiles que la
-                valeur reçue, sans plafond. */}
-            <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Star
-                  key={s}
-                  className={`w-3.5 h-3.5 ${s <= review.rating ? "fill-cta text-cta" : "text-black/10"}`}
-                />
-              ))}
-            </div>
-            <div className="flex-1">
-              <p className="text-apple-black text-[13px] leading-relaxed">
-                &ldquo;{review.text}&rdquo;
-              </p>
-              <ReviewPhotos
-                photos={review.photos}
-                auteur={review.name}
-                taille="sm"
+      {reviews.length > 0 ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {reviews.map((review) => (
+            <div
+              key={review.id}
+              className="glass-card relative flex flex-col gap-4 overflow-hidden rounded-3xl p-6"
+            >
+              <Quote
+                className="absolute right-4 top-4 h-8 w-8 text-black/[0.04]"
+                strokeWidth={1}
               />
-            </div>
-            <span className="text-[11px] bg-black/[0.04] text-apple-mid px-3 py-1 rounded-full self-start font-medium">
-              {review.productName}
-            </span>
-            <div className="flex items-center gap-3 pt-3 border-t border-black/[0.05]">
-              <div className="w-8 h-8 rounded-full bg-apple-black flex items-center justify-center text-white font-bold text-[12px] flex-shrink-0">
-                {review.initial}
+              <div role="img" className="flex gap-0.5" aria-label={`${review.rating} sur 5 étoiles`}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    aria-hidden="true"
+                    className={`h-3.5 w-3.5 ${star <= review.rating ? "fill-cta text-cta" : "text-black/10"}`}
+                  />
+                ))}
               </div>
-              <div>
-                <p className="font-semibold text-apple-black text-[13px] leading-tight">
-                  {review.name}
+              <div className="flex-1">
+                <p className="text-[13px] leading-relaxed text-apple-black">
+                  &ldquo;{review.text}&rdquo;
                 </p>
-                <p className="text-apple-mid text-[11px]">{review.city}</p>
+                <ReviewPhotos
+                  photos={review.photos}
+                  auteur={review.name}
+                  taille="sm"
+                />
+              </div>
+              {review.productName && (
+                <span className="self-start rounded-full bg-black/[0.04] px-3 py-1 text-[11px] font-medium text-apple-mid">
+                  {review.productName}
+                </span>
+              )}
+              <div className="flex items-center gap-3 border-t border-black/[0.05] pt-3">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-apple-black text-[12px] font-bold text-white">
+                  {review.initial}
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold leading-tight text-apple-black">
+                    {review.name}
+                  </p>
+                  <p className="text-[11px] text-apple-mid">{review.city}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <p className="rounded-2xl border border-black/[0.08] bg-white/70 p-6 text-sm text-neutral-500">
+          {mounted
+            ? "Aucun témoignage publié pour le moment."
+            : "Chargement des témoignages..."}
+        </p>
+      )}
 
       {resteAVoir && (
         <div className="flex justify-center mt-10">

@@ -46,14 +46,14 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-apple-gray border-t border-black/5 pt-16 pb-8 mt-20">
-      <div className="max-w-7xl mx-auto px-5 grid grid-cols-2 md:grid-cols-4 gap-10">
+    <footer className="mt-16 w-full border-t border-white/10 bg-[#080808] pt-14 pb-8 text-white">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-8 gap-y-10 px-5 md:grid-cols-4 md:gap-10">
         {/* Colonne 1 — Infos boutique */}
         <div className="col-span-2 md:col-span-1">
-          <span className="font-display font-black text-lg text-apple-black">
+          <span className="font-display text-lg font-black tracking-tight text-white">
             {mounted ? shopName : "MTECHBENIN"}
           </span>
-          <p className="mt-3 text-sm text-apple-mid leading-relaxed max-w-xs">
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/60">
             {mounted
               ? shopSlogan
               : "Votre boutique tech de confiance au Bénin."}
@@ -65,7 +65,7 @@ export default function Footer() {
                 href={s.href}
                 target="_blank"
                 rel="noreferrer"
-                className="text-sm text-apple-mid hover:text-apple-black transition-colors"
+                className="text-sm text-white/65 transition-colors hover:text-white"
               >
                 {s.label}
               </a>
@@ -78,7 +78,7 @@ export default function Footer() {
                   href={`https://wa.me/${shopWhatsapp.replace(/\s/g, "")}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 text-[12px] text-apple-mid hover:text-apple-black transition-colors"
+                className="flex items-center gap-1.5 text-[12px] text-white/60 transition-colors hover:text-white"
                 >
                   {shopWhatsapp}
                 </a>
@@ -86,13 +86,13 @@ export default function Footer() {
               {shopEmail && (
                 <a
                   href={`mailto:${shopEmail}`}
-                  className="flex items-center gap-1.5 text-[12px] text-apple-mid hover:text-apple-black transition-colors"
+                className="flex items-center gap-1.5 text-[12px] text-white/60 transition-colors hover:text-white"
                 >
                   {shopEmail}
                 </a>
               )}
               {shopAddress && (
-                <p className="flex items-center gap-1.5 text-[12px] text-apple-mid">
+                <p className="flex items-center gap-1.5 text-[12px] text-white/60">
                   {shopAddress}
                 </p>
               )}
@@ -125,7 +125,7 @@ export default function Footer() {
           },
         ].map((col) => (
           <div key={col.title}>
-            <h4 className="text-apple-black font-semibold text-sm mb-4">
+            <h4 className="mb-4 text-sm font-semibold text-white">
               {col.title}
             </h4>
             <ul className="space-y-3">
@@ -133,7 +133,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href || "#"}
-                    className="text-sm text-apple-mid hover:text-apple-black transition-colors"
+                    className="text-sm text-white/60 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -145,8 +145,8 @@ export default function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="max-w-7xl mx-auto px-5 mt-12 pt-6 border-t border-black/10 flex items-center justify-center">
-        <p className="text-xs text-apple-mid">
+      <div className="mx-auto mt-12 flex max-w-7xl items-center justify-center border-t border-white/10 px-5 pt-6">
+        <p className="text-xs text-white/50">
           © 2026 {mounted ? shopName : "MTECHBENIN"}. Tous droits réservés.
         </p>
       </div>

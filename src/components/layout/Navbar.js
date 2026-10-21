@@ -22,6 +22,8 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
 
   const searchInputRef = useRef(null);
+  const menuPanelRef = useRef(null);
+  const menuButtonRef = useRef(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -50,6 +52,39 @@ export default function Navbar() {
 
     return () => window.clearTimeout(timer);
   }, [searchOpen]);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusable = menuPanelRef.current?.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled])',
+    );
+    focusable?.[0]?.focus();
+
+    const trapFocus = (event) => {
+      if (event.key !== "Tab") return;
+      const elements = menuPanelRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled])',
+      );
+      if (!elements?.length) return;
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", trapFocus);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", trapFocus);
+      menuButtonRef.current?.focus();
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     const handleEscape = (event) => {
@@ -169,10 +204,12 @@ export default function Navbar() {
 
           <div className="flex shrink-0 items-center gap-1">
             <button
+              ref={menuButtonRef}
               type="button"
               onClick={handleToggleSearch}
               aria-label={searchOpen ? "Fermer la recherche" : "Rechercher"}
               aria-expanded={searchOpen}
+              aria-controls="header-search-panel"
               className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 transition hover:bg-black/[0.05] hover:text-neutral-950"
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -230,6 +267,7 @@ export default function Navbar() {
               onClick={handleToggleMenu}
               aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
               aria-expanded={menuOpen}
+              aria-controls="mobile-navigation-panel"
               className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-700 transition hover:bg-black/[0.05] lg:hidden"
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -257,6 +295,7 @@ export default function Navbar() {
           {searchOpen && (
             <motion.div
               key="search-panel"
+              id="header-search-panel"
               initial={{ opacity: 0, height: 0, y: -5 }}
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -5 }}
@@ -314,13 +353,15 @@ export default function Navbar() {
           {menuOpen && (
             <motion.div
               key="mobile-menu"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden border-t border-black/[0.06] bg-white/95 backdrop-blur-2xl lg:hidden"
+              id="mobile-navigation-panel"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed inset-x-0 bottom-0 top-[56px] z-50 overflow-y-auto bg-black/35 backdrop-blur-[2px] lg:hidden"
             >
-              <div className="max-h-[calc(100dvh-56px)] overflow-y-auto px-4 pb-6 pt-5 sm:px-6">
+              <button type="button" aria-label="Fermer le menu" onClick={() => setMenuOpen(false)} className="absolute inset-0 h-full w-full" />
+              <div role="dialog" aria-modal="true" aria-label="Menu de navigation" ref={menuPanelRef} className="relative ml-auto max-h-full w-full max-w-lg overflow-y-auto border-t border-black/[0.06] bg-white/95 px-4 pb-6 pt-5 shadow-2xl shadow-black/10 backdrop-blur-2xl sm:px-6">
                 <div className="mb-5 px-1">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                     Découvrir
