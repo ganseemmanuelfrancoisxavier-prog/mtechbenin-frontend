@@ -1,136 +1,165 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import styles from "./SplashScreen.module.css";
 
-const SPLASH_KEY = "mtechbenin_splash_shown";
+const SPLASH_KEY = "mtechbenin_cinematic_intro_v1";
+const SOURCE_WIDTH = 1024;
+const SOURCE_HEIGHT = 1536;
+const BLACK_HOLE_POSITION = { x: 0.5, y: 0.665 };
+
+function saveIntroSeen() {
+  try {
+    window.sessionStorage.setItem(SPLASH_KEY, "1");
+  } catch {}
+}
 
 export default function SplashScreen() {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [exiting, setExiting] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [imageFrame, setImageFrame] = useState(null);
+  const skipButtonRef = useRef(null);
+  const timersRef = useRef([]);
 
   useEffect(() => {
-    if (sessionStorage.getItem(SPLASH_KEY)) return;
+    try {
+      if (window.sessionStorage.getItem(SPLASH_KEY)) {
+        setVisible(false);
+        return undefined;
+      }
+    } catch {}
 
-    setVisible(true);
+    const motionPreference = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+    setReducedMotion(motionPreference.matches);
 
-    const t1 = setTimeout(() => setExiting(true), 2400);
-    const t2 = setTimeout(() => {
-      sessionStorage.setItem(SPLASH_KEY, "1");
-      setVisible(false);
-    }, 3100);
+    const updateImageFrame = () => {
+      const scale = Math.max(
+        window.innerWidth / SOURCE_WIDTH,
+        window.innerHeight / SOURCE_HEIGHT,
+      );
+      const width = SOURCE_WIDTH * scale;
+      const height = SOURCE_HEIGHT * scale;
+      const left = (window.innerWidth - width) / 2;
+      const top = (window.innerHeight - height) / 2;
+      const holeX = width * BLACK_HOLE_POSITION.x;
+      const holeY = height * BLACK_HOLE_POSITION.y;
+
+      setImageFrame({
+        width,
+        height,
+        left,
+        top,
+        holeX,
+        holeY,
+        shiftX: window.innerWidth / 2 - left - holeX,
+        shiftY: window.innerHeight / 2 - top - holeY,
+      });
+    };
+
+    updateImageFrame();
+    window.addEventListener("resize", updateImageFrame, { passive: true });
+    skipButtonRef.current?.focus({ preventScroll: true });
+
+    const exitDelay = motionPreference.matches ? 1500 : 7000;
+    const finishDelay = motionPreference.matches ? 2200 : 7800;
+    timersRef.current = [
+      window.setTimeout(() => setExiting(true), exitDelay),
+      window.setTimeout(() => {
+        saveIntroSeen();
+        setVisible(false);
+      }, finishDelay),
+    ];
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      setVisible(false);
-      setExiting(false);
+      window.removeEventListener("resize", updateImageFrame);
+      timersRef.current.forEach(window.clearTimeout);
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
     };
   }, []);
 
+  useEffect(() => {
+    if (!visible) return undefined;
+
+    const previousDocumentOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.documentElement.style.overflow = previousDocumentOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [visible]);
+
+  const skipIntro = () => {
+    timersRef.current.forEach(window.clearTimeout);
+    saveIntroSeen();
+    setVisible(false);
+  };
+
   if (!visible) return null;
 
+  const imageStyle = imageFrame
+    ? {
+        width: `${imageFrame.width}px`,
+        height: `${imageFrame.height}px`,
+        left: `${imageFrame.left}px`,
+        top: `${imageFrame.top}px`,
+        "--hole-x": `${imageFrame.holeX}px`,
+        "--hole-y": `${imageFrame.holeY}px`,
+        "--hole-shift-x": `${imageFrame.shiftX}px`,
+        "--hole-shift-y": `${imageFrame.shiftY}px`,
+      }
+    : undefined;
+
   return (
-    <>
-      <style>{`
-        @keyframes mt-bg-in {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-
-        @keyframes mt-sub-in {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0);    }
-        }
-
-        @keyframes mt-title-reveal {
-          from { clip-path: inset(0 0 100% 0); }
-          to   { clip-path: inset(0 0   0% 0); }
-        }
-
-        @keyframes mt-line-in {
-          from { transform: scaleX(0); }
-          to   { transform: scaleX(1); }
-        }
-
-        @keyframes mt-splash-out {
-          from { opacity: 1; }
-          to   { opacity: 0; }
-        }
-
-        .mt-splash {
-          position: fixed; inset: 0; z-index: 9999;
-          background: #000000;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          animation: mt-bg-in 0.30s ease forwards;
-        }
-        .mt-splash.exiting {
-          animation: mt-splash-out 0.70s ease forwards;
-        }
-
-        .mt-splash__inner {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-        }
-
-        .mt-splash__sub {
-          font-family: var(--font-display, 'Plus Jakarta Sans', sans-serif);
-          font-size: clamp(13px, 2vw, 16px);
-          font-weight: 400;
-          letter-spacing: 0.40em;
-          text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.50);
-          margin-bottom: 14px;
-          opacity: 0;
-          animation: mt-sub-in 0.50s cubic-bezier(0.22, 1, 0.36, 1) 0.30s forwards;
-        }
-
-        .mt-splash__title-wrap {
-          overflow: hidden;
-          padding-bottom: 6px;
-        }
-
-        .mt-splash__title {
-          display: block;
-          font-family: var(--font-display, 'Plus Jakarta Sans', sans-serif);
-          font-size: clamp(52px, 11vw, 96px);
-          font-weight: 900;
-          letter-spacing: -0.02em;
-          color: #ffffff;
-          line-height: 1;
-          clip-path: inset(0 0 100% 0);
-          animation: mt-title-reveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.70s forwards;
-        }
-
-        .mt-splash__line {
-          height: 1px;
-          width: 100%;
-          background: rgba(255, 255, 255, 0.20);
-          transform-origin: center;
-          transform: scaleX(0);
-          margin-top: 20px;
-          animation: mt-line-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 1.25s forwards;
-        }
-      `}</style>
-
+    <div
+      className={`${styles.overlay} ${exiting ? styles.exiting : ""} ${reducedMotion ? styles.reducedMotion : ""}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Introduction MTECHBENIN"
+    >
       <div
-        className={`mt-splash${exiting ? " exiting" : ""}`}
-        role="presentation"
+        className={`${styles.scene} ${imageFailed ? styles.fallback : ""}`}
         aria-hidden="true"
       >
-        <div className="mt-splash__inner">
-          <span className="mt-splash__sub">Bienvenue sur</span>
-
-          <div className="mt-splash__title-wrap">
-            <span className="mt-splash__title">MTECHBENIN</span>
-          </div>
-
-          <div className="mt-splash__line" />
-        </div>
+        {!imageFailed && (
+          <Image
+            src="/intro-mtechbenin.jpg"
+            alt=""
+            width={SOURCE_WIDTH}
+            height={SOURCE_HEIGHT}
+            priority
+            sizes="100vw"
+            className={styles.image}
+            style={imageStyle}
+            onError={() => setImageFailed(true)}
+          />
+        )}
+        <div className={styles.stars} />
+        <div className={styles.vignette} />
+        <div className={styles.halo} />
       </div>
-    </>
+
+      <button
+        ref={skipButtonRef}
+        type="button"
+        className={styles.skipButton}
+        onClick={skipIntro}
+      >
+        Passer l’introduction
+      </button>
+
+      <div className={styles.brand}>
+        <p className={styles.welcome}>BIENVENUE SUR</p>
+        <h1 className={styles.title}>MTECHBENIN</h1>
+      </div>
+    </div>
   );
 }
