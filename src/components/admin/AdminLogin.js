@@ -35,9 +35,9 @@ export default function AdminLogin() {
     setErrorType("");
 
     try {
-      await authApi.login(password);
-      // Le backend a validé le mot de passe (bcrypt) → on crée la session locale
-      setAdminSession(password);
+      const session = await authApi.login(password);
+      if (!session.accessToken) throw new Error("Réponse d’authentification invalide");
+      setAdminSession(session.accessToken);
       router.push(from);
     } catch (err) {
       const msg = err.message || "";

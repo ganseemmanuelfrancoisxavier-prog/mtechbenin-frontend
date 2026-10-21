@@ -5,7 +5,7 @@ export const metadata = { title: "Livraison | MTECHBENIN" };
 export default async function LivraisonPage() {
   let page = null;
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const apiUrl = process.env.API_SERVER_URL || process.env.NEXT_PUBLIC_API_URL || "https://mtechbenin-backend-xp3i.onrender.com";
     const res = await fetch(`${apiUrl}/api/legal/livraison`, { next: { revalidate: 300 } });
     if (res.ok) { const d = await res.json(); if (d.page?.content) page = d.page; }
   } catch {}

@@ -19,7 +19,7 @@ export const metadata = { title: "FAQ | MTECHBENIN" };
 export default async function FAQPage() {
   let faqs = null;
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const apiUrl = process.env.API_SERVER_URL || process.env.NEXT_PUBLIC_API_URL || "https://mtechbenin-backend-xp3i.onrender.com";
     const res = await fetch(`${apiUrl}/api/faq`, { next: { revalidate: 60 } });
     if (res.ok) {
       const data = await res.json();

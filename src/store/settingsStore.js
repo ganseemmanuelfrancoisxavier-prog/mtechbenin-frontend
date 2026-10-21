@@ -34,9 +34,6 @@ const useSettingsStore = create(
       maintenanceMode: false,
       maintenanceMessage: "Site en maintenance. Nous revenons très bientôt !",
 
-      // ── Mot de passe admin ────────────────────────────────────────────────
-      adminPassword: "admin2026",
-
       // ── Zones livraison ───────────────────────────────────────────────────
       zones: initialZones,
 
@@ -93,9 +90,6 @@ const useSettingsStore = create(
       setMaintenanceMode: (value) => set({ maintenanceMode: value }),
       setMaintenanceMessage: (msg) => set({ maintenanceMessage: msg }),
 
-      // ── Mot de passe ──────────────────────────────────────────────────────
-      setAdminPassword: (password) => set({ adminPassword: password }),
-
       // ── Zones ─────────────────────────────────────────────────────────────
       addZone: (zone) =>
         set((state) => ({
@@ -132,7 +126,22 @@ const useSettingsStore = create(
           .zones.filter((z) => z.active)
           .map((z) => z.name),
     }),
-    { name: "mtechbenin-settings" },
+    {
+      name: "mtechbenin-settings",
+      version: 2,
+      // Remove any password persisted by older versions from browser storage.
+      migrate: (persistedState) => {
+        if (persistedState && typeof persistedState === "object") {
+          delete persistedState.adminPassword;
+        }
+        return persistedState;
+      },
+      partialize: (state) => {
+        const safeState = { ...state };
+        delete safeState.adminPassword;
+        return safeState;
+      },
+    },
   ),
 );
 

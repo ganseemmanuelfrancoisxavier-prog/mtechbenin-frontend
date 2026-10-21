@@ -1,5 +1,5 @@
 const AUTH_KEY = "mtechbenin_admin_auth";
-const ADMIN_KEY = "admin-token";
+const ACCESS_TOKEN_KEY = "mtechbenin_admin_access_token";
 
 function isSecure() {
   if (typeof window === "undefined") return false;
@@ -11,49 +11,38 @@ function cookieOptions(maxAge) {
   return isSecure() ? `${base}; Secure` : base;
 }
 
-// Utilisé uniquement pour la vérification locale du formulaire "Mot de passe actuel"
-export function getStoredPassword() {
-  if (typeof window === "undefined") return "";
-  try {
-    const raw = localStorage.getItem("mtechbenin-settings");
-    if (!raw) return "";
-    const parsed = JSON.parse(raw);
-    return parsed?.state?.adminPassword || "";
-  } catch {
-    return "";
-  }
+export function getAdminAccessToken() {
+  if (typeof window === "undefined") return null;
+  return window.sessionStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
-export function setStoredPassword(pwd) {
-  if (typeof window === "undefined") return;
-  try {
-    const raw = localStorage.getItem("mtechbenin-settings");
-    const parsed = raw ? JSON.parse(raw) : { state: {} };
-    parsed.state.adminPassword = pwd;
-    localStorage.setItem("mtechbenin-settings", JSON.stringify(parsed));
-  } catch {}
-}
-
-// Appelé après une vérification backend réussie
-export function setAdminSession(password) {
+export function setAdminSession(accessToken) {
+  if (typeof window === "undefined" || !accessToken) return;
   const maxAge = 60 * 60 * 24 * 7; // 7 jours
+  window.sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  document.cookie = "admin-token=; path=/; max-age=0";
   document.cookie = `${AUTH_KEY}=true; ${cookieOptions(maxAge)}`;
-  document.cookie = `${ADMIN_KEY}=${encodeURIComponent(password)}; ${cookieOptions(maxAge)}`;
-  setStoredPassword(password);
+  try {
+    const raw = window.localStorage.getItem("mtechbenin-settings");
+    if (raw) {
+      const persisted = JSON.parse(raw);
+      if (persisted?.state && Object.prototype.hasOwnProperty.call(persisted.state, "adminPassword")) {
+        delete persisted.state.adminPassword;
+        window.localStorage.setItem("mtechbenin-settings", JSON.stringify(persisted));
+      }
+    }
+  } catch {}
 }
 
 export function logoutAdmin() {
   document.cookie = `${AUTH_KEY}=; path=/; max-age=0`;
-  document.cookie = `${ADMIN_KEY}=; path=/; max-age=0`;
+  document.cookie = "admin-token=; path=/; max-age=0";
+  if (typeof window !== "undefined") {
+    window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  }
 }
 
 export function isAdminAuthenticated() {
   if (typeof window === "undefined") return false;
   return document.cookie.includes(`${AUTH_KEY}=true`);
-}
-
-export function updateAdminCookie(newPassword) {
-  if (typeof window === "undefined") return;
-  const maxAge = 60 * 60 * 24 * 7;
-  document.cookie = `${ADMIN_KEY}=${encodeURIComponent(newPassword)}; ${cookieOptions(maxAge)}`;
 }

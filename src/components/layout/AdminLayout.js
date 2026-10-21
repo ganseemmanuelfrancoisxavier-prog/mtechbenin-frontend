@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { logoutAdmin } from "@/lib/auth";
-import { settingsApi, statsApi } from "@/lib/api";
+import { authApi, settingsApi, statsApi } from "@/lib/api";
 import useSondagePeriodique from "@/hooks/useSondagePeriodique";
 import useProductStore from "@/store/productStore";
 import {
@@ -197,8 +197,9 @@ export default function AdminLayout({ children }) {
     setSidebarOpen(false);
   }, [pathname]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     useProductStore.getState().reset();
+    try { await authApi.logout(); } catch {}
     logoutAdmin();
     router.push("/admin/login");
   };

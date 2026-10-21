@@ -9,7 +9,7 @@ const pwaConfig = withPWA({
   runtimeCaching: [
     // ── Pages et assets statiques ─────────────────────────────────────────
     {
-      urlPattern: /^https:\/\/mtechbenin\.com\/_next\/static\/.*/i,
+      urlPattern: /^https:\/\/(?:mtechbenin|mtechafrica)\.com\/_next\/static\/.*/i,
       handler: "CacheFirst",
       options: {
         cacheName: "static-assets",
@@ -17,7 +17,7 @@ const pwaConfig = withPWA({
       },
     },
     {
-      urlPattern: /^https:\/\/mtechbenin\.com\/_next\/image\?.*/i,
+      urlPattern: /^https:\/\/(?:mtechbenin|mtechafrica)\.com\/_next\/image\?.*/i,
       handler: "StaleWhileRevalidate",
       options: {
         cacheName: "next-images",
@@ -31,16 +31,6 @@ const pwaConfig = withPWA({
       options: {
         cacheName: "cloudinary-images",
         expiration: { maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60 },
-      },
-    },
-    // ── API backend ───────────────────────────────────────────────────────
-    {
-      urlPattern: /^https:\/\/mtechbenin-backend\.onrender\.com\/api\/.*/i,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "api-cache",
-        networkTimeoutSeconds: 10,
-        expiration: { maxEntries: 50, maxAgeSeconds: 5 * 60 },
       },
     },
     // ── Fonts Google ──────────────────────────────────────────────────────
@@ -61,6 +51,10 @@ const pwaConfig = withPWA({
 });
 
 const nextConfig = {
+  async rewrites() {
+    const backend = (process.env.API_PROXY_TARGET || "https://mtechbenin-backend-xp3i.onrender.com").replace(/\/$/, "");
+    return [{ source: "/api/:path*", destination: `${backend}/api/:path*` }];
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

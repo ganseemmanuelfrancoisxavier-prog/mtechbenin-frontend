@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { settingsApi, authApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
-import { updateAdminCookie, setStoredPassword } from "@/lib/auth";
 
 const inputBaseClass =
   "w-full bg-black/[0.03] text-[14px] placeholder-apple-mid/50 rounded-2xl px-4 py-3 border border-black/[0.07] focus:outline-none focus:border-black/20 transition";
@@ -320,9 +319,6 @@ export default function AdminParametres() {
     // 2. Sauvegarde le nouveau mot de passe (le backend doit le hacher)
     try {
       await settingsApi.update({ adminPassword: passwordForm.newPass });
-      // Met à jour cookie + localStorage pour la session en cours
-      setStoredPassword(passwordForm.newPass);
-      updateAdminCookie(passwordForm.newPass);
       setPasswordForm({ current: "", newPass: "", confirm: "" });
       setPasswordSaved(true);
       setTimeout(() => setPasswordSaved(false), 3000);
