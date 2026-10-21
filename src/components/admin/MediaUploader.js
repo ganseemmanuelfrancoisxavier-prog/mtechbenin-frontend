@@ -59,7 +59,7 @@ export default function MediaUploader({
     try {
       const videoFile =
         file.type.startsWith("video/") ||
-        /\\.(mp4|mov|avi|webm|m4v)$/i.test(file.name);
+        /\.(mp4|mov|avi|webm|m4v)$/i.test(file.name);
       const res = videoFile
         ? await uploadVideoDirectly(file, folder)
         : await uploadApi.upload(await toBase64(file), folder);
