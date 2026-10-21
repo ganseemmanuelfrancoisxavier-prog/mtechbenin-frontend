@@ -57,7 +57,7 @@ export default function StatisticsSection() {
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="glass-card rounded-3xl p-6 text-center">
+          <div key={stat.label} className="glass-card rounded-3xl p-6 text-center shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
             <div className="mb-1.5 font-display text-3xl font-black tracking-tight text-apple-black md:text-4xl">
               <AnimatedCounter value={stat.value} suffix={stat.suffix} />
             </div>
