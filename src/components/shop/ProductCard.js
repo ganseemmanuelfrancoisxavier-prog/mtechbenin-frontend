@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Heart } from "lucide-react";
 import { formatPrice, getDiscount } from "@/lib/format";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 // ── Normalise l'image depuis l'API (images JSON array) ou local (image string)
 function getProductImage(product) {
@@ -30,7 +29,6 @@ function getProductStatus(product) {
 }
 
 export default function ProductCard({ product, featuredCta = false }) {
-  const [liked, setLiked] = useState(false);
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -81,26 +79,6 @@ export default function ProductCard({ product, featuredCta = false }) {
           <span className="absolute top-3 left-3 badge-promo">{discount}</span>
         )}
 
-        {/* Favori */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            setLiked((previous) => !previous);
-          }}
-          aria-label={liked ? "Retirer des favoris" : "Ajouter aux favoris"}
-          aria-pressed={liked}
-          className="absolute top-3 right-3 w-8 h-8 rounded-xl flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200"
-          style={{
-            background: "rgba(255,255,255,0.75)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.5)",
-          }}
-        >
-          <Heart
-            className={`w-3.5 h-3.5 transition-all ${liked ? "fill-cta text-cta scale-110" : "text-apple-mid"}`}
-          />
-        </button>
 
       </div>
 
