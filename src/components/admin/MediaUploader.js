@@ -43,10 +43,9 @@ export default function MediaUploader({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Le fichier part encodé en base64, ce qui gonfle la charge d'environ 37 %.
-    // Le serveur accepte 35 Mo de corps de requête sur la route d'upload, soit
-    // environ 25 Mo de fichier réel. Annoncer davantage exposerait à un échec
-    // en fin de transfert, après une longue attente.
+    // Les vidéos partent directement vers Cloudinary. Ce plafond garde des
+    // transferts raisonnables sur mobile et évite de charger des fichiers lourds
+    // en mémoire dans le navigateur.
     if (file.size > MAX_FILE_MB * 1024 * 1024) {
       setError(
         `Fichier trop lourd (${Math.round(file.size / 1024 / 1024)} Mo) — maximum ${MAX_FILE_MB} Mo. ` +
@@ -58,11 +57,15 @@ export default function MediaUploader({
     setUploading(true);
     setError("");
     try {
-      const base64 = await toBase64(file);
-      const res = await uploadApi.upload(base64, folder);
+      const videoFile =
+        file.type.startsWith("video/") ||
+        /\\.(mp4|mov|avi|webm|m4v)$/i.test(file.name);
+      const res = videoFile
+        ? await uploadVideoDirectly(file, folder)
+        : await uploadApi.upload(await toBase64(file), folder);
       onChange(
         res.url,
-        res.resourceType || (isVideo(res.url) ? "video" : "image"),
+        res.resourceType || (videoFile || isVideo(res.url) ? "video" : "image"),
       );
       setUrlInput(res.url);
     } catch (err) {
@@ -214,4 +217,35 @@ function toBase64(file) {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+
+async function uploadVideoDirectly(file, folder) {
+  const signed = await uploadApi.createSignature(folder, "video");
+  const form = new FormData();
+  form.append("file", file);
+  form.append("api_key", signed.apiKey);
+  form.append("timestamp", String(signed.timestamp));
+  form.append("folder", signed.folder);
+  form.append("transformation", signed.transformation);
+  form.append("signature", signed.signature);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${encodeURIComponent(signed.cloudName)}/video/upload`,
+    { method: "POST", body: form },
+  );
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error(`Réponse Cloudinary invalide (HTTP ${response.status})`);
+  }
+  if (!response.ok) {
+    throw new Error(data.error?.message || `Échec Cloudinary (HTTP ${response.status})`);
+  }
+
+  return {
+    url: data.secure_url,
+    resourceType: data.resource_type || "video",
+  };
 }
