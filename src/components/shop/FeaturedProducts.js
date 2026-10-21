@@ -21,7 +21,7 @@ export default function FeaturedProducts() {
   // Skeleton pendant le chargement
   if (!mounted) {
     return (
-      <section className="max-w-7xl mx-auto px-5 py-20">
+      <section className="mx-auto max-w-7xl px-5 py-12 sm:py-14">
         <div className="flex items-end justify-between mb-10">
           <div>
             <div className="h-3 bg-black/[0.05] rounded-full w-20 mb-3 animate-pulse" />
@@ -49,7 +49,7 @@ export default function FeaturedProducts() {
   if (featured.length === 0) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-5 pt-[50px] pb-10">
+    <section className="mx-auto max-w-7xl px-5 pt-12 pb-8 sm:pt-14">
       <div className="flex items-end justify-between mb-10">
         <div>
           <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-2">
@@ -67,7 +67,7 @@ export default function FeaturedProducts() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {featured.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
