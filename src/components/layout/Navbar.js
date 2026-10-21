@@ -275,14 +275,14 @@ export default function Navbar() {
             <motion.div
               key="mobile-menu"
               id="mobile-navigation-panel"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-x-0 bottom-0 top-[56px] z-50 overflow-y-auto bg-black/35 backdrop-blur-[2px] lg:hidden"
+              initial={{ opacity: 0, y: -14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed inset-x-0 bottom-0 top-[56px] z-50 overflow-y-auto bg-white lg:hidden"
             >
               <button type="button" aria-label="Fermer le menu" onClick={() => setMenuOpen(false)} className="absolute inset-0 h-full w-full" />
-              <div role="dialog" aria-modal="true" aria-label="Menu de navigation" ref={menuPanelRef} tabIndex={-1} className="relative ml-auto max-h-full w-full max-w-lg overflow-y-auto border-t border-black/[0.06] bg-white/95 px-4 pb-6 pt-5 shadow-2xl shadow-black/10 backdrop-blur-2xl sm:px-6">
+              <div role="dialog" aria-modal="true" aria-label="Menu de navigation" ref={menuPanelRef} tabIndex={-1} className="relative min-h-full w-full overflow-y-auto border-t border-black/[0.06] bg-white px-6 pb-10 pt-6 sm:px-10">
                 <div className="mb-5 px-1">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                     Découvrir
@@ -329,19 +329,19 @@ export default function Navbar() {
                 <p className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                   Accès rapide
                 </p>
-                <div className="mb-6 grid grid-cols-2 gap-2">
+                <div className="mb-8 space-y-1">
                   {menuActions.map(({ label, href, icon: Icon }) => (
                     <Link
                       key={href}
                       href={href}
                       onClick={() => setMenuOpen(false)}
-                      className={`flex min-h-14 items-center gap-2.5 rounded-2xl border px-3 py-3 text-[13px] transition-colors ${
+                      className={`flex min-h-[64px] w-full items-center gap-4 border-b border-neutral-200 px-1 py-4 text-left text-base transition-colors ${
                         isActive(href)
-                          ? "border-neutral-300 bg-neutral-100 font-semibold text-neutral-950"
-                          : "border-neutral-200/70 bg-white font-medium text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50"
+                          ? "font-semibold text-neutral-950"
+                          : "font-medium text-neutral-700 hover:text-neutral-950"
                       }`}
                     >
-                      <Icon className="h-4 w-4 shrink-0 text-neutral-500" strokeWidth={1.8} />
+                      <Icon className="h-5 w-5 shrink-0 text-neutral-500" strokeWidth={1.8} />
                       <span>{label}</span>
                     </Link>
                   ))}
@@ -350,7 +350,7 @@ export default function Navbar() {
                 <p className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                   Catégories
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {menuCategories.map((category, index) => {
                     const active = isActive(category.href);
 
@@ -367,10 +367,10 @@ export default function Navbar() {
                         <Link
                           href={category.href}
                           onClick={() => setMenuOpen(false)}
-                          className={`group flex items-center justify-between rounded-2xl border px-4 py-3.5 text-sm transition-all ${
+                          className={`group flex items-center justify-between border-b border-neutral-200 px-1 py-4 text-base transition-colors ${
                             active
-                              ? "border-neutral-300 bg-neutral-100 font-semibold text-neutral-950"
-                              : "border-neutral-200/70 bg-white font-medium text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50"
+                              ? "font-semibold text-neutral-950"
+                              : "font-medium text-neutral-700 hover:text-neutral-950"
                           }`}
                         >
                           <span>{category.name}</span>
