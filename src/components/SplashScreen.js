@@ -22,7 +22,6 @@ export default function SplashScreen() {
   const [videoFailed, setVideoFailed] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [imageFrame, setImageFrame] = useState(null);
-  const skipButtonRef = useRef(null);
   const timersRef = useRef([]);
 
   useEffect(() => {
@@ -65,8 +64,6 @@ export default function SplashScreen() {
 
     updateImageFrame();
     window.addEventListener("resize", updateImageFrame, { passive: true });
-    skipButtonRef.current?.focus({ preventScroll: true });
-
     const exitDelay = motionPreference.matches ? 1500 : 7000;
     const finishDelay = motionPreference.matches ? 2200 : 8000;
     timersRef.current = [
@@ -98,12 +95,6 @@ export default function SplashScreen() {
       document.body.style.overflow = previousBodyOverflow;
     };
   }, [visible]);
-
-  const skipIntro = () => {
-    timersRef.current.forEach(window.clearTimeout);
-    saveIntroSeen();
-    setVisible(false);
-  };
 
   const finishIntro = () => {
     timersRef.current.forEach(window.clearTimeout);
@@ -170,15 +161,6 @@ export default function SplashScreen() {
           />
         ) : null}
       </div>
-
-      <button
-        ref={skipButtonRef}
-        type="button"
-        className={styles.skipButton}
-        onClick={skipIntro}
-      >
-        Passer l’introduction
-      </button>
 
       {reducedMotion && (
         <div className={styles.brand}>
