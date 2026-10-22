@@ -85,10 +85,27 @@ export default function useVisibleVideo({
 
   useEffect(() => {
     const video = ref.current;
-    if (!video) return;
-    if (selected && shouldPlay && !reducedMotion) {
+    if (!video) return undefined;
+
+    const tenterLecture = () => {
+      if (!selected || !shouldPlay || reducedMotion) return;
+      // Définir aussi les attributs avant play() aide Safari iOS à reconnaître
+      // une lecture muette autorisée, notamment après la fin de l'introduction.
       video.muted = true;
-      video.play().catch(() => {});
+      video.setAttribute("muted", "");
+      video.playsInline = true;
+      video.setAttribute("playsinline", "");
+      const lecture = video.play();
+      if (lecture && typeof lecture.catch === "function") {
+        lecture.catch(() => {});
+      }
+    };
+
+    if (selected && shouldPlay && !reducedMotion) {
+      video.addEventListener("loadeddata", tenterLecture);
+      video.addEventListener("canplay", tenterLecture);
+      document.addEventListener("visibilitychange", tenterLecture);
+      tenterLecture();
     } else {
       video.pause();
       if (!selected && video.hasAttribute("src")) {
@@ -96,6 +113,12 @@ export default function useVisibleVideo({
         video.load();
       }
     }
+
+    return () => {
+      video.removeEventListener("loadeddata", tenterLecture);
+      video.removeEventListener("canplay", tenterLecture);
+      document.removeEventListener("visibilitychange", tenterLecture);
+    };
   }, [selected, reducedMotion, shouldPlay]);
 
   return { ref, selected, reducedMotion };
