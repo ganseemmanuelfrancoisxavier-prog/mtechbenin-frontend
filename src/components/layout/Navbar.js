@@ -269,6 +269,9 @@ export default function Navbar() {
           </div>
         </div>
 
+
+      </header>
+
         {/* Menu mobile */}
         <AnimatePresence initial={false}>
           {menuOpen && (
@@ -279,7 +282,7 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -14 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-x-0 bottom-0 top-[56px] z-50 overflow-y-auto bg-white lg:hidden"
+              className="fixed inset-x-0 bottom-0 top-[56px] z-40 overflow-y-auto bg-white lg:hidden"
             >
               <button type="button" aria-label="Fermer le menu" onClick={() => setMenuOpen(false)} className="absolute inset-0 h-full w-full" />
               <div role="dialog" aria-modal="true" aria-label="Menu de navigation" ref={menuPanelRef} tabIndex={-1} className="relative min-h-full w-full overflow-y-auto border-t border-black/[0.06] bg-white px-6 pb-10 pt-6 sm:px-10">
@@ -391,7 +394,6 @@ export default function Navbar() {
             </motion.div>
           )}
         </AnimatePresence>
-      </header>
 
       {/* Espace sous la barre fixe */}
       <div aria-hidden="true" className="h-[56px]" />
