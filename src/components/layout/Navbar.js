@@ -312,6 +312,24 @@ export default function Navbar() {
                   </div>
                 </div>
 
+                <form onSubmit={handleSearch} className="relative px-1 pb-2 pt-1">
+                  <Search
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
+                    strokeWidth={1.8}
+                  />
+                  <input
+                    ref={searchInputRef}
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Rechercher un produit..."
+                    aria-label="Rechercher un produit"
+                    autoComplete="off"
+                    className="h-11 w-full rounded-xl border border-neutral-200 bg-neutral-50 pl-10 pr-4 text-base text-neutral-950 outline-none transition-colors placeholder:text-neutral-400 focus:border-neutral-400 focus:bg-white focus:ring-4 focus:ring-black/[0.04]"
+                  />
+                </form>
+
                 <nav aria-label="Accès rapides" className="relative space-y-1 p-1">
                   {menuActions.map(({ label, href, icon: Icon }, index) => (
                     <motion.div
