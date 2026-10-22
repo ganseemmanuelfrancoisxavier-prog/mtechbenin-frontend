@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import styles from "./SplashScreen.module.css";
 
-const SPLASH_KEY = "mtechbenin_cinematic_intro_v2";
+const SPLASH_KEY = "mtechbenin_cinematic_intro_v3";
 const SOURCE_WIDTH = 1024;
 const SOURCE_HEIGHT = 1536;
 const BLACK_HOLE_POSITION = { x: 0.5, y: 0.665 };
@@ -19,6 +19,7 @@ export default function SplashScreen() {
   const [visible, setVisible] = useState(true);
   const [exiting, setExiting] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [imageFrame, setImageFrame] = useState(null);
   const skipButtonRef = useRef(null);
@@ -67,9 +68,9 @@ export default function SplashScreen() {
     skipButtonRef.current?.focus({ preventScroll: true });
 
     const exitDelay = motionPreference.matches ? 1500 : 7000;
-    const finishDelay = motionPreference.matches ? 2200 : 7800;
+    const finishDelay = motionPreference.matches ? 2200 : 8000;
     timersRef.current = [
-      window.setTimeout(() => setExiting(true), exitDelay),
+      window.setTimeout(() => setExiting(true), motionPreference.matches ? exitDelay : 7200),
       window.setTimeout(() => {
         saveIntroSeen();
         setVisible(false);
@@ -131,7 +132,19 @@ export default function SplashScreen() {
         className={`${styles.scene} ${imageFailed ? styles.fallback : ""}`}
         aria-hidden="true"
       >
-        {!imageFailed && (
+        {!videoFailed && !reducedMotion ? (
+          <video
+            className={styles.video}
+            autoPlay={!reducedMotion}
+            muted
+            playsInline
+            preload="auto"
+            poster="/intro-mtechbenin.jpg"
+            onError={() => setVideoFailed(true)}
+          >
+            <source src="/intro-mtechbenin.mp4" type="video/mp4" />
+          </video>
+        ) : !imageFailed ? (
           <Image
             src="/intro-mtechbenin.jpg"
             alt=""
@@ -143,12 +156,7 @@ export default function SplashScreen() {
             style={imageStyle}
             onError={() => setImageFailed(true)}
           />
-        )}
-        <div className={styles.stars} />
-        <div className={styles.vignette} />
-        <div className={styles.starStreaks} />
-        <div className={styles.portalOpening} />
-        <div className={styles.portalLight} />
+        ) : null}
       </div>
 
       <button
@@ -160,10 +168,12 @@ export default function SplashScreen() {
         Passer l’introduction
       </button>
 
-      <div className={styles.brand}>
-        <p className={styles.welcome}>BIENVENUE SUR</p>
-        <h1 className={styles.title}>MTECHBENIN</h1>
-      </div>
+      {reducedMotion && (
+        <div className={styles.brand}>
+          <p className={styles.welcome}>BIENVENUE SUR</p>
+          <h1 className={styles.title}>MTECHBENIN</h1>
+        </div>
+      )}
     </div>
   );
 }
