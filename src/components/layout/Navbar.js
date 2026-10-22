@@ -9,13 +9,9 @@ import {
   X,
   Menu,
   ArrowRight,
-  Home,
   LayoutGrid,
   PackageSearch,
-  Wrench,
-  Tv,
   Headphones,
-  CircleHelp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,14 +23,9 @@ import { categories as staticCategories } from "@/lib/categories";
 import useScrollThreshold from "@/hooks/useScrollThreshold";
 
 const menuActions = [
-  { label: "Accueil", href: "/", icon: Home },
   { label: "Tous nos produits", href: "/catalogue", icon: LayoutGrid },
   { label: "Suivre ma commande", href: "/suivi", icon: PackageSearch },
-  { label: "Service de réparation", href: "/reparation", icon: Wrench },
-  { label: "Abonnements", href: "/abonnements", icon: Tv },
-  { label: "Mon panier", href: "/panier", icon: ShoppingCart },
-  { label: "Contacter le support", href: "/contact", icon: Headphones },
-  { label: "Aide & FAQ", href: "/faq", icon: CircleHelp },
+  { label: "Contacter un support", href: "/contact", icon: Headphones },
 ];
 
 export default function Navbar() {
@@ -136,11 +127,6 @@ export default function Navbar() {
         { name: "Réparation", href: "/reparation" },
         { name: "Suivi commande", href: "/suivi" },
       ];
-
-  const menuCategories = navCategories.filter(
-    (category) =>
-      !["/abonnements", "/reparation", "/suivi"].includes(category.href),
-  );
 
   const isActive = (href) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -272,128 +258,89 @@ export default function Navbar() {
 
       </header>
 
-        {/* Menu mobile */}
-        <AnimatePresence initial={false}>
-          {menuOpen && (
-            <motion.div
-              key="mobile-menu"
-              id="mobile-navigation-panel"
-              initial={{ opacity: 0, y: -14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -14 }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-x-0 bottom-0 top-[56px] z-40 overflow-y-auto bg-white lg:hidden"
-            >
-              <button type="button" aria-label="Fermer le menu" onClick={() => setMenuOpen(false)} className="absolute inset-0 h-full w-full" />
-              <div role="dialog" aria-modal="true" aria-label="Menu de navigation" ref={menuPanelRef} tabIndex={-1} className="relative min-h-full w-full overflow-y-auto border-t border-black/[0.06] bg-white px-6 pb-10 pt-6 sm:px-10">
-                <div className="mb-5 px-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                    Découvrir
-                  </p>
-                  <h2 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-950">
-                    {mounted && shopName ? shopName : "MTECHBENIN"}
-                  </h2>
-                  <p className="mt-1 text-sm text-neutral-500">
-                    Technologie. Accessoires. Services.
-                  </p>
-                </div>
+      <AnimatePresence initial={false}>
+        {menuOpen && (
+          <motion.div
+            key="mobile-menu-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-40 lg:hidden"
+          >
+            <motion.button
+              type="button"
+              aria-label="Fermer le menu"
+              onClick={() => setMenuOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 h-full w-full bg-neutral-950/20 backdrop-blur-[2px]"
+            />
 
-                <form onSubmit={handleSearch} className="relative mb-5">
-                  <Search
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400"
-                    strokeWidth={1.8}
-                  />
-                  <input
-                    ref={searchInputRef}
-                    type="search"
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder="Rechercher un produit..."
-                    aria-label="Rechercher un produit depuis le menu"
-                    autoComplete="off"
-                    className="h-[52px] w-full rounded-2xl border border-neutral-200 bg-neutral-100/80 pl-12 pr-12 text-base text-neutral-950 outline-none transition-colors placeholder:text-neutral-400 focus:border-neutral-400 focus:bg-white focus:ring-4 focus:ring-black/[0.04]"
-                  />
-                  {searchQuery && (
+            <motion.div
+              id="mobile-navigation-panel"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Accès rapides"
+              ref={menuPanelRef}
+              tabIndex={-1}
+              initial={{ opacity: 0, scale: 0.78, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.82, y: -8 }}
+              transition={{ type: "spring", stiffness: 420, damping: 29, mass: 0.8 }}
+              onClick={(event) => event.stopPropagation()}
+              className="absolute right-4 top-[64px] w-[min(22rem,calc(100vw-2rem))] origin-top-right overflow-visible rounded-[26px] border border-white/80 bg-white/95 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.22),0_4px_16px_rgba(0,0,0,0.08)] backdrop-blur-2xl sm:right-6"
+            >
+              <span aria-hidden="true" className="absolute -top-2 right-5 h-4 w-4 rotate-45 rounded-tl-sm border-l border-t border-white/80 bg-white" />
+              <div className="relative overflow-hidden rounded-[20px]">
+                <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-neutral-100/80 blur-3xl" />
+                <div className="relative px-3 pb-2 pt-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">MTECHBENIN</p>
+                      <h2 className="mt-1 text-lg font-semibold tracking-tight text-neutral-950">Accès rapides</h2>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => {
-                        setSearchQuery("");
-                        searchInputRef.current?.focus();
-                      }}
-                      aria-label="Effacer la recherche"
-                      className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-950"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </form>
-
-                <p className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                  Accès rapide
-                </p>
-                <div className="mb-8 space-y-1">
-                  {menuActions.map(({ label, href, icon: Icon }) => (
-                    <Link
-                      key={href}
-                      href={href}
                       onClick={() => setMenuOpen(false)}
-                      className={`flex min-h-[64px] w-full items-center gap-4 border-b border-neutral-200 px-1 py-4 text-left text-base transition-colors ${
-                        isActive(href)
-                          ? "font-semibold text-neutral-950"
-                          : "font-medium text-neutral-700 hover:text-neutral-950"
-                      }`}
+                      aria-label="Fermer le menu"
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-950"
                     >
-                      <Icon className="h-5 w-5 shrink-0 text-neutral-500" strokeWidth={1.8} />
-                      <span>{label}</span>
-                    </Link>
-                  ))}
+                      <X className="h-4 w-4" strokeWidth={1.8} />
+                    </button>
+                  </div>
                 </div>
 
-                <p className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                  Catégories
-                </p>
-                <div className="space-y-1">
-                  {menuCategories.map((category, index) => {
-                    const active = isActive(category.href);
-
-                    return (
-                      <motion.div
-                        key={category.href}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{
-                          delay: Math.min(index * 0.025, 0.2),
-                          duration: 0.2,
-                        }}
+                <nav aria-label="Accès rapides" className="relative space-y-1 p-1">
+                  {menuActions.map(({ label, href, icon: Icon }, index) => (
+                    <motion.div
+                      key={href}
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.06 + index * 0.055, duration: 0.22 }}
+                    >
+                      <Link
+                        href={href}
+                        onClick={() => setMenuOpen(false)}
+                        className={`group flex min-h-[60px] items-center gap-3 rounded-2xl border border-transparent px-3 transition-colors hover:border-neutral-200 hover:bg-neutral-50 ${
+                          isActive(href) ? "bg-neutral-50 font-semibold text-neutral-950" : "font-medium text-neutral-700"
+                        }`}
                       >
-                        <Link
-                          href={category.href}
-                          onClick={() => setMenuOpen(false)}
-                          className={`group flex items-center justify-between border-b border-neutral-200 px-1 py-4 text-base transition-colors ${
-                            active
-                              ? "font-semibold text-neutral-950"
-                              : "font-medium text-neutral-700 hover:text-neutral-950"
-                          }`}
-                        >
-                          <span>{category.name}</span>
-                          <ArrowRight
-                            className="h-4 w-4 text-neutral-400 transition-transform duration-200 group-hover:translate-x-1"
-                            strokeWidth={1.7}
-                          />
-                        </Link>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-
-                <p className="mt-6 text-center text-xs text-neutral-400">
-                  Une expérience simple, élégante et pensée pour vous.
-                </p>
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 transition-colors group-hover:bg-neutral-200">
+                          <Icon className="h-[19px] w-[19px]" strokeWidth={1.8} />
+                        </span>
+                        <span className="flex-1 text-sm">{label}</span>
+                        <ArrowRight className="h-4 w-4 text-neutral-400 transition-transform group-hover:translate-x-0.5" strokeWidth={1.8} />
+                      </Link>
+                    </motion.div>
+                  ))}
+                </nav>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Espace sous la barre fixe */}
       <div aria-hidden="true" className="h-[56px]" />
