@@ -105,6 +105,17 @@ export default function SplashScreen() {
     setVisible(false);
   };
 
+  const finishIntro = () => {
+    timersRef.current.forEach(window.clearTimeout);
+    setExiting(true);
+    timersRef.current = [
+      window.setTimeout(() => {
+        saveIntroSeen();
+        setVisible(false);
+      }, 800),
+    ];
+  };
+
   if (!visible) return null;
 
   const imageStyle = imageFrame
@@ -141,6 +152,7 @@ export default function SplashScreen() {
             preload="auto"
             poster="/intro-mtechbenin.jpg"
             onError={() => setVideoFailed(true)}
+            onEnded={finishIntro}
           >
             <source src="/intro-mtechbenin.mp4" type="video/mp4" />
           </video>
