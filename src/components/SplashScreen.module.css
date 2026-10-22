@@ -77,6 +77,28 @@
   animation: halo-reveal 7s ease-out both;
 }
 
+.portalLight {
+  position: absolute;
+  z-index: 3;
+  inset: -12%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(238, 247, 255, 0.82) 7%,
+    rgba(186, 216, 255, 0.38) 22%,
+    rgba(145, 188, 255, 0.13) 48%,
+    transparent 72%
+  );
+  filter: blur(5px);
+  mix-blend-mode: screen;
+  transform: scale(0.45);
+  transform-origin: center;
+  animation: portal-arrival 7.8s cubic-bezier(0.2, 0.7, 0.15, 1) both;
+  will-change: transform, opacity;
+}
+
 .fallback {
   background:
     radial-gradient(circle at 50% 50%, rgba(156, 199, 255, 0.2), transparent 18%),
@@ -143,6 +165,7 @@
 .reducedMotion .image,
 .reducedMotion .stars,
 .reducedMotion .halo,
+.reducedMotion .portalLight,
 .reducedMotion .brand {
   animation: none;
 }
@@ -159,6 +182,11 @@
 .reducedMotion .halo {
   opacity: 0.35;
   transform: translate(-50%, -50%);
+}
+
+.reducedMotion .portalLight {
+  opacity: 0;
+  transform: none;
 }
 
 .reducedMotion .brand {
@@ -215,6 +243,30 @@
   }
 }
 
+@keyframes portal-arrival {
+  0%,
+  68% {
+    opacity: 0;
+    transform: scale(0.45);
+  }
+  78% {
+    opacity: 0.18;
+    transform: scale(0.8);
+  }
+  89% {
+    opacity: 0.7;
+    transform: scale(1.35);
+  }
+  96% {
+    opacity: 0.9;
+    transform: scale(1.85);
+  }
+  100% {
+    opacity: 0.2;
+    transform: scale(2.1);
+  }
+}
+
 @keyframes star-drift {
   from {
     transform: translate3d(0, 0, 0);
@@ -265,5 +317,10 @@
   .halo {
     opacity: 0.35;
     transform: translate(-50%, -50%);
+  }
+
+  .portalLight {
+    opacity: 0;
+    transform: none;
   }
 }

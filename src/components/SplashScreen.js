@@ -145,6 +145,7 @@ export default function SplashScreen() {
         <div className={styles.stars} />
         <div className={styles.vignette} />
         <div className={styles.halo} />
+        <div className={styles.portalLight} />
       </div>
 
       <button
