@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import styles from "./SplashScreen.module.css";
 
-const SPLASH_KEY = "mtechbenin_cinematic_intro_v1";
+const SPLASH_KEY = "mtechbenin_cinematic_intro_v2";
 const SOURCE_WIDTH = 1024;
 const SOURCE_HEIGHT = 1536;
 const BLACK_HOLE_POSITION = { x: 0.5, y: 0.665 };
@@ -58,6 +58,7 @@ export default function SplashScreen() {
         holeY,
         shiftX: window.innerWidth / 2 - left - holeX,
         shiftY: window.innerHeight / 2 - top - holeY,
+        holeSize: Math.max(54, Math.min(width, height) * 0.075),
       });
     };
 
@@ -113,6 +114,7 @@ export default function SplashScreen() {
         top: `${imageFrame.top}px`,
         "--hole-x": `${imageFrame.holeX}px`,
         "--hole-y": `${imageFrame.holeY}px`,
+        "--hole-size": `${imageFrame.holeSize}px`,
         "--hole-shift-x": `${imageFrame.shiftX}px`,
         "--hole-shift-y": `${imageFrame.shiftY}px`,
       }
@@ -144,7 +146,8 @@ export default function SplashScreen() {
         )}
         <div className={styles.stars} />
         <div className={styles.vignette} />
-        <div className={styles.halo} />
+        <div className={styles.starStreaks} />
+        <div className={styles.portalOpening} />
         <div className={styles.portalLight} />
       </div>
 
