@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Smartphone, Tablet, Laptop, FileText, ArrowRight } from "lucide-react";
 
 // Composant SERVEUR : cet écran n'a ni état ni gestionnaire d'événement, et le
@@ -30,6 +31,7 @@ const ESPACES = [
     // il chercherait une quatrième tuile qui n'existe pas, et repartirait.
     detail: "iPhone · iPad · Mac",
     Icone: Smartphone,
+    image: "/images/reparation/apple.jpg",
     fond: "from-[#0A0A0A] via-[#1a1a2e] to-[#0f3460]",
   },
   {
@@ -38,6 +40,7 @@ const ESPACES = [
     nom: "Androïd",
     detail: "Samsung · Xiaomi · Tecno…",
     Icone: Tablet,
+    image: "/images/reparation/android.jpg",
     fond: "from-[#0f2027] via-[#203a43] to-[#2c5364]",
   },
   {
@@ -46,6 +49,7 @@ const ESPACES = [
     nom: "PC portable",
     detail: "Dell · HP · Lenovo · Asus…",
     Icone: Laptop,
+    image: "/images/reparation/pc.jpg",
     fond: "from-[#141E30] via-[#243B55] to-[#2b5876]",
   },
 ];
@@ -68,12 +72,20 @@ export default function ReparationHub() {
           ligne évite deux tuiles démesurées et beaucoup de vide sur un écran
           d'ordinateur. */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        {ESPACES.map(({ slug, nom, detail, Icone, fond, pret }) => {
+        {ESPACES.map(({ slug, nom, detail, Icone, image, fond, pret }) => {
           const contenu = (
             <>
-              <div className={`absolute inset-0 bg-gradient-to-br ${fond}`} />
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/[0.05] rounded-full" />
-              <div className="absolute -bottom-12 -left-8 w-32 h-32 bg-white/[0.03] rounded-full" />
+              <Image
+                src={image}
+                alt=""
+                fill
+                sizes="(max-width: 767px) 45vw, 25vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${fond} opacity-35 mix-blend-multiply`}
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/10 to-black/85" />
 
               <div className="relative h-full flex flex-col justify-between p-4 md:p-5">
                 <div className="flex items-start justify-between gap-2">
