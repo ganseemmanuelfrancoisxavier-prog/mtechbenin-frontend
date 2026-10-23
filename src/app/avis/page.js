@@ -147,6 +147,19 @@ export default function AvisPage() {
                 className="absolute top-4 right-4 w-8 h-8 text-black/[0.04]"
                 strokeWidth={1}
               />
+              <div className="flex items-center gap-3 pr-8">
+                <div className="w-10 h-10 rounded-full bg-apple-black flex items-center justify-center text-white font-bold text-[14px] flex-shrink-0">
+                  {review.name?.charAt(0) || "?"}
+                </div>
+                <div>
+                  <p className="font-semibold text-apple-black text-[15px] leading-tight">
+                    {review.name}
+                  </p>
+                  <p className="mt-1 text-apple-mid text-[12px]">
+                    {[review.city, review.date].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+              </div>
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <Star
@@ -172,19 +185,6 @@ export default function AvisPage() {
                 </Link>
               )}
 
-              <div className="flex items-center gap-3 pt-3 border-t border-black/[0.05]">
-                <div className="w-8 h-8 rounded-full bg-apple-black flex items-center justify-center text-white font-bold text-[12px] flex-shrink-0">
-                  {review.name?.charAt(0) || "?"}
-                </div>
-                <div>
-                  <p className="font-semibold text-apple-black text-[13px] leading-tight">
-                    {review.name}
-                  </p>
-                  <p className="text-apple-mid text-[11px]">
-                    {[review.city, review.date].filter(Boolean).join(" · ")}
-                  </p>
-                </div>
-              </div>
             </div>
           ))}
         </div>

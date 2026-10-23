@@ -49,6 +49,17 @@ export default function SocialProofSection() {
                 className="absolute right-4 top-4 h-8 w-8 text-black/[0.04]"
                 strokeWidth={1}
               />
+              <div className="flex items-center gap-3 pr-8">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-apple-black text-[14px] font-bold text-white">
+                  {review.initial}
+                </div>
+                <div>
+                  <p className="text-[15px] font-semibold leading-tight text-apple-black">
+                    {review.name}
+                  </p>
+                  <p className="mt-1 text-[12px] text-apple-mid">{review.city}</p>
+                </div>
+              </div>
               <div role="img" className="flex gap-0.5" aria-label={`${review.rating} sur 5 étoiles`}>
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
@@ -73,17 +84,6 @@ export default function SocialProofSection() {
                   {review.productName}
                 </span>
               )}
-              <div className="flex items-center gap-3 border-t border-black/[0.05] pt-3">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-apple-black text-[12px] font-bold text-white">
-                  {review.initial}
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold leading-tight text-apple-black">
-                    {review.name}
-                  </p>
-                  <p className="text-[11px] text-apple-mid">{review.city}</p>
-                </div>
-              </div>
             </div>
           ))}
         </div>
