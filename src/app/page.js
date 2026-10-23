@@ -7,18 +7,21 @@ import ClientGallery from "@/components/shop/ClientGallery";
 import SocialProofSection from "@/components/shop/SocialProofSection";
 import AdvertisingSection from "@/components/shop/AdvertisingSection";
 import StatisticsSection from "@/components/shop/StatisticsSection";
+import HomeDataBootstrap from "@/components/shop/HomeDataBootstrap";
 
 export default function HomePage() {
   return (
     <ShopLayout>
-      <HeroSection />
-      <CategoriesSection />
-      <FeaturedProducts />
-      <SubscriptionsSection />
-      <AdvertisingSection />
-      <StatisticsSection />
-      <ClientGallery />
-      <SocialProofSection />
+      <HomeDataBootstrap>
+        <HeroSection />
+        <CategoriesSection />
+        <FeaturedProducts />
+        <SubscriptionsSection />
+        <AdvertisingSection />
+        <StatisticsSection />
+        <ClientGallery />
+        <SocialProofSection />
+      </HomeDataBootstrap>
     </ShopLayout>
   );
 }
