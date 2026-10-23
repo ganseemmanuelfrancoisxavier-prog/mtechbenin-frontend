@@ -94,7 +94,7 @@ export default function SocialProofSection() {
         <div className="flex justify-center mt-10">
           <Link
             href="/avis"
-            className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-apple-black hover:bg-neutral-800 text-white text-[13px] font-semibold transition-all"
+            className="group inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-7 py-3.5 text-[13px] font-semibold text-apple-black shadow-sm transition-all hover:bg-neutral-50"
           >
             Voir plus d’avis
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
