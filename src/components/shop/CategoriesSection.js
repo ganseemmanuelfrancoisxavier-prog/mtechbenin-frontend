@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, useAnimationControls, useInView } from "framer-motion";
 import {
   ChevronRight,
@@ -129,48 +128,6 @@ const emojiToIcon = {
 const DefaultIcon = Package;
 const CATEGORIES_AFFICHÉES = 8;
 
-// Visuels des cartes « Notre univers », repris depuis la capture de référence.
-// Les catégories créées dans l'admin gardent leur icône si aucun visuel dédié
-// ne correspond à leur nom ou à leur slug.
-const categoryArtwork = {
-  abonnements: "/images/categories/abonnements.png",
-  accessoires: "/images/categories/accessoires.png",
-  ecouteurs: "/images/categories/ecouteurs.png",
-  enceintes: "/images/categories/enceintes.png",
-  "for-man": "/images/categories/for-man.png",
-  "for-woman": "/images/categories/for-woman.png",
-  reparation: "/images/categories/reparation.png",
-  "smartphone-tablette": "/images/categories/smartphone-tablette.png",
-};
-
-function getCategoryArtwork(slug, label) {
-  const normalize = (value = "") =>
-    value
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
-  const keys = [normalize(slug), normalize(label)];
-
-  for (const key of keys) {
-    if (categoryArtwork[key]) return categoryArtwork[key];
-    if (key.includes("abonnement")) return categoryArtwork.abonnements;
-    if (key.includes("accessoire")) return categoryArtwork.accessoires;
-    if (key.includes("ecouteur")) return categoryArtwork.ecouteurs;
-    if (key.includes("enceinte")) return categoryArtwork.enceintes;
-    if (key.includes("reparation")) return categoryArtwork.reparation;
-    if (key.includes("smartphone") || key.includes("tablette"))
-      return categoryArtwork["smartphone-tablette"];
-    if (key.includes("for-man") || key.includes("homme"))
-      return categoryArtwork["for-man"];
-    if (key.includes("for-woman") || key.includes("femme"))
-      return categoryArtwork["for-woman"];
-  }
-
-  return null;
-}
-
 function CategoryRevealCard({ item, index, scrollDirection }) {
   const cardRef = useRef(null);
   const isInView = useInView(cardRef, { once: false, amount: 0.2 });
@@ -197,7 +154,7 @@ function CategoryRevealCard({ item, index, scrollDirection }) {
     }
   }, [controls, index, isInView, scrollDirection]);
 
-  const { label, Icon, href, image } = item;
+  const { label, Icon, href } = item;
 
   return (
     <motion.div
@@ -207,24 +164,12 @@ function CategoryRevealCard({ item, index, scrollDirection }) {
     >
       <Link
         href={href}
-        className="glass-card flex min-h-[102px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white px-2 py-3 text-center shadow-[0_12px_30px_rgba(0,0,0,0.12)] sm:min-h-[132px] sm:px-4 sm:py-4"
+        className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
       >
-        {image ? (
-          <Image
-            src={image}
-            alt=""
-            aria-hidden="true"
-            width={255}
-            height={140}
-            loading="lazy"
-            className="h-12 w-[88%] object-contain sm:h-16"
-          />
-        ) : (
-          <span className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.04]">
-            <Icon className="h-5 w-5 text-apple-black" strokeWidth={1.6} />
-          </span>
-        )}
-        <span className="mt-2 text-[13px] font-semibold leading-tight text-apple-black">
+        <span className="mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.04]">
+          <Icon className="h-5 w-5 text-apple-black" strokeWidth={1.6} />
+        </span>
+        <span className="text-[13px] font-semibold leading-tight text-apple-black">
           {label}
         </span>
       </Link>
@@ -271,21 +216,18 @@ export default function CategoriesSection() {
         slug: cat.slug,
         label: cat.label || cat.name,
         Icon: emojiToIcon[cat.icon] || DefaultIcon,
-        image: getCategoryArtwork(cat.slug, cat.label || cat.name),
         href: `/catalogue/${cat.slug}`,
       })),
     {
       slug: "abonnements",
       label: "Abonnements",
       Icon: Tv,
-      image: categoryArtwork.abonnements,
       href: "/abonnements",
     },
     {
       slug: "reparation",
       label: "Réparation",
       Icon: Wrench,
-      image: categoryArtwork.reparation,
       href: "/reparation",
     },
     {
