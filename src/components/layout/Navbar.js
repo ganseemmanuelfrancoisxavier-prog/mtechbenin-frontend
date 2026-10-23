@@ -26,7 +26,12 @@ import useScrollThreshold from "@/hooks/useScrollThreshold";
 const menuActions = [
   { label: "Tous nos produits", href: "/catalogue", icon: LayoutGrid },
   { label: "Suivre ma commande", href: "/suivi", icon: PackageSearch },
-  { label: "Réparation et entretien", href: "/reparation", icon: Wrench },
+  {
+    label: "Réparation et entretien",
+    description: "MTECHBENIN répare et entretient vos appareils.",
+    href: "/reparation",
+    icon: Wrench,
+  },
   { label: "Contacter un support", href: "/contact", icon: Headphones },
 ];
 
@@ -333,7 +338,7 @@ export default function Navbar() {
                 </form>
 
                 <nav aria-label="Accès rapides" className="relative space-y-1 p-1">
-                  {menuActions.map(({ label, href, icon: Icon }, index) => (
+                  {menuActions.map(({ label, description, href, icon: Icon }, index) => (
                     <motion.div
                       key={href}
                       initial={{ opacity: 0, x: 10 }}
@@ -350,7 +355,14 @@ export default function Navbar() {
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 transition-colors group-hover:bg-neutral-200">
                           <Icon className="h-[19px] w-[19px]" strokeWidth={1.8} />
                         </span>
-                        <span className="flex-1 text-sm">{label}</span>
+                        <span className="flex-1 py-2">
+                          <span className="block text-sm">{label}</span>
+                          {description && (
+                            <span className="mt-0.5 block text-xs font-normal leading-snug text-neutral-500">
+                              {description}
+                            </span>
+                          )}
+                        </span>
                         <ArrowRight className="h-4 w-4 text-neutral-400 transition-transform group-hover:translate-x-0.5" strokeWidth={1.8} />
                       </Link>
                     </motion.div>
