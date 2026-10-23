@@ -13,12 +13,29 @@ export default function MaintenanceGuard({ children }) {
   const { maintenanceMode, fetchSettings } = useSettingsStore();
 
   useEffect(() => {
-    // Charge les paramètres depuis l'API au montage
-    fetchSettings();
-  }, []);
+    let cancelled = false;
+    let timeoutId;
+
+    // Sur un nouvel appareil, les préférences ne sont pas encore dans le
+    // stockage local. Attend la réponse publique avant d'afficher les valeurs
+    // de secours de la boutique, avec un délai maximal pour ne pas bloquer le
+    // site si le backend est indisponible.
+    const timeout = new Promise((resolve) => {
+      timeoutId = window.setTimeout(resolve, 10000);
+    });
+
+    Promise.race([fetchSettings(), timeout]).finally(() => {
+      window.clearTimeout(timeoutId);
+      if (!cancelled) setReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [fetchSettings]);
 
   useEffect(() => {
-    setReady(true);
     const isAdmin = pathname.startsWith("/admin");
     const isMaintenance = pathname === "/maintenance";
 
