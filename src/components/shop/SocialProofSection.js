@@ -8,8 +8,7 @@ import ReviewPhotos from "./ReviewPhotos";
 
 export default function SocialProofSection() {
   const [mounted, setMounted] = useState(false);
-  const { getFeaturedReviews, fetchFeaturedReviews, totalApprouves } =
-    useReviewStore();
+  const { getFeaturedReviews, fetchFeaturedReviews } = useReviewStore();
 
   useEffect(() => {
     setMounted(true);
@@ -23,10 +22,6 @@ export default function SocialProofSection() {
     initial: review.name?.charAt(0) || "?",
     productName: review.productName || "",
   }));
-
-  // On n'invite à « voir plus » que s'il reste réellement des avis à découvrir
-  // au-delà de ceux affichés ici. `mounted` évite un écart d'hydratation.
-  const resteAVoir = mounted && totalApprouves > reviews.length;
 
   return (
     <section className="mx-auto max-w-7xl px-5 pt-8 pb-16">
@@ -95,13 +90,13 @@ export default function SocialProofSection() {
         </p>
       )}
 
-      {resteAVoir && (
+      {reviews.length > 0 && (
         <div className="flex justify-center mt-10">
           <Link
             href="/avis"
             className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-apple-black hover:bg-neutral-800 text-white text-[13px] font-semibold transition-all"
           >
-            Voir les {totalApprouves} avis
+            Voir plus d’avis
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
@@ -115,11 +110,8 @@ export default function SocialProofSection() {
             <Wrench className="h-5 w-5" strokeWidth={1.8} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
-              MTECHBENIN
-            </span>
-            <span className="mt-1 block text-sm font-semibold leading-snug text-white sm:text-base">
-              Propose aussi des services de réparation et de maintenance des appareils. Cliquez pour y accéder.
+            <span className="block text-sm font-semibold leading-snug text-white sm:text-base">
+              MTECHBENIN propose aussi des services de réparation et de maintenance des appareils.
             </span>
           </span>
           <ArrowUpRight className="h-4 w-4 shrink-0 text-white/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
