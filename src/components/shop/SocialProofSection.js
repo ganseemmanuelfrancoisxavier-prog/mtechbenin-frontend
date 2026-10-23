@@ -109,20 +109,20 @@ export default function SocialProofSection() {
       <div className="mt-12 flex justify-center">
         <Link
           href="/reparation"
-          className="group flex w-full max-w-xl items-center gap-4 rounded-3xl border border-black/[0.06] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+          className="group flex w-full max-w-xl items-center gap-4 rounded-3xl border border-white/10 bg-neutral-950 p-5 text-white shadow-[0_16px_36px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5 hover:bg-neutral-900"
         >
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-black/[0.05] text-apple-black">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
             <Wrench className="h-5 w-5" strokeWidth={1.8} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-apple-mid">
-              Nouveau service
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
+              MTECHBENIN
             </span>
-            <span className="mt-1 block text-sm font-bold leading-snug text-apple-black sm:text-base">
-              Réparation et entretien d’appareils
+            <span className="mt-1 block text-sm font-semibold leading-snug text-white sm:text-base">
+              Propose aussi des services de réparation et de maintenance des appareils. Cliquez pour y accéder.
             </span>
           </span>
-          <ArrowUpRight className="h-4 w-4 shrink-0 text-apple-mid transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          <ArrowUpRight className="h-4 w-4 shrink-0 text-white/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </Link>
       </div>
     </section>

@@ -12,6 +12,7 @@ import {
   LayoutGrid,
   PackageSearch,
   Headphones,
+  Wrench,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -25,6 +26,7 @@ import useScrollThreshold from "@/hooks/useScrollThreshold";
 const menuActions = [
   { label: "Tous nos produits", href: "/catalogue", icon: LayoutGrid },
   { label: "Suivre ma commande", href: "/suivi", icon: PackageSearch },
+  { label: "Réparation et entretien", href: "/reparation", icon: Wrench },
   { label: "Contacter un support", href: "/contact", icon: Headphones },
 ];
 
