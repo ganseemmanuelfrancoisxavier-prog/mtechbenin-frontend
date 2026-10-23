@@ -27,7 +27,7 @@ const menuActions = [
   { label: "Tous nos produits", href: "/catalogue", icon: LayoutGrid },
   { label: "Suivre ma commande", href: "/suivi", icon: PackageSearch },
   {
-    label: "Réparation et entretien",
+    label: "Service de réparation",
     description: "MTECHBENIN répare et entretient vos appareils.",
     href: "/reparation",
     icon: Wrench,
