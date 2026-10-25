@@ -3,6 +3,7 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
 import ScrollToTop from "@/components/layout/ScrollToTop";
+import SeasonalFavicon from "@/components/layout/SeasonalFavicon";
 import SplashScreen from "@/components/SplashScreen";
 const inter = Inter({
   subsets: ["latin"],
@@ -96,6 +97,7 @@ export default function RootLayout({ children }) {
       >
         <SplashScreen />
         <ScrollToTop />
+        <SeasonalFavicon />
         <MaintenanceGuard>{children}</MaintenanceGuard>
       </body>
       {/* <body className="global-blur">{children}</body> */}
