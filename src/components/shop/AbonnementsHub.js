@@ -63,7 +63,7 @@ function ServiceCard({ service, onToggleMute, cardRef }) {
       ref={cardRef}
       href={isUnavailable ? "#" : `/abonnements/${service.slug}`}
       onClick={isUnavailable ? (e) => e.preventDefault() : undefined}
-      className={`group glass-card rounded-3xl overflow-hidden transition-all duration-300 relative ${
+      className={`group glass-card rounded-3xl overflow-hidden transition-all duration-300 relative shadow-[0_16px_38px_rgba(0,0,0,0.12)] hover:shadow-[0_20px_45px_rgba(0,0,0,0.16)] ${
         isUnavailable ? "cursor-not-allowed opacity-80" : "hover:-translate-y-1"
       }`}
     >
@@ -93,8 +93,7 @@ function ServiceCard({ service, onToggleMute, cardRef }) {
             className="absolute inset-0 w-full h-full object-cover"
           />
         )}
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 
         {isMaintenance && (
           <div className="absolute top-3 left-3 right-10 z-20">
