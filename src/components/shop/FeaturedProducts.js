@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import ProductCard from "./ProductCard";
 import useProductStore from "@/store/productStore";
@@ -69,20 +68,12 @@ export default function FeaturedProducts() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {featured.map((product, index) => (
-          <motion.div
+        {featured.map((product) => (
+          <div
             key={product.id}
-            initial={{ opacity: 0, y: -22, scale: 0.97 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{
-              duration: 0.8,
-              delay: index * 0.07,
-              ease: [0.22, 1, 0.36, 1],
-            }}
           >
             <ProductCard product={product} featuredCta />
-          </motion.div>
+          </div>
         ))}
       </div>
 

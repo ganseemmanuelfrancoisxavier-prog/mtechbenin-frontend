@@ -6,6 +6,7 @@ import ProductCard from "./ProductCard";
 import useProductStore from "@/store/productStore";
 import useCategoryStore from "@/store/categoryStore";
 import { categories as staticCategories } from "@/lib/categories";
+import { isCatalogueCategory } from "@/lib/catalogueCategories";
 
 const sortOptions = [
   { value: "default", label: "Par défaut" },
@@ -38,7 +39,7 @@ export default function CataloguePage({ initialCategory = "tous" }) {
 
   const categoryOptions = [
     { slug: "tous", label: "Tous les produits" },
-    ...activeCategories,
+    ...activeCategories.filter(isCatalogueCategory),
   ];
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);

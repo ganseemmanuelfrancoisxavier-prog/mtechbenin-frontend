@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useAnimationControls, useInView } from "framer-motion";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import {
   Headphones,
@@ -58,6 +57,7 @@ import {
 import useCategoryStore from "@/store/categoryStore";
 import useProductStore from "@/store/productStore";
 import { categories as staticCategories } from "@/lib/categories";
+import { isCatalogueCategory } from "@/lib/catalogueCategories";
 import styles from "./CategoriesSection.module.css";
 
 // Correspondance emoji admin → icône Lucide
@@ -192,15 +192,8 @@ const CATEGORY_CONTENT = {
     image: "/images/categories/ordinateurs.jpg",
     description: "Mac, PC, composants, accessoires, périphériques...",
   },
-  reparation: {
-    image: "/images/reparation/apple.jpg",
-    description: "Réparation et entretien de vos appareils.",
-  },
   vapes: {
     description: "Vapes et cigarettes électroniques.",
-  },
-  suivi: {
-    description: "Retrouvez les informations de votre commande.",
   },
 };
 
@@ -239,32 +232,7 @@ function getCategoryDescription(slug, label) {
   );
 }
 
-function CategoryRevealCard({ item, index, scrollDirection }) {
-  const cardRef = useRef(null);
-  const isInView = useInView(cardRef, { once: false, amount: 0.2 });
-  const controls = useAnimationControls();
-
-  useEffect(() => {
-    if (isInView) {
-      if (scrollDirection.current === "down") {
-        controls.start({
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          transition: {
-            duration: 1,
-            delay: index * 0.07,
-            ease: [0.22, 1, 0.36, 1],
-          },
-        });
-      } else {
-        controls.set({ opacity: 1, y: 0, scale: 1 });
-      }
-    } else if (scrollDirection.current === "up") {
-      controls.set({ opacity: 0, y: -22, scale: 0.97 });
-    }
-  }, [controls, index, isInView, scrollDirection]);
-
+function CategoryRevealCard({ item }) {
   const { label, Icon, href, image, description, slug } = item;
   const imageClassName =
     slug === "accessoires"
@@ -274,12 +242,7 @@ function CategoryRevealCard({ item, index, scrollDirection }) {
         : "";
 
   return (
-    <motion.div
-      ref={cardRef}
-      className={styles.reveal}
-      initial={{ opacity: 0, y: -22, scale: 0.97 }}
-      animate={controls}
-    >
+    <div className={styles.reveal}>
       <Link
         href={href}
         className={styles.card}
@@ -307,14 +270,12 @@ function CategoryRevealCard({ item, index, scrollDirection }) {
           </span>
         </span>
       </Link>
-    </motion.div>
+    </div>
   );
 }
 
 export default function CategoriesSection() {
   const [mounted, setMounted] = useState(false);
-  const scrollDirection = useRef("none");
-  const previousScrollY = useRef(0);
   const { getActiveCategories, fetchCategories } = useCategoryStore();
   const featuredProducts = useProductStore((state) => state.featuredProducts);
 
@@ -323,30 +284,13 @@ export default function CategoriesSection() {
     fetchCategories();
   }, []);
 
-  useEffect(() => {
-    previousScrollY.current = window.scrollY;
-    const updateScrollDirection = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY !== previousScrollY.current) {
-        scrollDirection.current =
-          currentScrollY > previousScrollY.current ? "down" : "up";
-        previousScrollY.current = currentScrollY;
-      }
-    };
-
-    window.addEventListener("scroll", updateScrollDirection, { passive: true });
-    return () => window.removeEventListener("scroll", updateScrollDirection);
-  }, []);
-
   const activeCategories = mounted
     ? getActiveCategories()
     : staticCategories.filter((c) => c.active);
 
   const allItems = [
     ...activeCategories
-      .filter((cat) => cat.slug !== "abonnements" &&
-          cat.slug !== "reparation" &&
-          cat.slug !== "suivi")
+      .filter((cat) => cat.slug !== "abonnements" && isCatalogueCategory(cat))
       .map((cat) => {
         const label = cat.label || cat.name;
         const content = getCategoryContent(cat.slug);
@@ -369,20 +313,6 @@ export default function CategoriesSection() {
       Icon: Tv,
       href: "/abonnements",
       ...getCategoryContent("abonnements"),
-    },
-    {
-      slug: "reparation",
-      label: "Réparation",
-      Icon: Wrench,
-      href: "/reparation",
-      ...getCategoryContent("reparation"),
-    },
-    {
-      slug: "suivi",
-      label: "Suivi commande",
-      Icon: Package,
-      href: "/suivi",
-      ...getCategoryContent("suivi"),
     },
   ].sort((a, b) => {
     const aOrder = CATEGORY_ORDER.indexOf(a.slug);
@@ -418,12 +348,10 @@ export default function CategoriesSection() {
         </div>
       ) : (
         <div className={styles.grid}>
-          {visibleItems.map((item, index) => (
+          {visibleItems.map((item) => (
             <CategoryRevealCard
               key={item.slug}
               item={item}
-              index={index}
-              scrollDirection={scrollDirection}
             />
           ))}
         </div>
