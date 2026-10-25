@@ -2,29 +2,19 @@
 
 import { useEffect } from "react";
 
-function getSecondFridayOfJanuary(year) {
-  const firstDay = new Date(year, 0, 1).getDay();
-  const daysUntilFriday = (5 - firstDay + 7) % 7;
-  return new Date(year, 0, 1 + daysUntilFriday + 7);
-}
-
 function getSeasonalIcon(now) {
   const month = now.getMonth();
   const day = now.getDate();
 
-  if (month === 9 && day >= 25) return "halloween";
-  if (month === 11 && day >= 15 && day <= 26) return "christmas";
-  if ((month === 11 && day >= 29) || (month === 0 && day <= 2)) {
+  if ((month === 9 && day >= 25) || (month === 10 && day <= 15)) {
+    return "halloween";
+  }
+  if (month === 11 && day >= 15 && day <= 29) return "christmas";
+  if ((month === 11 && day >= 30) || (month === 0 && day <= 2)) {
     return "new-year";
   }
 
-  const vodunFriday = getSecondFridayOfJanuary(now.getFullYear());
-  const vodunStart = new Date(vodunFriday);
-  const vodunEnd = new Date(vodunFriday);
-  vodunStart.setDate(vodunStart.getDate() - 1);
-  vodunEnd.setDate(vodunEnd.getDate() + 1);
-  const dateOnly = new Date(now.getFullYear(), month, day);
-  if (dateOnly >= vodunStart && dateOnly <= vodunEnd) return "vodun";
+  if (month === 0 && day >= 4 && day <= 14) return "vodun";
 
   return null;
 }
