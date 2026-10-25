@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import { reparationApi } from "@/lib/api";
+import { MODELES_IPHONE } from "@/lib/reparationModeles";
 import styles from "./ReparationEspace.module.css";
 
 const NOMS_ESPACE = { apple: "iPhone", android: "Android", pc: "Mac / PC" };
@@ -67,13 +68,25 @@ export default function ReparationEspace({ espace }) {
             family: groupe.famille || familles[index],
           })),
         );
-        const visibles =
+        let visibles =
           espace === "apple"
             ? tousLesModeles.filter((modele) => {
                 const nom = normaliserTexte(`${modele.name} ${modele.family?.name}`);
                 return nom.includes("iphone");
               })
             : tousLesModeles;
+        // L’API contient actuellement des familles Apple, mais aucune fiche
+        // iPhone. Afficher les modèles de la maquette permet au client de
+        // choisir son appareil en attendant la configuration du catalogue.
+        if (espace === "apple" && visibles.length === 0) {
+          visibles = MODELES_IPHONE.map((modele) => ({
+            ...modele,
+            id: modele.slug,
+            image: `/images/reparation/models/${modele.image}`,
+            family: { name: "iPhone" },
+            catalogueSecours: true,
+          }));
+        }
         if (!annule) setModeles(visibles);
       } catch (err) {
         if (!annule) setErreur(err.message || "Impossible de charger les modèles pour le moment.");

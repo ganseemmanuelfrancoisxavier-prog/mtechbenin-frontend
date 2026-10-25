@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { faqApi, reparationApi, reviewsApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
+import { modeleIphoneSecours } from "@/lib/reparationModeles";
 import styles from "./ReparationModele.module.css";
 
 // Estime un délai en heures pour comparer deux libellés en texte libre —
@@ -230,6 +231,44 @@ export default function ReparationModele({ espace, slug }) {
 
   // ── Modèle introuvable ────────────────────────────────────────────────────
   if (erreur || !donnees) {
+    const modeleSecours = espace === "apple" ? modeleIphoneSecours(slug) : null;
+    if (modeleSecours) {
+      const imageSecours = `/images/reparation/models/${modeleSecours.image}`;
+      const messageWhatsapp = encodeURIComponent(`Bonjour MTECHBENIN, je souhaite un diagnostic et un devis pour mon ${modeleSecours.name}.`);
+      return (
+        <div className={styles.page}>
+          <nav className={styles.breadcrumb} aria-label="Fil d’Ariane">
+            <Link href="/">Accueil</Link><ChevronRight /><Link href="/reparation">Réparation</Link><ChevronRight /><Link href="/reparation/apple">iPhone</Link><ChevronRight /><span>{modeleSecours.name}</span>
+          </nav>
+          <section className={styles.product}>
+            <div className={styles.gallery}><div className={styles.mainImage}><Image src={imageSecours} alt={modeleSecours.name} fill priority sizes="(max-width: 700px) 80vw, 440px" /></div></div>
+            <div className={styles.summary}>
+              <p className={styles.eyebrow}>Service de réparation</p>
+              <h1>Réparation {modeleSecours.name}</h1>
+              <div className={styles.badges}>
+                <span><BadgeCheck /> Diagnostic avant réparation</span>
+                <span><ShieldCheck /> Garantie 3 jours</span>
+                <span><Clock /> Devis personnalisé</span>
+              </div>
+              <div className={styles.priceBox}><span>Tarif communiqué après diagnostic</span><strong>Sur devis</strong></div>
+            </div>
+          </section>
+          <div className={styles.benefits}>
+            <div><Clock /><span>Délai estimé<strong>Après diagnostic</strong></span></div>
+            <div><ShieldCheck /><span>Garantie<strong>3 jours</strong></span></div>
+            <div><BadgeCheck /><span>Pièce<strong>Confirmée sur devis</strong></span></div>
+          </div>
+          <div className={styles.tabPanel}>
+            <h2>Description du service</h2>
+            <p className={styles.description}>Les réparations et les prix de ce modèle ne sont pas encore enregistrés dans le catalogue. Écris-nous sur WhatsApp pour décrire la panne et recevoir un diagnostic et un devis.</p>
+          </div>
+          <div className={styles.actionBar}>
+            <div className={styles.total}><span>Appareil sélectionné</span><strong>{modeleSecours.name}</strong></div>
+            <Link className={styles.fallbackQuote} href={`https://wa.me/22961151561?text=${messageWhatsapp}`} target="_blank" rel="noreferrer"><MessageCircle /> Demander un devis <ArrowRight /></Link>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="max-w-xl mx-auto px-5 py-20 text-center">
         <p className="text-apple-mid text-xl mb-6">{erreur || "Modèle introuvable"}</p>
