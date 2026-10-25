@@ -72,7 +72,7 @@ export default function FeaturedProducts() {
           <div
             key={product.id}
           >
-            <ProductCard product={product} featuredCta />
+            <ProductCard product={product} />
           </div>
         ))}
       </div>
