@@ -193,6 +193,7 @@ const CATEGORY_CONTENT = {
     description: "Mac, PC, composants, accessoires, périphériques...",
   },
   vapes: {
+    image: "/images/categories/vapes.webp",
     description: "Vapes et cigarettes électroniques.",
   },
 };
