@@ -80,10 +80,12 @@
   z-index: 0;
 }
 
-.heroProduct img {
-  mix-blend-mode: multiply;
-  object-fit: contain;
-  object-position: center right;
+.heroPoster {
+  background-position: center right;
+  background-repeat: no-repeat;
+  background-size: contain;
+  inset: 0;
+  position: absolute;
 }
 
 .heroBenefits {
@@ -114,6 +116,61 @@
   flex: 0 0 auto;
   height: 22px;
   width: 22px;
+}
+
+.benefits {
+  background: #f6f6f6;
+  border-radius: 26px;
+  display: grid;
+  gap: 18px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 26px auto 18px;
+  max-width: 1240px;
+  padding: 22px 20px;
+  width: calc(100% - 36px);
+}
+
+.benefit {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.benefitIcon {
+  align-items: center;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  flex: 0 0 54px;
+  height: 54px;
+  justify-content: center;
+  width: 54px;
+}
+
+.benefitIcon svg {
+  height: 26px;
+  stroke-width: 2.2;
+  width: 26px;
+}
+
+.benefitText strong,
+.benefitText small {
+  display: block;
+}
+
+.benefitText strong {
+  color: #111113;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.benefitText small {
+  color: #737373;
+  font-size: 12px;
+  line-height: 1.3;
+  margin-top: 3px;
 }
 
 .catalogue {
@@ -326,6 +383,35 @@
     right: 0;
     top: 10px;
     width: 58%;
+  }
+
+  .benefits {
+    gap: 24px 34px;
+    margin-bottom: 22px;
+    padding: 30px 40px;
+  }
+
+  .benefit {
+    gap: 16px;
+  }
+
+  .benefitIcon {
+    flex-basis: 66px;
+    height: 66px;
+    width: 66px;
+  }
+
+  .benefitIcon svg {
+    height: 32px;
+    width: 32px;
+  }
+
+  .benefitText strong {
+    font-size: 18px;
+  }
+
+  .benefitText small {
+    font-size: 15px;
   }
 
   .heroBenefits {
