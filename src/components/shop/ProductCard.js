@@ -113,7 +113,7 @@ export default function ProductCard({ product, featuredCta = false }) {
               : "border-t border-black/[0.06] pt-3 text-neutral-500"
           }`}
         >
-          {isRupture ? "Indisponible" : featuredCta ? "Commander" : hasOptions ? "Voir les options" : "Voir le produit"}
+          {isRupture ? "Indisponible" : hasOptions ? "Voir les options" : "Commander"}
         </span>
       </div>
     </Link>
