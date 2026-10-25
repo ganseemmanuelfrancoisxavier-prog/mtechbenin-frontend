@@ -28,7 +28,7 @@ function getProductStatus(product) {
   return "En stock";
 }
 
-export default function ProductCard({ product, featuredCta = false }) {
+export default function ProductCard({ product }) {
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function ProductCard({ product, featuredCta = false }) {
 
         <span
           className={`mt-auto flex w-full items-center justify-center rounded-2xl py-2.5 text-[12px] font-semibold ${
-            featuredCta && !isRupture
+            !isRupture
               ? "bg-black text-white"
               : "border-t border-black/[0.06] pt-3 text-neutral-500"
           }`}
