@@ -93,7 +93,8 @@ function ServiceCard({ service, onToggleMute, cardRef }) {
             className="absolute inset-0 w-full h-full object-cover"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
         {isMaintenance && (
           <div className="absolute top-3 left-3 right-10 z-20">
