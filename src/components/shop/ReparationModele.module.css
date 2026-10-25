@@ -1,0 +1,129 @@
+.page {
+  width: min(100% - 40px, 1180px);
+  margin: 0 auto;
+  padding: 26px 0 190px;
+  color: #111;
+}
+
+.breadcrumb { display:flex; align-items:center; gap:7px; overflow:hidden; white-space:nowrap; margin: 0 8px 24px; color:#777; font-size:13px; }
+.breadcrumb a:hover { color:#111; }
+.breadcrumb svg { width:14px; height:14px; flex:none; color:#aaa; }
+.breadcrumb span { overflow:hidden; text-overflow:ellipsis; color:#222; }
+.product { display:grid; grid-template-columns:minmax(0, 1.08fr) minmax(320px, .92fr); gap:38px; align-items:center; }
+.gallery { min-width:0; display:grid; grid-template-columns:76px minmax(0, 1fr); gap:16px; align-items:center; }
+.gallery:has(.thumbnails) { grid-template-columns:76px minmax(0, 1fr); }
+.gallery:not(:has(.thumbnails)) { grid-template-columns:minmax(0, 1fr); }
+.thumbnails { display:grid; gap:12px; }
+.thumbnail { position:relative; width:76px; height:86px; border:1px solid #e7e7e7; border-radius:16px; overflow:hidden; background:#fff; cursor:pointer; }
+.thumbnailActive { border:2px solid #111; }
+.thumbnail img { object-fit:contain; padding:5px; }
+.mainImage { position:relative; width:100%; min-height:360px; height:clamp(340px, 42vw, 500px); border-radius:24px; overflow:hidden; background:#fff; }
+.mainImage img { object-fit:contain; padding:12px; }
+.summary { padding:12px 0; }
+.eyebrow { margin:0 0 12px; text-transform:uppercase; letter-spacing:.16em; font-size:12px; color:#656565; font-weight:700; }
+.summary h1 { margin:0; font-size:clamp(28px, 3.2vw, 42px); line-height:1.12; letter-spacing:-.04em; font-weight:750; }
+.badges { display:grid; gap:10px; margin:22px 0; }
+.badges span { display:flex; align-items:center; gap:10px; width:max-content; max-width:100%; padding:8px 12px; border-radius:999px; background:#f5f5f5; color:#444; font-size:14px; }
+.badges svg { width:19px; height:19px; color:#111; flex:none; }
+.priceBox { display:flex; flex-direction:column; gap:3px; margin-top:28px; padding:20px 22px; border:1px solid #eee; border-radius:22px; box-shadow:0 8px 28px #00000008; }
+.priceBox span { color:#777; font-size:14px; }
+.priceBox strong { font-size:30px; line-height:1.1; letter-spacing:-.03em; }
+.benefits { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin:30px 6px 24px; }
+.benefits > div { display:flex; gap:12px; align-items:center; color:#777; font-size:14px; }
+.benefits svg { width:28px; height:28px; flex:none; color:#333; }
+.benefits span { display:grid; gap:3px; }
+.benefits strong { color:#222; font-size:15px; font-weight:600; }
+.tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; padding:5px; border-radius:999px; background:#f3f3f3; margin:28px 0 24px; }
+.tabs button { border:0; border-radius:999px; min-height:48px; background:transparent; font:inherit; font-weight:600; color:#555; cursor:pointer; }
+.tabs .tabActive { background:#111; color:white; box-shadow:0 3px 8px #0002; }
+.tabPanel { min-height:190px; }
+.tabPanel h2 { margin:0 0 10px; font-size:23px; letter-spacing:-.025em; }
+.description { margin:0 0 24px; color:#686868; line-height:1.65; font-size:16px; max-width:850px; }
+.repairHeading { margin:24px 0 12px; font-size:18px; }
+.repairList { display:grid; gap:10px; }
+.repairCard { padding:16px; border:1px solid #eee; border-radius:20px; background:#fff; box-shadow:0 5px 20px #00000008; }
+.repairSelect { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:0; background:transparent; cursor:pointer; }
+.checkbox { width:23px; height:23px; display:grid; place-items:center; border:2px solid #bbb; border-radius:7px; flex:none; }
+.checkbox svg { width:15px; height:15px; color:#fff; stroke-width:3; }
+.checkboxChecked { background:#111; border-color:#111; }
+.repairText { flex:1; min-width:0; display:grid; gap:5px; }
+.repairText strong { font-size:16px; }
+.repairText small { display:flex; align-items:center; gap:5px; color:#777; font-size:12px; }
+.repairText small svg { width:13px; height:13px; }
+.repairPrice { white-space:nowrap; font-size:15px; }
+.options { display:grid; gap:8px; margin:14px 0 0 35px; }
+.options button { display:flex; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid #eee; border-radius:14px; background:#f7f7f7; color:#222; font:inherit; text-align:left; cursor:pointer; }
+.options .optionSelected { background:#111; color:#fff; border-color:#111; }
+.diagnostic { display:flex; align-items:center; gap:8px; margin:20px 0; color:#555; font-size:14px; }
+.diagnostic svg { width:17px; height:17px; }
+.diagnostic svg:last-child { margin-left:auto; }
+.empty { padding:20px; color:#666; background:#fafafa; border-radius:16px; line-height:1.6; }
+.empty a { color:#111; text-decoration:underline; }
+.faqList { display:grid; gap:10px; }
+.faqList details { border:1px solid #eee; border-radius:16px; padding:15px 18px; }
+.faqList summary { display:flex; justify-content:space-between; gap:12px; cursor:pointer; font-weight:650; list-style:none; }
+.faqList summary::-webkit-details-marker { display:none; }
+.faqList summary svg { width:18px; height:18px; flex:none; transition:transform .2s; }
+.faqList details[open] summary svg { transform:rotate(90deg); }
+.faqList details p { margin:12px 0 0; color:#666; line-height:1.6; }
+.reviewList { display:grid; gap:12px; }
+.reviewList article { padding:18px; border:1px solid #eee; border-radius:18px; }
+.reviewTop { display:flex; justify-content:space-between; gap:12px; }
+.reviewTop span { display:flex; align-items:center; gap:5px; color:#b42318; }
+.reviewTop svg { width:16px; height:16px; fill:currentColor; }
+.reviewList p { margin:10px 0 0; color:#555; line-height:1.55; }
+.conditions { display:flex; justify-content:space-between; align-items:center; gap:15px; margin:22px 0 30px; padding:16px 18px; border:1px solid #eee; border-radius:17px; font-weight:650; }
+.conditions svg { width:19px; height:19px; flex:none; }
+.actionBar { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:18px 20px; border:1px solid #ececec; border-radius:22px; background:#fff; box-shadow:0 8px 30px #0000000c; }
+.total { display:grid; gap:3px; }
+.total > span { font-size:12px; color:#777; }
+.total > strong { font-size:22px; }
+.total small { display:flex; align-items:center; gap:5px; color:#666; }
+.total small svg { width:14px; height:14px; }
+.actions { display:flex; gap:10px; }
+.actions button { display:flex; align-items:center; justify-content:center; gap:9px; min-height:50px; padding:0 20px; border:0; border-radius:14px; font:inherit; font-weight:650; cursor:pointer; }
+.actions button:disabled { opacity:.4; cursor:not-allowed; }
+.actions svg { width:18px; height:18px; }
+.quote { background:#111; color:#fff; }
+.order { background:#f1f1f1; color:#111; }
+
+@media (max-width: 760px) {
+  .page { width:calc(100% - 32px); padding:20px 0 170px; }
+  .breadcrumb { margin:0 2px 18px; font-size:11px; gap:4px; }
+  .product { grid-template-columns:1fr; gap:16px; }
+  .gallery { grid-template-columns:58px minmax(0,1fr); gap:10px; }
+  .thumbnail { width:58px; height:66px; border-radius:13px; }
+  .mainImage { min-height:250px; height:62vw; max-height:390px; border-radius:19px; }
+  .summary { padding:2px 2px 0; }
+  .eyebrow { margin-bottom:8px; font-size:10px; }
+  .summary h1 { font-size:27px; }
+  .badges { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:14px 0; }
+  .badges span { width:auto; justify-content:center; gap:5px; padding:8px 5px; font-size:10px; text-align:center; }
+  .badges svg { width:15px; height:15px; }
+  .priceBox { margin-top:14px; padding:14px 16px; }
+  .priceBox strong { font-size:25px; }
+  .benefits { gap:8px; margin:20px 0; }
+  .benefits > div { align-items:flex-start; gap:6px; font-size:10px; }
+  .benefits svg { width:20px; height:20px; }
+  .benefits strong { font-size:11px; line-height:1.3; }
+  .tabs { margin:20px 0; }
+  .tabs button { min-height:43px; font-size:13px; }
+  .tabPanel h2 { font-size:20px; }
+  .description { font-size:14px; }
+  .repairCard { padding:13px; border-radius:16px; }
+  .repairText strong { font-size:14px; }
+  .repairPrice { font-size:13px; }
+  .conditions { font-size:13px; }
+  .actionBar { position:fixed; z-index:30; left:10px; right:10px; bottom:calc(66px + env(safe-area-inset-bottom)); padding:12px; gap:8px; border-radius:19px; box-shadow:0 5px 26px #0002; }
+  .total > strong { font-size:17px; }
+  .total > span { font-size:10px; }
+  .actions { gap:6px; }
+  .actions button { min-height:44px; padding:0 11px; border-radius:12px; font-size:11px; }
+  .actions svg { width:15px; height:15px; }
+}
+
+@media (max-width: 390px) {
+  .page { width:calc(100% - 24px); }
+  .actions button { padding:0 8px; font-size:10px; }
+  .total > strong { font-size:15px; }
+}

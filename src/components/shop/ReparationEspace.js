@@ -1,48 +1,55 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  Search,
-  Wrench,
-  X,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import { reparationApi } from "@/lib/api";
+import styles from "./ReparationEspace.module.css";
 
-// Libellé affiché pour chaque espace. La liste des espaces eux-mêmes (et le
-// garde-fou qui la fige) vit dans ReparationHub / le `page.js` parent — ce
-// fichier ne fait que nommer celui qu'on lui donne.
-const NOMS_ESPACE = {
-  apple: "Apple",
-  android: "Androïd",
-  pc: "PC portable",
-};
+const NOMS_ESPACE = { apple: "iPhone", android: "Android", pc: "Mac / PC" };
+
+const IPHONE_IMAGES = [
+  ["iphone17promax", "iphone-17-pro-max"],
+  ["iphone17pro", "iphone-17-pro"],
+  ["iphone17", "iphone-17"],
+  ["iphone16promax", "iphone-16-pro-max"],
+  ["iphone16pro", "iphone-16-pro"],
+  ["iphone16", "iphone-16"],
+  ["iphone15promax", "iphone-15-pro-max"],
+  ["iphone15pro", "iphone-15-pro"],
+  ["iphone15", "iphone-15"],
+  ["iphone14", "iphone-14"],
+  ["iphone13", "iphone-13"],
+  ["iphone12", "iphone-12"],
+];
+
+function normaliserTexte(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function imageModele(modele, espace) {
+  const nom = normaliserTexte(`${modele.name} ${modele.slug}`);
+  if (espace === "apple") {
+    const entree = IPHONE_IMAGES.find(([cle]) => nom.includes(cle));
+    if (entree) return `/images/reparation/models/${entree[1]}.jpg`;
+    return "/images/categories/smartphone-tablette.jpg";
+  }
+  if (espace === "android") return "/images/reparation/devices/android.png";
+  return "/images/reparation/devices/computer.png";
+}
 
 export default function ReparationEspace({ espace }) {
-  // L'URL porte la forme courte (`apple`), l'API attend l'enum serveur
-  // (`APPLE`) — la conversion est purement mécanique, elle ne vaut pas la
-  // peine d'être poussée plus haut.
   const espaceApi = espace.toUpperCase();
   const nomEspace = NOMS_ESPACE[espace] || espace;
-
-  const [familles, setFamilles] = useState([]);
+  const [modeles, setModeles] = useState([]);
+  const [query, setQuery] = useState("");
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState(null);
-
-  // Accordéon : les modèles d'une famille ne sont chargés qu'à l'ouverture,
-  // et gardés en mémoire ensuite pour ne pas refaire la requête si le client
-  // replie puis rouvre la même famille.
-  const [familleOuverte, setFamilleOuverte] = useState(null);
-  const [modelesParFamille, setModelesParFamille] = useState({});
-  const [chargementFamille, setChargementFamille] = useState(null);
-
-  const [query, setQuery] = useState("");
-  const [resultats, setResultats] = useState([]);
-  const [rechercheEnCours, setRechercheEnCours] = useState(false);
 
   useEffect(() => {
     let annule = false;
@@ -50,10 +57,26 @@ export default function ReparationEspace({ espace }) {
       setChargement(true);
       setErreur(null);
       try {
-        const data = await reparationApi.familles(espaceApi);
-        if (!annule) setFamilles(data.familles || []);
-      } catch {
-        if (!annule) setErreur("Impossible de charger le catalogue pour le moment.");
+        const { familles = [] } = await reparationApi.familles(espaceApi);
+        const groupes = await Promise.all(
+          familles.map((famille) => reparationApi.modelesDeFamille(famille.slug)),
+        );
+        const tousLesModeles = groupes.flatMap((groupe, index) =>
+          (groupe.modeles || []).map((modele) => ({
+            ...modele,
+            family: groupe.famille || familles[index],
+          })),
+        );
+        const visibles =
+          espace === "apple"
+            ? tousLesModeles.filter((modele) => {
+                const nom = normaliserTexte(`${modele.name} ${modele.family?.name}`);
+                return nom.includes("iphone");
+              })
+            : tousLesModeles;
+        if (!annule) setModeles(visibles);
+      } catch (err) {
+        if (!annule) setErreur(err.message || "Impossible de charger les modèles pour le moment.");
       } finally {
         if (!annule) setChargement(false);
       }
@@ -62,180 +85,69 @@ export default function ReparationEspace({ espace }) {
     return () => {
       annule = true;
     };
-  }, [espaceApi]);
+  }, [espace, espaceApi]);
 
-  // Recherche bornée à l'espace, dès deux caractères. Ne pas l'étendre
-  // au-delà : le client a déjà choisi son appareil en arrivant sur cet écran.
-  useEffect(() => {
-    const q = query.trim();
-    if (q.length < 2) {
-      setResultats([]);
-      setRechercheEnCours(false);
-      return;
-    }
-    setRechercheEnCours(true);
-    const t = setTimeout(async () => {
-      try {
-        const data = await reparationApi.recherche(espaceApi, q);
-        setResultats(data.modeles || []);
-      } catch {
-        setResultats([]);
-      } finally {
-        setRechercheEnCours(false);
-      }
-    }, 300);
-    return () => clearTimeout(t);
-  }, [query, espaceApi]);
-
-  const toggleFamille = useCallback(
-    (slug) => {
-      setFamilleOuverte((actuelle) => (actuelle === slug ? null : slug));
-      if (!modelesParFamille[slug]) {
-        setChargementFamille(slug);
-        reparationApi
-          .modelesDeFamille(slug)
-          .then((data) => {
-            setModelesParFamille((m) => ({ ...m, [slug]: data.modeles || [] }));
-          })
-          .catch(() => {
-            setModelesParFamille((m) => ({ ...m, [slug]: [] }));
-          })
-          .finally(() => setChargementFamille((c) => (c === slug ? null : c)));
-      }
-    },
-    [modelesParFamille],
-  );
-
-  const enRecherche = query.trim().length >= 2;
+  const modelesFiltres = useMemo(() => {
+    const terme = normaliserTexte(query);
+    if (!terme) return modeles;
+    return modeles.filter((modele) =>
+      normaliserTexte(`${modele.name} ${modele.family?.name}`).includes(terme),
+    );
+  }, [modeles, query]);
 
   return (
-    <div className="max-w-3xl mx-auto px-5 py-10">
-      <Link
-        href="/reparation"
-        className="inline-flex items-center gap-1.5 text-apple-mid hover:text-apple-black text-[13px] font-medium mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" /> Réparation
+    <div className={styles.page}>
+      <Link href="/reparation" className={styles.back}>
+        <ArrowLeft /> Réparation
       </Link>
 
-      <div className="mb-6">
-        <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1">
-          Réparation
-        </p>
-        <h1 className="font-display font-black text-3xl md:text-4xl text-apple-black tracking-tight">
-          {nomEspace}
-        </h1>
-      </div>
-
-      {/* Recherche — bornée à l'espace courant */}
-      <div className="relative mb-6">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-mid" />
+      <label className={styles.search}>
+        <Search aria-hidden="true" />
         <input
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={`Rechercher un modèle ${nomEspace}...`}
-          className="w-full bg-black/[0.03] border border-black/10 rounded-2xl pl-11 pr-11 py-3.5 text-[14px] focus:outline-none focus:border-black/20 transition"
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={`Rechercher un modèle (ex : ${espace === "apple" ? "iPhone 15" : nomEspace})`}
+          aria-label="Rechercher un modèle"
         />
-        {query && (
-          <button
-            onClick={() => setQuery("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-apple-mid hover:text-apple-black transition"
-            aria-label="Effacer la recherche"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
+      </label>
+
+      <div className={styles.heading}>
+        <p>Réparation · {nomEspace}</p>
+        <h1>Tous les modèles</h1>
       </div>
 
-      {enRecherche ? (
-        // ── Résultats de recherche — remplacent la liste des familles tant
-        // qu'une requête est active, plutôt que de s'empiler dessus.
-        <div className="space-y-2">
-          {rechercheEnCours ? (
-            <p className="text-apple-mid text-[13px] text-center py-10">Recherche...</p>
-          ) : resultats.length === 0 ? (
-            <p className="text-apple-mid text-[13px] text-center py-10">
-              Aucun modèle ne correspond à « {query.trim()} ».
-            </p>
-          ) : (
-            resultats.map((m) => (
-              <Link
-                key={m.id}
-                href={`/reparation/${espace}/${m.slug}`}
-                className="glass-card rounded-2xl px-4 py-3.5 flex items-center justify-between hover:opacity-80 transition"
-              >
-                <div>
-                  <p className="font-semibold text-apple-black text-[14px]">{m.name}</p>
-                  <p className="text-apple-mid text-[12px]">{m.family?.name}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-apple-mid flex-shrink-0" />
-              </Link>
-            ))
-          )}
-        </div>
-      ) : chargement ? (
-        <p className="text-apple-mid text-[13px] text-center py-14">
-          Chargement du catalogue...
-        </p>
+      {chargement ? (
+        <p className={styles.message}>Chargement des modèles…</p>
       ) : erreur ? (
-        <p className="text-apple-mid text-[13px] text-center py-14">{erreur}</p>
-      ) : familles.length === 0 ? (
-        // État actuel en production : le catalogue n'a pas encore été rempli
-        // par l'administrateur. Le dire clairement vaut mieux qu'un écran vide.
-        <div className="glass-card rounded-3xl p-8 text-center">
-          <Wrench className="w-8 h-8 text-apple-mid/30 mx-auto mb-3" strokeWidth={1.4} />
-          <p className="text-apple-mid text-[13px]">
-            Aucun modèle enregistré pour cet espace pour le moment.
-          </p>
-        </div>
+        <p className={styles.message}>{erreur}</p>
+      ) : modelesFiltres.length === 0 ? (
+        <p className={styles.message}>
+          {query ? `Aucun modèle ne correspond à « ${query} ».` : "Aucun modèle disponible pour le moment."}
+        </p>
       ) : (
-        <div className="space-y-2.5">
-          {familles.map((f) => {
-            const ouverte = familleOuverte === f.slug;
-            const modeles = modelesParFamille[f.slug];
-            return (
-              <div key={f.id} className="glass-card rounded-3xl overflow-hidden">
-                <button
-                  onClick={() => toggleFamille(f.slug)}
-                  className="w-full flex items-center justify-between px-5 py-4 text-left"
-                >
-                  <span className="font-semibold text-apple-black text-[14px]">
-                    {f.name}
-                  </span>
-                  {ouverte ? (
-                    <ChevronUp className="w-4 h-4 text-apple-mid flex-shrink-0" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-apple-mid flex-shrink-0" />
-                  )}
-                </button>
-                {ouverte && (
-                  <div className="px-3 pb-3 border-t border-black/[0.05]">
-                    {chargementFamille === f.slug ? (
-                      <p className="text-apple-mid text-[12px] py-4 text-center">
-                        Chargement...
-                      </p>
-                    ) : modeles?.length === 0 ? (
-                      <p className="text-apple-mid text-[12px] py-4 text-center">
-                        Aucun modèle enregistré dans cette famille.
-                      </p>
-                    ) : (
-                      <div className="pt-2 space-y-1">
-                        {modeles?.map((m) => (
-                          <Link
-                            key={m.id}
-                            href={`/reparation/${espace}/${m.slug}`}
-                            className="flex items-center justify-between px-3 py-3 rounded-2xl hover:bg-black/[0.03] transition"
-                          >
-                            <span className="text-[13px] text-apple-black">{m.name}</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-apple-mid/50 flex-shrink-0" />
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div className={styles.grid}>
+          {modelesFiltres.map((modele) => (
+            <Link
+              key={modele.id}
+              href={`/reparation/${espace}/${modele.slug}`}
+              className={styles.card}
+            >
+              <span className={styles.imageFrame}>
+                <Image
+                  src={imageModele(modele, espace)}
+                  alt={modele.name}
+                  fill
+                  sizes="(max-width: 640px) 30vw, (max-width: 1024px) 30vw, 260px"
+                  className={styles.image}
+                />
+              </span>
+              <span className={styles.cardFooter}>
+                <span className={styles.modelName}>{modele.name}</span>
+                <span className={styles.family}>{modele.family?.name || nomEspace}</span>
+                <span className={styles.arrow} aria-hidden="true"><ArrowRight /></span>
+              </span>
+            </Link>
+          ))}
         </div>
       )}
     </div>

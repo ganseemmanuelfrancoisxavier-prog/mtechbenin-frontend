@@ -1,20 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
+  BadgeCheck,
+  ChevronRight,
   Check,
   Clock,
   Loader2,
   MessageCircle,
+  ShieldCheck,
+  Star,
   Stethoscope,
   X,
 } from "lucide-react";
-import { reparationApi } from "@/lib/api";
+import { faqApi, reparationApi, reviewsApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
+import styles from "./ReparationModele.module.css";
 
 // Estime un délai en heures pour comparer deux libellés en texte libre —
 // l'administrateur écrit « 24h », « 2 jours », « 48 h »... sans format
@@ -40,6 +46,29 @@ function prixMini(options) {
   return prix.length ? Math.min(...prix) : 0;
 }
 
+function imageModele(slug, espace) {
+  const normalise = String(slug || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (normalise.includes("iphone")) {
+    const n = normalise.match(/iphone(17|16|15|14|13|12)/)?.[1];
+    const suffixe = normalise.includes("promax")
+      ? "pro-max"
+      : normalise.includes("pro")
+        ? "pro"
+        : "";
+    if (n) return `/images/reparation/models/iphone-${n}${suffixe ? `-${suffixe}` : ""}.jpg`;
+  }
+  if (espace === "android") return "/images/reparation/devices/android.png";
+  if (espace === "pc") return "/images/reparation/devices/computer.png";
+  return "/images/categories/smartphone-tablette.jpg";
+}
+
+function imagesDetail(slug, espace) {
+  if (String(slug).toLowerCase().includes("iphone-15-pro-max") || String(slug).toLowerCase().includes("iphone15promax")) {
+    return [1, 2, 3].map((numero) => `/images/reparation/models/iphone-15-pro-max-thumb-${numero}.jpg`);
+  }
+  return [imageModele(slug, espace)];
+}
+
 export default function ReparationModele({ espace, slug }) {
   const router = useRouter();
 
@@ -57,6 +86,10 @@ export default function ReparationModele({ espace, slug }) {
   const [devisWhatsapp, setDevisWhatsapp] = useState("");
   const [devisEnvoi, setDevisEnvoi] = useState(false);
   const [devisResultat, setDevisResultat] = useState(null); // { ok, message }
+  const [onglet, setOnglet] = useState("description");
+  const [imageActive, setImageActive] = useState(0);
+  const [faq, setFaq] = useState([]);
+  const [avis, setAvis] = useState([]);
 
   useEffect(() => {
     let annule = false;
@@ -74,6 +107,24 @@ export default function ReparationModele({ espace, slug }) {
       }
     }
     charger();
+    return () => {
+      annule = true;
+    };
+  }, [slug]);
+
+  useEffect(() => {
+    let annule = false;
+    Promise.allSettled([faqApi.getPublished(), reviewsApi.getBySlug(slug)]).then(
+      ([faqResultat, avisResultat]) => {
+        if (annule) return;
+        if (faqResultat.status === "fulfilled") {
+          setFaq(faqResultat.value?.faqs || []);
+        }
+        if (avisResultat.status === "fulfilled") {
+          setAvis(avisResultat.value?.reviews || []);
+        }
+      },
+    );
     return () => {
       annule = true;
     };
@@ -194,165 +245,121 @@ export default function ReparationModele({ espace, slug }) {
 
   const { modele, famille } = donnees;
 
-  return (
-    <div className="max-w-3xl mx-auto px-5 py-10 pb-48 md:pb-16">
-      <Link
-        href="/reparation"
-        className="inline-flex items-center gap-1.5 text-apple-mid hover:text-apple-black text-[13px] font-medium mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" /> Réparation
-      </Link>
+  const photos = imagesDetail(slug, espace);
+  const photosDetail = photos.map((src, index) =>
+    index === 0 && photos.length > 1
+      ? "/images/reparation/models/iphone-15-pro-max-repair.jpg"
+      : src,
+  );
+  const reparationVedette = reparations.find((job) => /écran|ecran/i.test(job.name)) || reparations[0];
+  const prixDepart = prixMini(reparationVedette?.options);
+  const nomReparation = reparationVedette?.name || "Réparation";
+  const faqAffichees = faq
+    .filter((item) => /répar|repar|appareil|technicien/i.test(`${item.category || ""} ${item.question || ""}`))
+    .slice(0, 6);
 
-      <div className="mb-6">
-        <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1">
-          {famille?.name}
-        </p>
-        <h1 className="font-display font-black text-3xl md:text-4xl text-apple-black tracking-tight">
-          {modele?.name}
-        </h1>
+  return (
+    <div className={styles.page}>
+      <nav className={styles.breadcrumb} aria-label="Fil d’Ariane">
+        <Link href="/">Accueil</Link><ChevronRight />
+        <Link href="/reparation">Réparation</Link><ChevronRight />
+        <Link href={`/reparation/${espace}`}>{famille?.name || (espace === "apple" ? "iPhone" : espace)}</Link><ChevronRight />
+        <span>{modele?.name}</span>
+      </nav>
+
+      <section className={styles.product}>
+        <div className={styles.gallery}>
+          {photosDetail.length > 1 && (
+            <div className={styles.thumbnails}>
+              {photosDetail.map((src, index) => (
+                <button key={src} className={`${styles.thumbnail} ${imageActive === index ? styles.thumbnailActive : ""}`} onClick={() => setImageActive(index)} aria-label={`Voir la photo ${index + 1}`}>
+                  <Image src={src} alt="" fill sizes="72px" />
+                </button>
+              ))}
+            </div>
+          )}
+          <div className={styles.mainImage}>
+            <Image src={photosDetail[imageActive] || photosDetail[0]} alt={modele?.name || "Appareil à réparer"} fill priority sizes="(max-width: 700px) 80vw, 440px" />
+          </div>
+        </div>
+
+        <div className={styles.summary}>
+          <p className={styles.eyebrow}>Service de réparation</p>
+          <h1>{nomReparation} {modele?.name}</h1>
+          <div className={styles.badges}>
+            <span><BadgeCheck /> Pièce de qualité</span>
+            <span><ShieldCheck /> Garantie 3 jours</span>
+            <span><Clock /> Réparation rapide</span>
+          </div>
+          {prixDepart > 0 && (
+            <div className={styles.priceBox}><span>À partir de</span><strong>{formatPrice(prixDepart)}</strong></div>
+          )}
+        </div>
+      </section>
+
+      <div className={styles.benefits}>
+        <div><Clock /><span>Délai estimé<strong>{reparationVedette?.delay || "Selon la réparation"}</strong></span></div>
+        <div><ShieldCheck /><span>Garantie<strong>3 jours</strong></span></div>
+        <div><BadgeCheck /><span>Pièce<strong>Qualité proposée au choix</strong></span></div>
       </div>
 
-      {reparations.length === 0 ? (
-        <div className="glass-card rounded-3xl p-8 text-center">
-          <p className="text-apple-mid text-[13px]">
-            Aucune réparation disponible pour ce modèle pour le moment.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-2.5">
-          {reparations.map((job) => {
-            const checked = selections[job.id] !== undefined;
-            const optionUnique = job.options.length === 1;
-            const selectedOptionId = selections[job.id];
-            return (
-              <div key={job.id} className="glass-card rounded-3xl p-4">
-                <button
-                  onClick={() => toggleReparation(job)}
-                  className="w-full flex items-start gap-3 text-left"
-                >
-                  <div
-                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center mt-0.5 flex-shrink-0 transition-all ${
-                      checked
-                        ? "bg-apple-black border-apple-black"
-                        : "border-apple-mid/40"
-                    }`}
-                  >
-                    {checked && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-apple-black text-[14px]">
-                        {job.name}
-                      </span>
-                      {/* Le prix se lit sans rien cocher. Une réparation à
-                          plusieurs qualités n'en affichait aucun ici : la ligne
-                          restait vide jusqu'au clic, sur la page dont le prix
-                          est justement la raison d'être. Elle annonce
-                          désormais le moins cher, et le détail par qualité
-                          arrive au clic. */}
-                      <span className="font-display font-black text-[14px] text-apple-black flex-shrink-0">
-                        {optionUnique
-                          ? formatPrice(job.options[0]?.price || 0)
-                          : `dès ${formatPrice(prixMini(job.options))}`}
-                      </span>
-                    </div>
-                    {job.delay && (
-                      <span className="text-apple-mid text-[11px] inline-flex items-center gap-1 mt-0.5">
-                        <Clock className="w-3 h-3" /> {job.delay}
-                      </span>
-                    )}
-                  </div>
-                </button>
+      <div className={styles.tabs} role="tablist" aria-label="Informations réparation">
+        {[["description", "Description"], ["faq", "FAQ"], ["avis", "Avis"]].map(([key, label]) => (
+          <button key={key} type="button" role="tab" aria-selected={onglet === key} className={onglet === key ? styles.tabActive : ""} onClick={() => setOnglet(key)}>{label}</button>
+        ))}
+      </div>
 
-                {/* Qualité — seulement s'il existe un choix. Une réparation à
-                    option unique n'affiche jamais ce bloc : il n'y a rien à
-                    choisir, et le montrer suggérerait à tort une décision. */}
-                {checked && !optionUnique && (
-                  <div className="mt-3 pl-8 space-y-1.5">
-                    {job.options.map((o) => (
-                      <button
-                        key={o.id}
-                        onClick={() => choisirOption(job.id, o.id)}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-[13px] transition-all ${
-                          selectedOptionId === o.id
-                            ? "bg-apple-black text-white"
-                            : "bg-black/[0.03] text-apple-black hover:bg-black/[0.06]"
-                        }`}
-                      >
-                        <span>{o.label}</span>
-                        <span className="font-semibold">{formatPrice(o.price)}</span>
-                      </button>
-                    ))}
+      {onglet === "description" && (
+        <section className={styles.tabPanel}>
+          <h2>Description du service</h2>
+          <p className={styles.description}>Choisissez la réparation souhaitée et la qualité de pièce disponible. Le prix est affiché avant votre demande et la réparation est réalisée par nos techniciens.</p>
+          <h3 className={styles.repairHeading}>Réparations disponibles</h3>
+          {reparations.length === 0 ? (
+            <div className={styles.empty}>Aucune réparation disponible pour ce modèle pour le moment.</div>
+          ) : (
+            <div className={styles.repairList}>
+              {reparations.map((job) => {
+                const checked = selections[job.id] !== undefined;
+                const optionUnique = job.options.length === 1;
+                const selectedOptionId = selections[job.id];
+                return (
+                  <div key={job.id} className={styles.repairCard}>
+                    <button onClick={() => toggleReparation(job)} className={styles.repairSelect} aria-pressed={checked}>
+                      <span className={`${styles.checkbox} ${checked ? styles.checkboxChecked : ""}`}>{checked && <Check />}</span>
+                      <span className={styles.repairText}><strong>{job.name}</strong>{job.delay && <small><Clock /> {job.delay}</small>}</span>
+                      <strong className={styles.repairPrice}>{optionUnique ? formatPrice(job.options[0]?.price || 0) : `dès ${formatPrice(prixMini(job.options))}`}</strong>
+                    </button>
+                    {checked && !optionUnique && <div className={styles.options}>{job.options.map((option) => <button key={option.id} onClick={() => choisirOption(job.id, option.id)} className={selectedOptionId === option.id ? styles.optionSelected : ""}><span>{option.label}</span><strong>{formatPrice(option.price)}</strong></button>)}</div>}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          )}
+          <Link href={`/reparation/diagnostic?modele=${encodeURIComponent(slug)}`} className={styles.diagnostic}><Stethoscope /> Pas sûr du problème ? Lancer un diagnostic <ArrowRight /></Link>
+        </section>
       )}
 
-      {/* Lien discret vers le diagnostic — pour le client qui n'est pas sûr
-          de la panne à cocher. Construit par un autre agent : on ne fait que
-          pointer vers sa route, avec le modèle déjà connu. */}
-      <Link
-        href={`/reparation/diagnostic?modele=${encodeURIComponent(slug)}`}
-        className="mt-6 flex items-center gap-2 text-apple-mid hover:text-apple-black text-[12px] transition-colors"
-      >
-        <Stethoscope className="w-3.5 h-3.5" /> Pas sûr du problème ? Lancer un diagnostic
-      </Link>
+      {onglet === "faq" && (
+        <section className={styles.tabPanel}>
+          <h2>Questions fréquentes</h2>
+          {faqAffichees.length ? <div className={styles.faqList}>{faqAffichees.map((item, index) => <details key={item.id || index}><summary>{item.question || item.title || "Question fréquente"}<ChevronRight /></summary><p>{item.answer || item.reponse || item.content}</p></details>)}</div> : <p className={styles.empty}>Aucune question fréquente n’est publiée pour le moment. <Link href="/contact">Contactez notre équipe</Link> pour obtenir de l’aide.</p>}
+        </section>
+      )}
 
-      {/* Barre total + actions — flottante sur mobile pour rester visible au
-          pouce pendant qu'on coche, simple bloc en fin de page sur desktop où
-          l'écran entier est déjà visible sans défiler. */}
-      <div className="fixed inset-x-0 bottom-16 z-30 px-4 md:static md:px-0 md:mt-6">
-        <div className="glass-card rounded-3xl p-4 md:p-5 shadow-premium max-w-3xl mx-auto md:mx-0">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
-                Total
-              </p>
-              <p className="font-display font-black text-[22px] text-apple-black tracking-tight">
-                {formatPrice(total)}
-              </p>
-            </div>
-            {delaiPlusLong && (
-              <div className="text-right">
-                <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
-                  Délai
-                </p>
-                <p className="text-[13px] text-apple-black font-medium inline-flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" /> {delaiPlusLong}
-                </p>
-              </div>
-            )}
-          </div>
-          <div className="flex gap-2.5">
-            <button
-              onClick={handleCommande}
-              disabled={!auMoinsUneSelection}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[13px] font-semibold transition-all duration-200 disabled:opacity-35 disabled:cursor-not-allowed"
-              style={{
-                background: auMoinsUneSelection ? "rgba(29,29,31,0.92)" : "rgba(0,0,0,0.06)",
-                color: auMoinsUneSelection ? "#FFFFFF" : "#6E6E73",
-              }}
-            >
-              Demander la réparation <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={ouvrirDevis}
-              disabled={!auMoinsUneSelection}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[13px] font-semibold transition-all duration-200 disabled:opacity-35 disabled:cursor-not-allowed"
-              style={{
-                background: "rgba(255,255,255,0.22)",
-                backdropFilter: "blur(24px) saturate(200%)",
-                WebkitBackdropFilter: "blur(24px) saturate(200%)",
-                border: "1px solid rgba(255,255,255,0.50)",
-                color: "#1D1D1F",
-              }}
-            >
-              <MessageCircle className="w-4 h-4" /> Devis WhatsApp
-            </button>
-          </div>
+      {onglet === "avis" && (
+        <section className={styles.tabPanel}>
+          <h2>Avis clients</h2>
+          {avis.length ? <div className={styles.reviewList}>{avis.map((review, index) => <article key={review.id || index}><div className={styles.reviewTop}><strong>{review.customerName || review.name || "Client MTECHBENIN"}</strong><span><Star /> {review.rating || 5}/5</span></div><p>{review.comment || review.content || review.message}</p></article>)}</div> : <p className={styles.empty}>Aucun avis n’a encore été publié pour ce modèle.</p>}
+        </section>
+      )}
+
+      <Link href="/reparation/conditions" className={styles.conditions}>Consulter les conditions générales de réparation <ArrowRight /></Link>
+
+      <div className={styles.actionBar}>
+        <div className={styles.total}><span>Total sélectionné</span><strong>{formatPrice(total)}</strong>{delaiPlusLong && <small><Clock /> {delaiPlusLong}</small>}</div>
+        <div className={styles.actions}>
+          <button onClick={ouvrirDevis} disabled={!auMoinsUneSelection} className={styles.quote}><MessageCircle /> Demander un devis</button>
+          <button onClick={handleCommande} disabled={!auMoinsUneSelection} className={styles.order}>Continuer <ArrowRight /></button>
         </div>
       </div>
 
