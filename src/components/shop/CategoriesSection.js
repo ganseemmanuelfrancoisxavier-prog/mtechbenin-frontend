@@ -331,7 +331,7 @@ export default function CategoriesSection() {
           label,
           Icon: emojiToIcon[cat.icon] || DefaultIcon,
           href: isSmartphoneCategory(cat.slug)
-            ? "/reparation"
+            ? "/smartphones"
             : `/catalogue/${cat.slug}`,
           ...content,
           image: content.image || productImage,
