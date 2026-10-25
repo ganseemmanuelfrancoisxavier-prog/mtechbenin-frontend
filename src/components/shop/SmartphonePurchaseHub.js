@@ -1,7 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Award, FileText, ShieldCheck, Truck } from "lucide-react";
+import {
+  ArrowRight,
+  Award,
+  Clock3,
+  FileText,
+  Headset,
+  Settings,
+  ShieldCheck,
+  Truck,
+} from "lucide-react";
 import styles from "./SmartphonePurchaseHub.module.css";
+import smartphonePosterImage from "./smartphonePosterImage";
 
 const DEVICES = [
   {
@@ -30,6 +40,13 @@ const DEVICES = [
   },
 ];
 
+const BENEFITS = [
+  { Icon: ShieldCheck, title: "Diagnostic gratuit", detail: "Avant toute réparation" },
+  { Icon: Clock3, title: "Service rapide", detail: "48h en moyenne" },
+  { Icon: Settings, title: "Pièces de qualité", detail: "Originales ou premium" },
+  { Icon: Headset, title: "Support client", detail: "Suivi de votre réparation" },
+];
+
 export default function SmartphonePurchaseHub() {
   return (
     <div className={styles.page}>
@@ -46,12 +63,9 @@ export default function SmartphonePurchaseHub() {
           </Link>
         </div>
         <div className={styles.heroProduct} aria-hidden="true">
-          <Image
-            src="/images/categories/smartphone-tablette-reference.jpg"
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 640px) 55vw, 520px"
+          <div
+            className={styles.heroPoster}
+            style={{ backgroundImage: `url("${smartphonePosterImage}")` }}
           />
         </div>
         <div className={styles.heroBenefits}>
@@ -95,6 +109,20 @@ export default function SmartphonePurchaseHub() {
             </Link>
           ))}
         </div>
+      </section>
+
+      <section className={styles.benefits} aria-label="Nos engagements">
+        {BENEFITS.map(({ Icon, title, detail }) => (
+          <div className={styles.benefit} key={title}>
+            <span className={styles.benefitIcon} aria-hidden="true">
+              <Icon />
+            </span>
+            <span className={styles.benefitText}>
+              <strong>{title}</strong>
+              <small>{detail}</small>
+            </span>
+          </div>
+        ))}
       </section>
 
       <section className={styles.terms} aria-labelledby="terms-heading">
