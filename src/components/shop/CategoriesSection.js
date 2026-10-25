@@ -145,7 +145,7 @@ const CATEGORY_CONTENT = {
     description: "AirPods, écouteurs Bluetooth, accessoires audio...",
   },
   enceintes: {
-    image: "/images/categories/enceintes.jpg",
+    image: "/images/categories/enceintes-reference.jpg",
     description: "Enceintes Bluetooth, barres de son, audio pro...",
   },
   "for-man": {
@@ -165,31 +165,31 @@ const CATEGORY_CONTENT = {
     description: "Montres, sacs, parfums, accessoires, lifestyle...",
   },
   "smartphone-tablette": {
-    image: "/images/categories/smartphone-tablette.jpg",
+    image: "/images/categories/smartphone-tablette-reference.jpg",
     description: "iPhone, Samsung, Xiaomi, tablettes, et plus...",
   },
   smartphones: {
-    image: "/images/categories/smartphone-tablette.jpg",
+    image: "/images/categories/smartphone-tablette-reference.jpg",
     description: "iPhone, Samsung, Xiaomi, tablettes, et plus...",
   },
   telephones: {
-    image: "/images/categories/smartphone-tablette.jpg",
+    image: "/images/categories/smartphone-tablette-reference.jpg",
     description: "iPhone, Samsung, Xiaomi, tablettes, et plus...",
   },
   tablettes: {
-    image: "/images/categories/smartphone-tablette.jpg",
+    image: "/images/categories/smartphone-tablette-reference.jpg",
     description: "iPhone, Samsung, Xiaomi, tablettes, et plus...",
   },
   ordinateurs: {
-    image: "/images/categories/ordinateurs.jpg",
+    image: "/images/categories/ordinateurs-reference.jpg",
     description: "Mac, PC, composants, accessoires, périphériques...",
   },
   ordinateur: {
-    image: "/images/categories/ordinateurs.jpg",
+    image: "/images/categories/ordinateurs-reference.jpg",
     description: "Mac, PC, composants, accessoires, périphériques...",
   },
   "pc-portable": {
-    image: "/images/categories/ordinateurs.jpg",
+    image: "/images/categories/ordinateurs-reference.jpg",
     description: "Mac, PC, composants, accessoires, périphériques...",
   },
   vapes: {
@@ -199,14 +199,34 @@ const CATEGORY_CONTENT = {
 
 const CATEGORY_ORDER = [
   "abonnements",
+  "ordinateurs",
+  "smartphone-tablette",
   "accessoires",
   "ecouteurs",
   "enceintes",
   "for-man",
   "for-woman",
-  "smartphone-tablette",
-  "ordinateurs",
 ];
+
+function getCategoryOrderIndex(slug) {
+  const key = String(slug || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  if (/(ordinateur|laptop|pc-portable|informatique)/.test(key)) {
+    return CATEGORY_ORDER.indexOf("ordinateurs");
+  }
+  if (/(smartphone|telephone|tablette)/.test(key)) {
+    return CATEGORY_ORDER.indexOf("smartphone-tablette");
+  }
+  if (/^for-(wo)?man$/.test(key)) {
+    return CATEGORY_ORDER.indexOf(key.includes("wo") ? "for-woman" : "for-man");
+  }
+  return CATEGORY_ORDER.indexOf(key);
+}
 
 function getCategoryContent(slug) {
   const key = String(slug || "")
@@ -315,8 +335,8 @@ export default function CategoriesSection() {
       ...getCategoryContent("abonnements"),
     },
   ].sort((a, b) => {
-    const aOrder = CATEGORY_ORDER.indexOf(a.slug);
-    const bOrder = CATEGORY_ORDER.indexOf(b.slug);
+    const aOrder = getCategoryOrderIndex(a.slug);
+    const bOrder = getCategoryOrderIndex(b.slug);
     if (aOrder !== -1 || bOrder !== -1) {
       return (aOrder === -1 ? CATEGORY_ORDER.length : aOrder) -
         (bOrder === -1 ? CATEGORY_ORDER.length : bOrder);
