@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useAnimationControls, useInView } from "framer-motion";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import {
-  ChevronRight,
   Headphones,
   Speaker,
   Wind,
@@ -55,7 +56,9 @@ import {
   Flower,
 } from "lucide-react";
 import useCategoryStore from "@/store/categoryStore";
+import useProductStore from "@/store/productStore";
 import { categories as staticCategories } from "@/lib/categories";
+import styles from "./CategoriesSection.module.css";
 
 // Correspondance emoji admin → icône Lucide
 const emojiToIcon = {
@@ -128,6 +131,114 @@ const emojiToIcon = {
 const DefaultIcon = Package;
 const CATEGORIES_AFFICHÉES = 8;
 
+const CATEGORY_CONTENT = {
+  abonnements: {
+    image: "/images/categories/abonnements.jpg",
+    description: "Netflix, Apple Music, iCloud+, Apple TV, etc.",
+  },
+  accessoires: {
+    image: "/images/categories/accessoires.jpg",
+    description: "Chargeurs, câbles, coques, protections, MagSafe...",
+  },
+  ecouteurs: {
+    image: "/images/categories/ecouteurs.jpg",
+    description: "AirPods, écouteurs Bluetooth, accessoires audio...",
+  },
+  enceintes: {
+    image: "/images/categories/enceintes.jpg",
+    description: "Enceintes Bluetooth, barres de son, audio pro...",
+  },
+  "for-man": {
+    image: "/images/categories/for-man.jpg",
+    description: "Montres, accessoires, gadgets, lifestyle...",
+  },
+  "for-men": {
+    image: "/images/categories/for-man.jpg",
+    description: "Montres, accessoires, gadgets, lifestyle...",
+  },
+  "for-woman": {
+    image: "/images/categories/for-woman.jpg",
+    description: "Montres, sacs, parfums, accessoires, lifestyle...",
+  },
+  "for-women": {
+    image: "/images/categories/for-woman.jpg",
+    description: "Montres, sacs, parfums, accessoires, lifestyle...",
+  },
+  "smartphone-tablette": {
+    image: "/images/categories/smartphone-tablette.jpg",
+    description: "iPhone, Samsung, Xiaomi, tablettes, et plus...",
+  },
+  smartphones: {
+    image: "/images/categories/smartphone-tablette.jpg",
+    description: "iPhone, Samsung, Xiaomi, tablettes, et plus...",
+  },
+  telephones: {
+    image: "/images/categories/smartphone-tablette.jpg",
+    description: "iPhone, Samsung, Xiaomi, tablettes, et plus...",
+  },
+  tablettes: {
+    image: "/images/categories/smartphone-tablette.jpg",
+    description: "iPhone, Samsung, Xiaomi, tablettes, et plus...",
+  },
+  ordinateurs: {
+    image: "/images/categories/ordinateurs.jpg",
+    description: "Mac, PC, composants, accessoires, périphériques...",
+  },
+  ordinateur: {
+    image: "/images/categories/ordinateurs.jpg",
+    description: "Mac, PC, composants, accessoires, périphériques...",
+  },
+  "pc-portable": {
+    image: "/images/categories/ordinateurs.jpg",
+    description: "Mac, PC, composants, accessoires, périphériques...",
+  },
+  reparation: {
+    image: "/images/reparation/apple.jpg",
+    description: "Réparation et entretien de vos appareils.",
+  },
+  vapes: {
+    description: "Vapes et cigarettes électroniques.",
+  },
+  suivi: {
+    description: "Retrouvez les informations de votre commande.",
+  },
+};
+
+const CATEGORY_ORDER = [
+  "abonnements",
+  "accessoires",
+  "ecouteurs",
+  "enceintes",
+  "for-man",
+  "for-woman",
+  "smartphone-tablette",
+  "ordinateurs",
+];
+
+function getCategoryContent(slug) {
+  const key = String(slug || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  if (CATEGORY_CONTENT[key]) return CATEGORY_CONTENT[key];
+  if (/(smartphone|telephone|tablette)/.test(key)) {
+    return CATEGORY_CONTENT["smartphone-tablette"];
+  }
+  if (/(ordinateur|laptop|pc-portable|informatique)/.test(key)) {
+    return CATEGORY_CONTENT.ordinateurs;
+  }
+  return {};
+}
+
+function getCategoryDescription(slug, label) {
+  return (
+    getCategoryContent(slug).description ||
+    `Découvrez notre sélection de ${String(label || "produits").toLowerCase()}...`
+  );
+}
+
 function CategoryRevealCard({ item, index, scrollDirection }) {
   const cardRef = useRef(null);
   const isInView = useInView(cardRef, { once: false, amount: 0.2 });
@@ -154,23 +265,40 @@ function CategoryRevealCard({ item, index, scrollDirection }) {
     }
   }, [controls, index, isInView, scrollDirection]);
 
-  const { label, Icon, href } = item;
+  const { label, Icon, href, image, description } = item;
 
   return (
     <motion.div
       ref={cardRef}
+      className={styles.reveal}
       initial={{ opacity: 0, y: -22, scale: 0.97 }}
       animate={controls}
     >
       <Link
         href={href}
-        className="glass-card flex min-h-[118px] flex-col items-center justify-center rounded-3xl border border-black/[0.04] bg-white p-5 text-center shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
+        className={styles.card}
       >
-        <span className="mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.04]">
-          <Icon className="h-5 w-5 text-apple-black" strokeWidth={1.6} />
+        <span className={styles.imageFrame}>
+          {image ? (
+            <Image
+              src={image}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className={styles.image}
+            />
+          ) : (
+            <span className={styles.imageFallback} aria-hidden="true">
+              <Icon className={styles.fallbackIcon} strokeWidth={1.4} />
+            </span>
+          )}
         </span>
-        <span className="text-[13px] font-semibold leading-tight text-apple-black">
-          {label}
+        <span className={styles.cardInfo}>
+          <span className={styles.cardTitle}>{label}</span>
+          <span className={styles.cardDescription}>{description}</span>
+          <span className={styles.arrow} aria-hidden="true">
+            <ArrowRight />
+          </span>
         </span>
       </Link>
     </motion.div>
@@ -182,6 +310,7 @@ export default function CategoriesSection() {
   const scrollDirection = useRef("none");
   const previousScrollY = useRef(0);
   const { getActiveCategories, fetchCategories } = useCategoryStore();
+  const featuredProducts = useProductStore((state) => state.featuredProducts);
 
   useEffect(() => {
     setMounted(true);
@@ -212,62 +341,77 @@ export default function CategoriesSection() {
       .filter((cat) => cat.slug !== "abonnements" &&
           cat.slug !== "reparation" &&
           cat.slug !== "suivi")
-      .map((cat) => ({
-        slug: cat.slug,
-        label: cat.label || cat.name,
-        Icon: emojiToIcon[cat.icon] || DefaultIcon,
-        href: `/catalogue/${cat.slug}`,
-      })),
+      .map((cat) => {
+        const label = cat.label || cat.name;
+        const content = getCategoryContent(cat.slug);
+        const productImage = featuredProducts.find(
+          (product) => product.category === cat.slug && product.image,
+        )?.image;
+        return {
+          slug: cat.slug,
+          label,
+          Icon: emojiToIcon[cat.icon] || DefaultIcon,
+          href: `/catalogue/${cat.slug}`,
+          ...content,
+          image: content.image || productImage,
+          description: getCategoryDescription(cat.slug, label),
+        };
+      }),
     {
       slug: "abonnements",
       label: "Abonnements",
       Icon: Tv,
       href: "/abonnements",
+      ...getCategoryContent("abonnements"),
     },
     {
       slug: "reparation",
       label: "Réparation",
       Icon: Wrench,
       href: "/reparation",
+      ...getCategoryContent("reparation"),
     },
     {
       slug: "suivi",
       label: "Suivi commande",
       Icon: Package,
       href: "/suivi",
+      ...getCategoryContent("suivi"),
     },
-  ].sort((a, b) => a.label.localeCompare(b.label, "fr", { sensitivity: "base" }));
+  ].sort((a, b) => {
+    const aOrder = CATEGORY_ORDER.indexOf(a.slug);
+    const bOrder = CATEGORY_ORDER.indexOf(b.slug);
+    if (aOrder !== -1 || bOrder !== -1) {
+      return (aOrder === -1 ? CATEGORY_ORDER.length : aOrder) -
+        (bOrder === -1 ? CATEGORY_ORDER.length : bOrder);
+    }
+    return a.label.localeCompare(b.label, "fr", { sensitivity: "base" });
+  });
 
   const visibleItems = allItems.slice(0, CATEGORIES_AFFICHÉES);
 
   return (
-    <section className="max-w-7xl mx-auto px-5 pt-20 pb-[50px]">
-      <div className="flex items-end justify-between mb-10">
-        <div>
-          <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-2">
-            Catégories
-          </p>
-          <h2 className="font-display font-black text-3xl md:text-4xl text-apple-black tracking-tight">
-            Notre univers
-          </h2>
-        </div>
+    <section className={styles.section}>
+      <div className={styles.heading}>
+        <p className={styles.eyebrow}>Catalogue</p>
+        <h2 className={styles.title}>Nos produits</h2>
+        <p className={styles.intro}>
+          Découvrez notre sélection de produits et services Apple, Android et bien plus.
+        </p>
       </div>
 
       {!mounted ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className={styles.grid}>
           {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="glass-card rounded-3xl p-5 flex flex-col items-center animate-pulse"
-            >
-              <div className="w-12 h-12 bg-black/[0.06] rounded-2xl mb-3.5" />
-              <div className="h-3 bg-black/[0.05] rounded-full w-16 mb-1" />
-              <div className="h-2 bg-black/[0.04] rounded-full w-20 hidden md:block" />
+            <div key={i} className={styles.skeleton}>
+              <div className={styles.skeletonImage} />
+              <div className={styles.skeletonTitle} />
+              <div className={styles.skeletonDescription} />
             </div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className={styles.grid}>
           {visibleItems.map((item, index) => (
             <CategoryRevealCard
               key={item.slug}
@@ -279,14 +423,14 @@ export default function CategoriesSection() {
         </div>
       )}
 
-      {mounted && (
-        <div className="mt-8 flex justify-center">
+      {mounted && allItems.length > CATEGORIES_AFFICHÉES && (
+        <div className={styles.more}>
           <Link
             href="/catalogue"
-            className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-black/10 bg-white px-6 py-3 text-[13px] font-semibold text-apple-black shadow-sm transition-all hover:-translate-y-0.5 hover:border-black/20 hover:shadow-md"
+            className={styles.moreLink}
           >
             Voir plus de catégories
-            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <ChevronRight className={styles.moreChevron} />
           </Link>
         </div>
       )}
