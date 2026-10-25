@@ -1,188 +1,140 @@
-import Link from "next/link";
 import Image from "next/image";
-import { Smartphone, Tablet, Laptop, FileText, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Clock3,
+  FileText,
+  Headset,
+  Settings,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
+import styles from "./ReparationHub.module.css";
 
-// Composant SERVEUR : cet écran n'a ni état ni gestionnaire d'événement, et le
-// survol est purement CSS. Un `"use client"` y aurait embarqué la page dans le
-// paquet JavaScript du navigateur sans rien apporter.
-
-// Écran d'entrée du service de réparation.
-//
-// Quatre tuiles, mais elles ne sont PAS de même nature : les trois premières
-// ouvrent un catalogue, la quatrième est une page de contenu. La distinction
-// est portée par le visuel (fond sombre contre fond clair) plutôt que par un
-// titre de section : le client la comprend sans qu'on la lui explique.
-//
-// Les trois espaces sont figés côté serveur (`enum RepairSpace`), et ils le
-// sont ici aussi. Les ajouter en base ne suffirait pas à les faire apparaître —
-// c'est voulu : l'administrateur gère le CONTENU de chaque espace, pas la liste
-// des espaces.
-//
-// `pret` dit si l'écran de destination existe DÉJÀ. Tant qu'il vaut `false`, la
-// tuile ne mène nulle part et l'annonce : un lien vers une page inexistante
-// envoie le client sur une erreur 404, ce qui est pire que de ne rien proposer.
-// Chaque écran construit fera passer sa tuile à `true`.
-const ESPACES = [
+const APPAREILS = [
   {
-    slug: "apple",
-    pret: true,
-    nom: "Apple",
-    // « iPhone » seul écarterait le client venu pour son iPad ou son MacBook :
-    // il chercherait une quatrième tuile qui n'existe pas, et repartirait.
-    detail: "iPhone · iPad · Mac",
-    Icone: Smartphone,
-    image: "/images/reparation/apple.jpg",
-    fond: "from-[#0A0A0A] via-[#1a1a2e] to-[#0f3460]",
+    nom: "iPhone",
+    detail: "Écran, batterie, Face ID, caméra, carte mère…",
+    href: "/reparation/apple",
+    image: "/images/categories/smartphone-tablette.jpg",
+    alt: "iPhone et appareils Apple",
+    imageClass: styles.iphoneImage,
   },
   {
-    slug: "android",
-    pret: true,
-    nom: "Androïd",
-    detail: "Samsung · Xiaomi · Tecno…",
-    Icone: Tablet,
+    nom: "Android",
+    detail: "Écran, batterie, connecteur, caméra, déblocage…",
+    href: "/reparation/android",
     image: "/images/reparation/android.jpg",
-    fond: "from-[#0f2027] via-[#203a43] to-[#2c5364]",
+    alt: "Réparation d'un téléphone Android",
+    imageClass: styles.androidImage,
   },
   {
-    slug: "pc",
-    pret: true,
-    nom: "PC portable",
-    detail: "Dell · HP · Lenovo · Asus…",
-    Icone: Laptop,
-    image: "/images/reparation/pc.jpg",
-    fond: "from-[#141E30] via-[#243B55] to-[#2b5876]",
+    nom: "Mac / PC",
+    detail: "Diagnostic, nettoyage, système, composants…",
+    href: "/reparation/pc",
+    image: "/images/categories/ordinateurs.jpg",
+    alt: "Ordinateurs portables et Mac",
+    imageClass: styles.computerImage,
   },
+  {
+    nom: "Tablette",
+    detail: "Écran, batterie, connecteur, système…",
+    href: "/reparation/apple",
+    image: "/images/categories/smartphone-tablette.jpg",
+    alt: "Tablette et appareils mobiles",
+    imageClass: styles.tabletImage,
+  },
+];
+
+const AVANTAGES = [
+  { Icon: ShieldCheck, titre: "Diagnostic gratuit", detail: "Avant toute réparation" },
+  { Icon: Clock3, titre: "Service rapide", detail: "48h en moyenne" },
+  { Icon: Settings, titre: "Pièces de qualité", detail: "Originales ou premium" },
+  { Icon: Headset, titre: "Support client", detail: "Suivi de votre réparation" },
 ];
 
 export default function ReparationHub() {
   return (
-    <div className="max-w-7xl mx-auto px-5 py-10">
-      <div className="mb-8">
-        <h1 className="font-display font-black text-3xl md:text-5xl text-apple-black tracking-tight mb-2">
-          Réparation
-        </h1>
-        <p className="text-apple-mid text-[14px] md:text-[15px] max-w-xl">
-          Choisissez votre appareil, sélectionnez la réparation, et découvrez le
-          prix immédiatement. Un livreur passe récupérer votre appareil.
-        </p>
-      </div>
-
-      {/* Grille 2 × 2 sur mobile, les quatre sur une ligne à partir de `md`.
-          Le 2 × 2 vient de la maquette du propriétaire ; l'alignement sur une
-          ligne évite deux tuiles démesurées et beaucoup de vide sur un écran
-          d'ordinateur. */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        {ESPACES.map(({ slug, nom, detail, Icone, image, fond, pret }) => {
-          const contenu = (
-            <>
-              <Image
-                src={image}
-                alt=""
-                fill
-                sizes="(max-width: 767px) 45vw, 25vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${fond} opacity-35 mix-blend-multiply`}
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/10 to-black/85" />
-
-              <div className="relative h-full flex flex-col justify-between p-4 md:p-5">
-                <div className="flex items-start justify-between gap-2">
-                  <Icone
-                    className="w-7 h-7 md:w-8 md:h-8 text-white/90"
-                    strokeWidth={1.6}
-                  />
-                  {!pret && (
-                    <span className="text-white/70 text-[9px] md:text-[10px] font-semibold uppercase tracking-widest bg-white/10 rounded-full px-2 py-0.5 whitespace-nowrap">
-                      Bientôt
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <p className="font-display font-black text-white text-lg md:text-2xl tracking-tight leading-none">
-                    {nom}
-                  </p>
-                  <p className="text-white/55 text-[11px] md:text-[12px] mt-1.5 leading-snug">
-                    {detail}
-                  </p>
-                </div>
-              </div>
-            </>
-          );
-
-          const forme =
-            "group relative rounded-3xl overflow-hidden aspect-[3/4] md:aspect-[4/5] transition-all duration-300";
-
-          // Une tuile pas encore prête reste visible — le client voit ce qui
-          // arrive — mais n'est ni cliquable ni annoncée comme un lien aux
-          // lecteurs d'écran.
-          return pret ? (
-            <Link
-              key={slug}
-              href={`/reparation/${slug}`}
-              className={`${forme} hover:-translate-y-1 hover:shadow-xl`}
-            >
-              {contenu}
-            </Link>
-          ) : (
-            <div key={slug} className={`${forme} opacity-75 cursor-default`}>
-              {contenu}
-            </div>
-          );
-        })}
-
-        {/* La quatrième tuile ne mène à aucun catalogue : fond clair, pour
-            qu'on ne la confonde pas avec un appareil réparable. */}
-        <Link
-          href="/reparation/conditions"
-          className="group relative rounded-3xl overflow-hidden aspect-[3/4] md:aspect-[4/5] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-          style={{
-            background: "rgba(0,0,0,0.03)",
-            border: "1px solid rgba(0,0,0,0.07)",
-          }}
-        >
-          <div className="relative h-full flex flex-col justify-between p-4 md:p-5">
-            <FileText
-              className="w-7 h-7 md:w-8 md:h-8 text-apple-mid"
-              strokeWidth={1.6}
-            />
-            <div>
-              <p className="font-display font-black text-apple-black text-[15px] md:text-lg tracking-tight leading-tight">
-                Conditions générales de réparation
-              </p>
-              <span className="inline-flex items-center gap-1 text-apple-mid text-[11px] md:text-[12px] mt-1.5 group-hover:gap-2 transition-all">
-                Lire <ArrowRight className="w-3 h-3" />
-              </span>
-            </div>
+    <div className={styles.page}>
+      <section className={styles.hero} aria-labelledby="repair-title">
+        <Image
+          src="/images/reparation/apple.jpg"
+          alt="Technicien réparant un appareil dans son atelier"
+          fill
+          priority
+          sizes="(max-width: 767px) 100vw, 1200px"
+          className={styles.heroImage}
+        />
+        <div className={styles.heroShade} />
+        <div className={styles.heroContent}>
+          <p className={styles.eyebrow}>Service de réparation</p>
+          <h1 id="repair-title">Vos appareils<br />entre de bonnes mains</h1>
+          <p className={styles.heroCopy}>
+            Diagnostic rapide, pièces de qualité<br className={styles.desktopBreak} />
+            {" "}et réparation garantie.
+          </p>
+          <div className={styles.heroPromises}>
+            <span><ShieldCheck /><span>Garantie<br />sur nos services</span></span>
+            <span><Zap /><span>Réparation<br />rapide</span></span>
+            <span><Settings /><span>Techniciens<br />qualifiés</span></span>
           </div>
-        </Link>
-      </div>
-
-      {/* Le client qui ignore la panne n'a rien à chercher dans le catalogue :
-          on le sort du parcours dès l'entrée plutôt qu'au bout de trois écrans.
-          Le choix de l'appareil reste nécessaire, d'où le passage par un
-          espace. */}
-      <div
-        className="mt-6 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-        style={{
-          background: "rgba(0,0,0,0.02)",
-          border: "1px solid rgba(0,0,0,0.07)",
-        }}
-      >
-        <div>
-          <p className="font-semibold text-apple-black text-[14px]">
-            Vous ne savez pas ce qui ne va pas ?
-          </p>
-          <p className="text-apple-mid text-[12px] mt-0.5">
-            Décrivez la panne, nous récupérons l&apos;appareil et nous
-            l&apos;analysons.
-          </p>
         </div>
-        <span className="text-apple-mid text-[12px] whitespace-nowrap">
-          Choisissez d&apos;abord votre appareil ci-dessus
+      </section>
+
+      <section className={styles.devices} aria-labelledby="devices-title">
+        <p className={styles.sectionEyebrow}>Nos services</p>
+        <h2 id="devices-title">Choisissez votre appareil</h2>
+        <div className={styles.deviceGrid}>
+          {APPAREILS.map((appareil) => (
+            <Link key={appareil.nom} href={appareil.href} className={styles.deviceCard}>
+              <div className={`${styles.devicePicture} ${appareil.imageClass}`}>
+                <Image
+                  src={appareil.image}
+                  alt={appareil.alt}
+                  fill
+                  sizes="(max-width: 640px) 45vw, (max-width: 1024px) 40vw, 260px"
+                  className={styles.deviceImage}
+                />
+              </div>
+              <div className={styles.deviceText}>
+                <h3>{appareil.nom}</h3>
+                <p>{appareil.detail}</p>
+                <span className={styles.arrowCircle} aria-hidden="true"><ArrowRight /></span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.benefits} aria-label="Les avantages de notre service">
+        {AVANTAGES.map(({ Icon, titre, detail }) => (
+          <div className={styles.benefit} key={titre}>
+            <span className={styles.benefitIcon}><Icon /></span>
+            <span><strong>{titre}</strong><small>{detail}</small></span>
+          </div>
+        ))}
+      </section>
+
+      <Link href="/reparation/conditions" className={styles.conditions}>
+        <Image
+          src="/images/reparation/pc.jpg"
+          alt="Outils professionnels de réparation"
+          fill
+          sizes="(max-width: 767px) 100vw, 1200px"
+          className={styles.conditionsImage}
+        />
+        <span className={styles.conditionsShade} />
+        <span className={styles.conditionsContent}>
+          <span className={styles.eyebrow}>À lire avant toute réparation</span>
+          <strong>Conditions générales<br />de réparation</strong>
+          <span className={styles.conditionsCopy}>
+            Découvrez nos conditions, garanties,<br className={styles.desktopBreak} /> délais et responsabilités.
+          </span>
+          <span className={styles.conditionsButton}>
+            <FileText /> Conditions générales de réparation <ArrowRight />
+          </span>
         </span>
-      </div>
+      </Link>
     </div>
   );
 }
