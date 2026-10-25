@@ -253,6 +253,14 @@ function getCategoryDescription(slug, label) {
   );
 }
 
+function isSmartphoneCategory(slug) {
+  const key = String(slug || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+  return /(smartphone|telephone|tablette)/.test(key);
+}
+
 function CategoryRevealCard({ item }) {
   const { label, Icon, href, image, description, slug } = item;
   const imageClassName =
@@ -322,7 +330,9 @@ export default function CategoriesSection() {
           slug: cat.slug,
           label,
           Icon: emojiToIcon[cat.icon] || DefaultIcon,
-          href: `/catalogue/${cat.slug}`,
+          href: isSmartphoneCategory(cat.slug)
+            ? "/reparation"
+            : `/catalogue/${cat.slug}`,
           ...content,
           image: content.image || productImage,
           description: getCategoryDescription(cat.slug, label),
