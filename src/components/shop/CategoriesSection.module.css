@@ -79,6 +79,12 @@
   transition: transform 350ms ease;
 }
 
+.accessoriesImage,
+.earbudsImage {
+  object-fit: contain;
+  padding: 7px;
+}
+
 .card:hover .image {
   transform: scale(1.035);
 }

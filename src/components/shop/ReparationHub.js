@@ -16,33 +16,29 @@ const APPAREILS = [
     nom: "iPhone",
     detail: "Écran, batterie, Face ID, caméra, carte mère…",
     href: "/reparation/apple",
-    image: "/images/categories/smartphone-tablette.jpg",
+    image: "/images/reparation/devices/iphone.jpg",
     alt: "iPhone et appareils Apple",
-    imageClass: styles.iphoneImage,
   },
   {
     nom: "Android",
     detail: "Écran, batterie, connecteur, caméra, déblocage…",
     href: "/reparation/android",
-    image: "/images/reparation/android.jpg",
+    image: "/images/reparation/devices/android.png",
     alt: "Réparation d'un téléphone Android",
-    imageClass: styles.androidImage,
   },
   {
     nom: "Mac / PC",
     detail: "Diagnostic, nettoyage, système, composants…",
     href: "/reparation/pc",
-    image: "/images/categories/ordinateurs.jpg",
+    image: "/images/reparation/devices/computer.png",
     alt: "Ordinateurs portables et Mac",
-    imageClass: styles.computerImage,
   },
   {
     nom: "Tablette",
     detail: "Écran, batterie, connecteur, système…",
     href: "/reparation/apple",
-    image: "/images/categories/smartphone-tablette.jpg",
+    image: "/images/reparation/devices/tablet.png",
     alt: "Tablette et appareils mobiles",
-    imageClass: styles.tabletImage,
   },
 ];
 
@@ -87,7 +83,7 @@ export default function ReparationHub() {
         <div className={styles.deviceGrid}>
           {APPAREILS.map((appareil) => (
             <Link key={appareil.nom} href={appareil.href} className={styles.deviceCard}>
-              <div className={`${styles.devicePicture} ${appareil.imageClass}`}>
+              <div className={styles.devicePicture}>
                 <Image
                   src={appareil.image}
                   alt={appareil.alt}
@@ -117,7 +113,7 @@ export default function ReparationHub() {
 
       <Link href="/reparation/conditions" className={styles.conditions}>
         <Image
-          src="/images/reparation/pc.jpg"
+          src="/images/reparation/devices/conditions-tools.png"
           alt="Outils professionnels de réparation"
           fill
           sizes="(max-width: 767px) 100vw, 1200px"

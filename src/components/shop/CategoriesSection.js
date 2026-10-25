@@ -265,7 +265,13 @@ function CategoryRevealCard({ item, index, scrollDirection }) {
     }
   }, [controls, index, isInView, scrollDirection]);
 
-  const { label, Icon, href, image, description } = item;
+  const { label, Icon, href, image, description, slug } = item;
+  const imageClassName =
+    slug === "accessoires"
+      ? styles.accessoriesImage
+      : slug === "ecouteurs"
+        ? styles.earbudsImage
+        : "";
 
   return (
     <motion.div
@@ -285,7 +291,7 @@ function CategoryRevealCard({ item, index, scrollDirection }) {
               alt=""
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className={styles.image}
+              className={`${styles.image} ${imageClassName}`}
             />
           ) : (
             <span className={styles.imageFallback} aria-hidden="true">
