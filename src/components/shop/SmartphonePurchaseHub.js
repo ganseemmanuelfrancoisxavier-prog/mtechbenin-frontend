@@ -1,4 +1,6 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -12,6 +14,7 @@ import {
 } from "lucide-react";
 import styles from "./SmartphonePurchaseHub.module.css";
 import smartphonePosterImage from "./smartphonePosterImage";
+import { settingsApi } from "@/lib/api";
 
 const DEVICES = [
   {
@@ -48,6 +51,24 @@ const BENEFITS = [
 ];
 
 export default function SmartphonePurchaseHub() {
+  const [devices, setDevices] = useState(DEVICES);
+
+  useEffect(() => {
+    settingsApi.getPublic().then(({ settings }) => {
+      if (!settings?.smartphoneHubDevices) return;
+      try {
+        const configuredDevices = JSON.parse(settings.smartphoneHubDevices);
+        if (Array.isArray(configuredDevices)) {
+          setDevices(configuredDevices.filter((device) => device.active !== false));
+        }
+      } catch (error) {
+        console.error("Impossible de lire les appareils de la boutique", error);
+      }
+    }).catch((error) => {
+      console.error("Impossible de charger les appareils de la boutique", error);
+    });
+  }, []);
+
   return (
     <div className={styles.page}>
       <section className={styles.hero} aria-label="Offres smartphones">
@@ -82,21 +103,17 @@ export default function SmartphonePurchaseHub() {
         </h2>
 
         <div className={styles.grid}>
-          {DEVICES.map((device) => (
+          {devices.map((device) => (
             <Link
               className={styles.deviceCard}
-              href={`/recherche?q=${encodeURIComponent(device.query)}`}
-              key={device.title}
+              href={device.href || `/recherche?q=${encodeURIComponent(device.title)}`}
+              key={device.id || device.title}
             >
-              <span className={styles.deviceImage}>
-                <Image
-                  src={device.image}
-                  alt={device.title}
-                  fill
-                  sizes="(max-width: 640px) 42vw, 220px"
-                  className={styles.image}
-                />
-              </span>
+              {device.image ? (
+                <span className={styles.deviceImage}>
+                  <img src={device.image} alt={device.title} className={styles.image} />
+                </span>
+              ) : <span className={styles.deviceImage} aria-hidden="true" />}
               <span className={styles.deviceInfo}>
                 <span className={styles.deviceTitle}>{device.title}</span>
                 <span className={styles.deviceDescription}>
