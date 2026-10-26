@@ -15,10 +15,6 @@ import {
 import { categoriesApi } from "@/lib/api";
 
 const emptyForm = { label: "", slug: "", icon: "📦", active: true };
-const deviceCategories = [
-  { label: "iPhone", name: "iPhone", slug: "iphone", icon: "📱", active: true },
-  { label: "Android", name: "Android", slug: "android", icon: "📱", active: true },
-];
 
 function generateSlug(label) {
   return label
@@ -56,8 +52,6 @@ export default function AdminCategories() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [settingUpDevices, setSettingUpDevices] = useState(false);
-  const [notice, setNotice] = useState("");
 
   // ── Charge TOUTES les catégories (actives + inactives) via l'endpoint admin ──
   const loadAll = async () => {
@@ -116,29 +110,6 @@ export default function AdminCategories() {
       console.error("Erreur save catégorie", err.message);
     }
     setSaving(false);
-  };
-
-  const addDeviceCategories = async () => {
-    setSettingUpDevices(true);
-    setNotice("");
-    try {
-      const existingSlugs = new Set(categories.map((category) => category.slug));
-      const missingCategories = deviceCategories.filter(
-        (category) => !existingSlugs.has(category.slug),
-      );
-      for (const category of missingCategories) {
-        await categoriesApi.create(category);
-      }
-      await loadAll();
-      setNotice(
-        missingCategories.length
-          ? "Catégories iPhone et Android ajoutées. Tu peux maintenant choisir leur catégorie dans chaque fiche produit."
-          : "Les catégories iPhone et Android existent déjà. Tu peux les choisir dans chaque fiche produit.",
-      );
-    } catch (err) {
-      setNotice(err.message || "Impossible de créer les catégories pour le moment.");
-    }
-    setSettingUpDevices(false);
   };
 
   const handleDelete = async (id) => {
@@ -202,23 +173,6 @@ export default function AdminCategories() {
             <Plus className="w-4 h-4" /> Ajouter
           </button>
         </div>
-      </div>
-
-      <div className="rounded-2xl border border-black/[0.07] bg-white p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
-        <div>
-          <p className="font-semibold text-apple-black text-sm">Séparer les téléphones</p>
-          <p className="text-apple-mid text-xs mt-1">
-            Ajoute les catégories iPhone et Android, puis assigne-les dans la fiche de chaque produit.
-          </p>
-          {notice && <p role="status" className="text-xs mt-2 text-apple-black">{notice}</p>}
-        </div>
-        <button
-          onClick={addDeviceCategories}
-          disabled={loading || settingUpDevices}
-          className="mt-3 sm:mt-0 shrink-0 rounded-xl bg-apple-black px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50"
-        >
-          {settingUpDevices ? "Mise en place…" : "Ajouter iPhone et Android"}
-        </button>
       </div>
 
       <div className="glass-card rounded-3xl overflow-hidden">
