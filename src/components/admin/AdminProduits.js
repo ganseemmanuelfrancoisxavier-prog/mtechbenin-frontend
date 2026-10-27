@@ -239,11 +239,11 @@ function VariantOptionPriceInput({ productId, option, basePrice, onSaved }) {
   );
 }
 
-export default function AdminProduits() {
+export default function AdminProduits({ smartphoneOnly = false }) {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
-  const [filterCat, setFilterCat] = useState("tous");
+  const [filterCat, setFilterCat] = useState(smartphoneOnly ? "smartphone-tablette" : "tous");
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -444,7 +444,7 @@ export default function AdminProduits() {
 
   const openAdd = () => {
     setEditingProduct(null);
-    setForm(emptyForm);
+    setForm(smartphoneOnly ? { ...emptyForm, category: "smartphone-tablette" } : emptyForm);
     setVariantTypes([]);
     setNewTypeName("");
     setNewOptionValue({});
@@ -565,8 +565,9 @@ export default function AdminProduits() {
 
   const filtered = products.filter((p) => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    const matchCat =
-      filterCat === "tous" || (p.categorySlug || p.category) === filterCat;
+    const matchCat = smartphoneOnly
+      ? (p.categorySlug || p.category) === "smartphone-tablette"
+      : filterCat === "tous" || (p.categorySlug || p.category) === filterCat;
     return matchSearch && matchCat;
   });
 
@@ -584,10 +585,10 @@ export default function AdminProduits() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display font-black text-2xl text-apple-black tracking-tight">
-            Produits
+            {smartphoneOnly ? "Téléphones et tablettes" : "Produits"}
           </h1>
           <p className="text-apple-mid text-[13px] mt-1">
-            {products.length} produits au total
+            {smartphoneOnly ? `${filtered.length} téléphones et tablettes` : `${products.length} produits au total`}
             {products.length >= LIMITE_PRODUITS && (
               <span className="ml-2 text-amber-500 text-[11px] font-medium">
                 (limite {LIMITE_PRODUITS} atteinte — utilisez les filtres pour affiner)
@@ -633,8 +634,8 @@ export default function AdminProduits() {
             onChange={(e) => setFilterCat(e.target.value)}
             className="appearance-none bg-black/[0.03] border border-black/[0.06] rounded-2xl px-4 py-2.5 pr-9 text-[13px] focus:outline-none text-apple-black"
           >
-            <option value="tous">Toutes catégories</option>
-            {categories.map((c) => (
+            {!smartphoneOnly && <option value="tous">Toutes catégories</option>}
+            {(smartphoneOnly ? categories.filter((c) => c.slug === "smartphone-tablette") : categories).map((c) => (
               <option key={c.slug} value={c.slug}>
                 {c.label || c.name}
               </option>
@@ -907,9 +908,10 @@ export default function AdminProduits() {
                   <select
                     value={form.category}
                     onChange={(e) => updateForm("category", e.target.value)}
+                    disabled={smartphoneOnly}
                     className={`${inputClass} appearance-none pr-10`}
                   >
-                    {categories.map((c) => (
+                    {(smartphoneOnly ? categories.filter((c) => c.slug === "smartphone-tablette") : categories).map((c) => (
                       <option key={c.slug} value={c.slug}>
                         {c.label || c.name}
                       </option>

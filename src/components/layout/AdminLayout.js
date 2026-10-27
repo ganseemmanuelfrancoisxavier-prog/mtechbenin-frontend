@@ -37,7 +37,7 @@ import {
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true },
   { href: "/admin/produits", icon: Package, label: "Produits" },
-  { href: "/admin/appareils", icon: Smartphone, label: "Appareils smartphone" },
+  { href: "/admin/appareils", icon: Smartphone, label: "Smartphones" },
   { href: "/admin/caracteristiques", icon: SlidersHorizontal, label: "Caractéristiques" },
   { href: "/admin/categories", icon: LayoutGrid, label: "Catégories" },
   { href: "/admin/commandes", icon: ShoppingBag, label: "Commandes" },
@@ -59,7 +59,7 @@ const navItems = [
 const pageLabels = {
   "/admin": "Dashboard",
   "/admin/produits": "Produits",
-  "/admin/appareils": "Appareils smartphone",
+  "/admin/appareils": "Smartphones",
   "/admin/caracteristiques": "Caractéristiques",
   "/admin/categories": "Catégories",
   "/admin/commandes": "Commandes",

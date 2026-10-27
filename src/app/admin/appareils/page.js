@@ -1,7 +1,12 @@
+import AdminLayout from "@/components/layout/AdminLayout";
 import AdminSmartphoneDevices from "@/components/admin/AdminSmartphoneDevices";
 
-export const metadata = { title: "Appareils | Admin MTECHBENIN" };
+export const metadata = { title: "Smartphones | Admin MTECHBENIN" };
 
 export default function AdminAppareilsPage() {
-  return <AdminSmartphoneDevices />;
+  return (
+    <AdminLayout>
+      <AdminSmartphoneDevices />
+    </AdminLayout>
+  );
 }
