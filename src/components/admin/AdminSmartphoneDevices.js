@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Save, Trash2, Smartphone } from "lucide-react";
 import { settingsApi } from "@/lib/api";
+import MediaUploader from "@/components/admin/MediaUploader";
 
 const defaults = [
   { id: "iphone", title: "iPhone", description: "Derniers modèles, accessoires, et plus encore.", image: "/images/reparation/devices/iphone.jpg", href: "/recherche?q=iPhone", active: true },
@@ -78,9 +79,15 @@ export default function AdminSmartphoneDevices() {
               <label className="text-xs font-semibold text-apple-mid sm:col-span-2">Description
                 <input className={`${inputClass} mt-1.5`} value={device.description || ""} onChange={(event) => updateDevice(device.id, "description", event.target.value)} placeholder="Modèles et accessoires…" />
               </label>
-              <label className="text-xs font-semibold text-apple-mid sm:col-span-2">Adresse de l’image
-                <input className={`${inputClass} mt-1.5`} value={device.image || ""} onChange={(event) => updateDevice(device.id, "image", event.target.value)} placeholder="/images/mon-appareil.jpg" />
-              </label>
+              <div className="sm:col-span-2">
+                <MediaUploader
+                  value={device.image || ""}
+                  onChange={(url) => updateDevice(device.id, "image", url)}
+                  folder="mtechbenin/smartphone-devices"
+                  accept="image/*"
+                  label="Image de l’appareil"
+                />
+              </div>
               <label className="flex items-center gap-2 text-sm text-apple-black">
                 <input type="checkbox" checked={device.active !== false} onChange={(event) => updateDevice(device.id, "active", event.target.checked)} /> Afficher sur le site
               </label>
