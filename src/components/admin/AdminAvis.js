@@ -1,15 +1,31 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Check, X, Star, MessageSquare, Eye, RefreshCw } from "lucide-react";
+import { Check, X, Star, MessageSquare, Eye, RefreshCw, Pencil, Save } from "lucide-react";
 import { reviewsApi } from "@/lib/api";
 import ReviewPhotos from "@/components/shop/ReviewPhotos";
 import useSondagePeriodique from "@/hooks/useSondagePeriodique";
+
+const moisFrancais = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+
+function dateVersMois(value, fallback) {
+  const normalized = String(value || "").toLocaleLowerCase("fr-FR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const match = normalized.match(/([a-z]+)\s+(\d{4})/);
+  if (match) {
+    const month = moisFrancais.findIndex((name) => name.normalize("NFD").replace(/[\u0300-\u036f]/g, "") === match[1]);
+    if (month >= 0) return match[2] + "-" + String(month + 1).padStart(2, "0");
+  }
+  return fallback ? new Date(fallback).toISOString().slice(0, 7) : "";
+}
 
 export default function AdminAvis() {
   const [reviews, setReviews] = useState([]);
   const [filter, setFilter] = useState("pending");
   const [loading, setLoading] = useState(false);
+  const [editingDateId, setEditingDateId] = useState(null);
+  const [dateDraft, setDateDraft] = useState("");
+  const [savingDate, setSavingDate] = useState(false);
+  const [dateError, setDateError] = useState("");
 
   // ── Charge pending + approuvés depuis l'API ───────────────────────────────
   const loadAll = useCallback(async () => {
@@ -76,6 +92,29 @@ export default function AdminAvis() {
     } catch (err) {
       console.error("Erreur toggleFeatured", err.message);
     }
+  };
+
+  const startDateEdit = (review) => {
+    setEditingDateId(review.id);
+    setDateDraft(dateVersMois(review.date, review.createdAt));
+    setDateError("");
+  };
+
+  const handleSaveDate = async (review) => {
+    if (!dateDraft) {
+      setDateError("Choisissez un mois et une année.");
+      return;
+    }
+    setSavingDate(true);
+    setDateError("");
+    try {
+      const { review: updated } = await reviewsApi.updateDate(review.id, dateDraft);
+      setReviews((previous) => previous.map((item) => item.id === review.id ? { ...item, date: updated.date } : item));
+      setEditingDateId(null);
+    } catch (err) {
+      setDateError(err.message || "Date non enregistrée.");
+    }
+    setSavingDate(false);
   };
 
   return (
@@ -166,9 +205,31 @@ export default function AdminAvis() {
                       {review.city && (
                         <span className="text-apple-mid text-[11px]">·</span>
                       )}
-                      <span className="text-apple-mid text-[11px]">
-                        {review.date}
-                      </span>
+                      {editingDateId === review.id ? (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <input
+                            type="month"
+                            aria-label={"Date de l’avis de " + review.name}
+                            value={dateDraft}
+                            onChange={(event) => setDateDraft(event.target.value)}
+                            className="rounded-lg border border-black/10 bg-white px-2 py-1 text-[11px] text-apple-black"
+                          />
+                          <button onClick={() => handleSaveDate(review)} disabled={savingDate} className="rounded-lg bg-black px-2 py-1 text-[11px] font-semibold text-white disabled:opacity-50" title="Enregistrer la date">
+                            <Save className="h-3 w-3" />
+                          </button>
+                          <button onClick={() => { setEditingDateId(null); setDateError(""); }} className="rounded-lg bg-black/[0.05] px-2 py-1 text-[11px] text-apple-mid" title="Annuler">
+                            <X className="h-3 w-3" />
+                          </button>
+                          {dateError && <span role="alert" className="basis-full text-[11px] text-red-600">{dateError}</span>}
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-apple-mid text-[11px]">
+                          {review.date}
+                          <button onClick={() => startDateEdit(review)} className="rounded-md p-1 text-apple-mid/70 hover:bg-black/[0.05] hover:text-apple-black" aria-label={"Modifier la date de l’avis de " + review.name} title="Modifier la date">
+                            <Pencil className="h-3 w-3" />
+                          </button>
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-0.5 mb-2">
                       {[1, 2, 3, 4, 5].map((s) => (

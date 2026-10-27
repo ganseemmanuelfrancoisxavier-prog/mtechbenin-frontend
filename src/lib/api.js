@@ -201,6 +201,11 @@ export const reviewsApi = {
     apiFetch("/api/reviews", { method: "POST", body: JSON.stringify(data) }),
   approve: (id) =>
     apiFetch(`/api/reviews/admin/${id}/approve`, { method: "PATCH" }),
+  updateDate: (id, date) =>
+    apiFetch(`/api/reviews/admin/${id}/date`, {
+      method: "PATCH",
+      body: JSON.stringify({ date }),
+    }),
   featured: (id) =>
     apiFetch(`/api/reviews/admin/${id}/featured`, { method: "PATCH" }),
   delete: (id) => apiFetch(`/api/reviews/admin/${id}`, { method: "DELETE" }),
