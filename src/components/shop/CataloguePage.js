@@ -17,6 +17,8 @@ const sortOptions = [
 
 export default function CataloguePage({ initialCategory = "tous" }) {
   const [mounted, setMounted] = useState(false);
+  const [ageCheckReady, setAgeCheckReady] = useState(false);
+  const [ageVerified, setAgeVerified] = useState(false);
 
   const { products, fetchProducts, loading, error } = useProductStore();
   const { getActiveCategories, getCategoryLabel, fetchCategories } =
@@ -47,6 +49,38 @@ export default function CataloguePage({ initialCategory = "tous" }) {
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [maxPrice, setMaxPrice] = useState(500000);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isVapesCategory = ["vape", "vapes"].includes(
+    String(selectedCategory).toLowerCase(),
+  );
+  const showAgeGate = isVapesCategory && (!ageCheckReady || !ageVerified);
+
+  useEffect(() => {
+    setAgeCheckReady(false);
+    if (!isVapesCategory) {
+      setAgeVerified(false);
+      setAgeCheckReady(true);
+      return;
+    }
+
+    setAgeVerified(
+      window.sessionStorage.getItem("mtechbenin-vapes-age-verified") === "true",
+    );
+    setAgeCheckReady(true);
+  }, [isVapesCategory]);
+
+  useEffect(() => {
+    if (!showAgeGate) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showAgeGate]);
+
+  const acceptAgeGate = () => {
+    window.sessionStorage.setItem("mtechbenin-vapes-age-verified", "true");
+    setAgeVerified(true);
+  };
 
   const filtered = useMemo(() => {
     let list = [...allProducts];
@@ -169,7 +203,11 @@ export default function CataloguePage({ initialCategory = "tous" }) {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-5 py-10">
+    <>
+    <div
+      className={`max-w-7xl mx-auto px-5 py-10 transition-[filter] duration-300 ${showAgeGate ? "blur-sm" : ""}`}
+      aria-hidden={showAgeGate || undefined}
+    >
       <div className="mb-8">
         <h1 className="font-display font-black text-3xl md:text-4xl text-apple-black">
           {pageTitle}
@@ -284,5 +322,43 @@ export default function CataloguePage({ initialCategory = "tous" }) {
         </div>
       )}
     </div>
+    {showAgeGate && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 p-5 backdrop-blur-md">
+        <section
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="age-gate-title"
+          aria-describedby="age-gate-description"
+          className="w-full max-w-md rounded-3xl border border-white/70 bg-white p-7 text-center shadow-2xl sm:p-9"
+        >
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-2xl font-black text-primary">
+            18+
+          </div>
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+            Vérification de l’âge
+          </p>
+          <h2 id="age-gate-title" className="font-display text-2xl font-black text-apple-black">
+            Cette catégorie est réservée aux adultes
+          </h2>
+          <p id="age-gate-description" className="mt-3 text-sm leading-6 text-apple-mid">
+            Confirme que tu as 18 ans ou plus pour consulter les produits de la catégorie Vapes.
+          </p>
+          <button
+            type="button"
+            onClick={acceptAgeGate}
+            className="mt-7 w-full rounded-2xl bg-primary px-5 py-3.5 text-sm font-bold text-white transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-primary/25"
+          >
+            Oui, j’ai 18 ans ou plus
+          </button>
+          <a
+            href="/"
+            className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-black/10 px-5 py-3 text-sm font-semibold text-apple-mid transition hover:bg-black/[0.03] hover:text-apple-black"
+          >
+            Non, quitter cette catégorie
+          </a>
+        </section>
+      </div>
+    )}
+    </>
   );
 }
