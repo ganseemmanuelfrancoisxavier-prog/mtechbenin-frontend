@@ -17,7 +17,6 @@ const sortOptions = [
 
 export default function CataloguePage({ initialCategory = "tous" }) {
   const [mounted, setMounted] = useState(false);
-  const [ageCheckReady, setAgeCheckReady] = useState(false);
   const [ageVerified, setAgeVerified] = useState(false);
 
   const { products, fetchProducts, loading, error } = useProductStore();
@@ -52,20 +51,10 @@ export default function CataloguePage({ initialCategory = "tous" }) {
   const isVapesCategory = ["vape", "vapes"].includes(
     String(selectedCategory).toLowerCase(),
   );
-  const showAgeGate = isVapesCategory && (!ageCheckReady || !ageVerified);
+  const showAgeGate = isVapesCategory && !ageVerified;
 
   useEffect(() => {
-    setAgeCheckReady(false);
-    if (!isVapesCategory) {
-      setAgeVerified(false);
-      setAgeCheckReady(true);
-      return;
-    }
-
-    setAgeVerified(
-      window.sessionStorage.getItem("mtechbenin-vapes-age-verified") === "true",
-    );
-    setAgeCheckReady(true);
+    if (!isVapesCategory) setAgeVerified(false);
   }, [isVapesCategory]);
 
   useEffect(() => {
@@ -78,7 +67,6 @@ export default function CataloguePage({ initialCategory = "tous" }) {
   }, [showAgeGate]);
 
   const acceptAgeGate = () => {
-    window.sessionStorage.setItem("mtechbenin-vapes-age-verified", "true");
     setAgeVerified(true);
   };
 
