@@ -445,6 +445,11 @@ export const settingsApi = {
     apiFetch("/api/settings", { method: "POST", body: JSON.stringify(data) }),
 };
 
+// QR WhatsApp du bot (authentification admin obligatoire).
+export const whatsappAdminApi = {
+  getQr: () => apiFetch("/api/whatsapp/admin/qr"),
+};
+
 // ── FAQ ───────────────────────────────────────────────────────────────────────
 export const faqApi = {
   getPublished: () => apiFetch("/api/faq"),
