@@ -44,4 +44,13 @@ export const categories = [
     sortOrder: 5,
     active: true,
   },
+  {
+    id: "sextoys",
+    slug: "sextoys",
+    label: "Sextoys",
+    name: "Sextoys",
+    icon: "🌸",
+    sortOrder: 20,
+    active: true,
+  },
 ];
