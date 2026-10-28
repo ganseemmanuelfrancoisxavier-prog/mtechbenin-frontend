@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="1000" viewBox="200 50 800 606">
   <rect width="1200" height="800" fill="#fff" />
   <defs>
     <filter id="whiten" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR type="linear" slope="1.4" intercept="-0.28" /><feFuncG type="linear" slope="1.4" intercept="-0.28" /><feFuncB type="linear" slope="1.4" intercept="-0.28" /></feComponentTransfer></filter>
