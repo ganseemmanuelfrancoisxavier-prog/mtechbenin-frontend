@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="rose" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#F9B7CC"/>
+      <stop offset="1" stop-color="#D95F8A"/>
+    </linearGradient>
+    <linearGradient id="plum" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#D3B4F2"/>
+      <stop offset="1" stop-color="#7952A5"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#fff" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="#fff"/>
+  <ellipse cx="600" cy="786" rx="180" ry="28" fill="#382838" opacity=".12" filter="url(#shadow)"/>
+  <ellipse cx="1030" cy="786" rx="190" ry="28" fill="#382838" opacity=".12" filter="url(#shadow)"/>
+  <g transform="rotate(-8 600 450)">
+    <rect x="490" y="208" width="220" height="510" rx="108" fill="url(#rose)"/>
+    <ellipse cx="600" cy="221" rx="78" ry="42" fill="#F7C6D5"/>
+    <rect x="520" y="300" width="29" height="360" rx="14" fill="url(#shine)" opacity=".75"/>
+    <circle cx="600" cy="672" r="15" fill="#FBE8EF" opacity=".95"/>
+    <circle cx="600" cy="672" r="6" fill="#C94B79"/>
+    <path d="M556 717h88" stroke="#B3446C" stroke-width="7" stroke-linecap="round" opacity=".45"/>
+  </g>
+  <g transform="rotate(8 1030 450)">
+    <path d="M945 262c-2-76 26-137 69-137 38 0 52 46 51 103l-2 101" stroke="#8155AA" stroke-width="52" stroke-linecap="round"/>
+    <path d="M1078 262c2-76-26-137-69-137-38 0-52 46-51 103l2 101" stroke="#A47AC7" stroke-width="52" stroke-linecap="round"/>
+    <rect x="900" y="283" width="260" height="440" rx="126" fill="url(#plum)"/>
+    <ellipse cx="1030" cy="304" rx="92" ry="36" fill="#DDC7F0"/>
+    <rect x="932" y="367" width="30" height="300" rx="15" fill="url(#shine)" opacity=".8"/>
+    <circle cx="1030" cy="676" r="16" fill="#F3EAFB"/>
+    <circle cx="1030" cy="676" r="6" fill="#7952A5"/>
+  </g>
+</svg>
