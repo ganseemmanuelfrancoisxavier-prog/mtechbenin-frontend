@@ -272,7 +272,9 @@ function CategoryRevealCard({ item }) {
       ? styles.accessoriesImage
       : slug === "ecouteurs"
         ? styles.earbudsImage
-        : "";
+        : slug === "sextoys"
+          ? styles.sextoysImage
+          : "";
 
   return (
     <div className={styles.reveal}>
@@ -350,6 +352,8 @@ export default function CategoriesSection() {
       ...getCategoryContent("abonnements"),
     },
   ].sort((a, b) => {
+    if (a.slug === "sextoys") return b.slug === "sextoys" ? 0 : 1;
+    if (b.slug === "sextoys") return -1;
     const aOrder = getCategoryOrderIndex(a.slug);
     const bOrder = getCategoryOrderIndex(b.slug);
     if (aOrder !== -1 || bOrder !== -1) {
