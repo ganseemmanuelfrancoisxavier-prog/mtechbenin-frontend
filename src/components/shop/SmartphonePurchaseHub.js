@@ -106,7 +106,9 @@ export default function SmartphonePurchaseHub() {
           {devices.map((device) => (
             <Link
               className={styles.deviceCard}
-              href={device.href || `/recherche?q=${encodeURIComponent(device.title)}`}
+              href={device.href || (device.title?.toLowerCase() === "iphone"
+                ? "/smartphones/iphone"
+                : `/recherche?q=${encodeURIComponent(device.title)}`)}
               key={device.id || device.title}
             >
               {device.image ? (
