@@ -145,7 +145,7 @@ const CATEGORY_CONTENT = {
     description: "AirPods, écouteurs Bluetooth, accessoires audio...",
   },
   enceintes: {
-    image: "/images/categories/enceintes-reference.jpg",
+    image: "/images/categories/enceintes-partybox.svg",
     description: "Enceintes Bluetooth, barres de son, audio pro...",
   },
   "for-man": {
