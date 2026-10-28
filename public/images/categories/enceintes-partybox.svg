@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <rect width="1200" height="800" fill="#fff" />
+  <defs>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feGaussianBlur stdDeviation="18" /></filter>
+    <clipPath id="large"><rect x="200" y="80" width="510" height="650" rx="22" /></clipPath>
+    <clipPath id="small"><rect x="675" y="310" width="390" height="420" rx="22" /></clipPath>
+  </defs>
+  <ellipse cx="450" cy="730" rx="260" ry="24" fill="#111" opacity=".15" filter="url(#shadow)" />
+  <ellipse cx="870" cy="730" rx="200" ry="24" fill="#111" opacity=".15" filter="url(#shadow)" />
+  <image href="https://www.jbl.com.br/dw/image/v2/BFND_PRD/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw46cb0495/JBL_PARTYBOX_CLUB_120_SENSATION_WHITE_HERO_2_0311_x3.png?sh=1605&amp;sw=1605" x="200" y="80" width="510" height="650" preserveAspectRatio="xMidYMid meet" clip-path="url(#large)" />
+  <image href="https://www.jbl.com.mx/dw/image/v2/BFND_PRD/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw03a97d85/JBL_PARTYBOX_ENCORE_ESSENTIAL_FRONT_1605x1605px.png?sh=1605&amp;sw=1605" x="675" y="310" width="390" height="420" preserveAspectRatio="xMidYMid meet" clip-path="url(#small)" />
+</svg>
