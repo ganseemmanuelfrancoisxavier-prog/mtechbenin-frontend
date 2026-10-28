@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Check, CirclePlus, LoaderCircle, Pencil, Plus, Smartphone, Trash2 } from "lucide-react";
-import { productsApi, variantsApi } from "@/lib/api";
+import { Check, CirclePlus, ImagePlus, LoaderCircle, Pencil, Plus, Smartphone, Trash2, X } from "lucide-react";
+import { productsApi, uploadApi, variantsApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 
 const emptyForm = {
@@ -14,14 +14,73 @@ const emptyForm = {
   stock: "1",
   active: true,
   storages: [{ value: "", price: "" }],
-  colors: [{ value: "", delta: "0" }],
+  colors: [{ value: "", delta: "0", imageUrl: "" }],
 };
 const fieldClass = "w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-black/40";
+const COLOR_IMAGES_SPEC = "__mtech_iphone_color_images";
 const isIPhone = (product) => /iphone[\s-]*\d+/i.test(`${product?.name || ""} ${product?.slug || ""}`);
 const slugify = (value) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 function variantByName(types, name) {
   return types.find((type) => type.name.trim().toLowerCase() === name.toLowerCase());
+}
+
+function parseColorImages(raw) {
+  let specs = raw;
+  if (typeof specs === "string") {
+    try { specs = JSON.parse(specs); } catch { return []; }
+  }
+  if (!Array.isArray(specs)) return [];
+  const metadata = specs.find((spec) => spec.label === COLOR_IMAGES_SPEC);
+  if (!metadata?.value) return [];
+  try {
+    const images = JSON.parse(metadata.value);
+    return Array.isArray(images) ? images : [];
+  } catch { return []; }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function ColorImageInput({ value, onChange, color }) {
+  const inputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  const upload = async (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return setError("Choisissez un fichier image.");
+    if (file.size > 25 * 1024 * 1024) return setError("L’image doit faire moins de 25 Mo.");
+    setUploading(true);
+    setError("");
+    try {
+      const result = await uploadApi.upload(await fileToBase64(file), "mtechbenin/products/iphone-colors");
+      onChange(result.url);
+    } catch (err) {
+      setError(err.message || "Envoi de l’image impossible.");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="flex min-w-0 flex-wrap items-center gap-2">
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(event) => upload(event.target.files?.[0])} />
+      {value && <img src={value} alt={`Couleur ${color || ""}`} className="h-12 w-12 rounded-lg border border-black/10 bg-white object-contain p-0.5" />}
+      <button type="button" disabled={uploading} onClick={() => inputRef.current?.click()} className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-black/10 bg-white px-3 text-xs font-semibold hover:bg-neutral-100 disabled:opacity-50">
+        {uploading ? <LoaderCircle size={14} className="animate-spin" /> : <ImagePlus size={14} />}{value ? "Changer l’image" : "Ajouter l’image"}
+      </button>
+      {value && <button type="button" aria-label={`Retirer l’image de ${color}`} onClick={() => onChange("")} className="rounded-lg p-2 text-neutral-400 hover:bg-red-50 hover:text-red-600"><X size={15} /></button>}
+      {error && <span role="alert" className="text-xs text-red-600">{error}</span>}
+    </div>
+  );
 }
 
 export default function AdminIPhoneCatalog() {
@@ -55,6 +114,7 @@ export default function AdminIPhoneCatalog() {
       const { variantTypes = [] } = await variantsApi.getAll(product.id);
       const storage = variantByName(variantTypes, "Stockage");
       const color = variantByName(variantTypes, "Couleur");
+      const colorImages = parseColorImages(product.specs);
       setForm({
         id: product.id,
         name: product.name || "",
@@ -66,8 +126,8 @@ export default function AdminIPhoneCatalog() {
           ? storage.options.map((option) => ({ value: option.value, price: String(Number(product.price || 0) + Number(option.priceDelta || 0)) }))
           : [{ value: "", price: String(product.price || "") }],
         colors: color?.options?.length
-          ? color.options.map((option) => ({ value: option.value, delta: String(option.priceDelta || 0) }))
-          : [{ value: "", delta: "0" }],
+          ? color.options.map((option) => ({ value: option.value, delta: String(option.priceDelta || 0), imageUrl: colorImages.find((item) => item.color === option.value)?.imageUrl || "" }))
+          : [{ value: "", delta: "0", imageUrl: "" }]
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
@@ -129,11 +189,15 @@ export default function AdminIPhoneCatalog() {
     try {
       const minPrice = Math.min(...cleanStorages.map((row) => Number(row.price)));
       const slug = (form.slug.trim() || slugify(form.name)).toLowerCase();
+      const colorImages = cleanColors
+        .filter((row) => row.imageUrl)
+        .map((row) => ({ color: row.value.trim(), imageUrl: row.imageUrl }));
       const payload = {
         name: form.name.trim(), slug, categorySlug: "smartphone-tablette", price: minPrice,
         stock: Number(form.stock), status: Number(form.stock) > 0 ? "En stock" : "Rupture de stock",
         description: `Achetez ${form.name.trim()} chez MTECHBENIN. Choisissez le stockage et la couleur.`,
-        active: form.active, featured: false, images: JSON.stringify([form.image.trim()]), videoUrl: null, specs: [],
+        active: form.active, featured: false, images: JSON.stringify([form.image.trim()]), videoUrl: null,
+        specs: [{ label: COLOR_IMAGES_SPEC, value: JSON.stringify(colorImages) }],
       };
       if (form.id) {
         const result = await productsApi.update(form.id, payload);
@@ -195,9 +259,9 @@ export default function AdminIPhoneCatalog() {
         </section>
 
         <section className="rounded-2xl bg-neutral-50 p-4 sm:p-5">
-          <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="font-bold">Couleurs</h3><p className="text-xs text-neutral-500">Ajoutez un supplément en FCFA si une couleur coûte plus cher, sinon laissez 0.</p></div><button type="button" onClick={() => addRow("colors", { value: "", delta: "0" })} className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-bold"><Plus size={14} /> Couleur</button></div>
+          <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="font-bold">Couleurs</h3><p className="text-xs text-neutral-500">Ajoutez un supplément en FCFA si une couleur coûte plus cher, sinon laissez 0. Vous pouvez aussi ajouter une photo à chaque couleur.</p></div><button type="button" onClick={() => addRow("colors", { value: "", delta: "0", imageUrl: "" })} className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-bold"><Plus size={14} /> Couleur</button></div>
           <div className="space-y-2">
-            {form.colors.map((row, index) => <div key={`color-${index}`} className="grid grid-cols-[1fr_1fr_auto] gap-2"><input className={fieldClass} aria-label="Couleur" placeholder="Titane naturel" value={row.value} onChange={(e) => updateRow("colors", index, "value", e.target.value)} /><input className={fieldClass} aria-label="Supplément de prix couleur en FCFA" type="number" step="1" placeholder="Supplément FCFA" value={row.delta} onChange={(e) => updateRow("colors", index, "delta", e.target.value)} /><button type="button" aria-label="Supprimer cette couleur" onClick={() => removeRow("colors", index)} className="rounded-xl px-2 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={17} /></button></div>)}
+            {form.colors.map((row, index) => <div key={`color-${index}`} className="space-y-2 rounded-xl border border-black/[.06] bg-white p-3"><div className="grid grid-cols-[1fr_1fr_auto] gap-2"><input className={fieldClass} aria-label="Couleur" placeholder="Titane naturel" value={row.value} onChange={(e) => updateRow("colors", index, "value", e.target.value)} /><input className={fieldClass} aria-label="Supplément de prix couleur en FCFA" type="number" step="1" placeholder="Supplément FCFA" value={row.delta} onChange={(e) => updateRow("colors", index, "delta", e.target.value)} /><button type="button" aria-label="Supprimer cette couleur" onClick={() => removeRow("colors", index)} className="rounded-xl px-2 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={17} /></button></div><ColorImageInput color={row.value} value={row.imageUrl} onChange={(imageUrl) => updateRow("colors", index, "imageUrl", imageUrl)} /></div>)}
           </div>
         </section>
 
