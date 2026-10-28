@@ -18,7 +18,7 @@ import { settingsApi } from "@/lib/api";
 
 const DEVICES = [
   {
-    title: "iPhone",
+    title: "Apple",
     description: "Derniers modèles, accessoires, et plus encore.",
     image: "/images/reparation/devices/iphone.jpg",
     query: "iPhone",
@@ -59,7 +59,11 @@ export default function SmartphonePurchaseHub() {
       try {
         const configuredDevices = JSON.parse(settings.smartphoneHubDevices);
         if (Array.isArray(configuredDevices)) {
-          setDevices(configuredDevices.filter((device) => device.active !== false));
+          const normalizedDevices = configuredDevices.map((device) => {
+            const isApple = /iphone/i.test(String(device.title || "") + " " + String(device.href || ""));
+            return isApple ? { ...device, title: "Apple", href: "/smartphones/iphone" } : device;
+          });
+          setDevices(normalizedDevices.filter((device) => device.active !== false));
         }
       } catch (error) {
         console.error("Impossible de lire les appareils de la boutique", error);
@@ -106,7 +110,7 @@ export default function SmartphonePurchaseHub() {
           {devices.map((device) => (
             <Link
               className={styles.deviceCard}
-              href={device.href || (device.title?.toLowerCase() === "iphone"
+              href={device.href || (/^(apple|iphone)$/i.test(device.title || "")
                 ? "/smartphones/iphone"
                 : `/recherche?q=${encodeURIComponent(device.title)}`)}
               key={device.id || device.title}
