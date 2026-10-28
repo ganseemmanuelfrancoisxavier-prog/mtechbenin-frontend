@@ -79,6 +79,11 @@ export default function CataloguePage({ initialCategory = "tous" }) {
           // Supporte les deux champs : categorySlug (API) et category (local)
           (p.categorySlug || p.category) === selectedCategory,
       );
+    } else {
+      list = list.filter((p) => {
+        const category = String(p.categorySlug || p.category || "").toLowerCase();
+        return category !== "vape" && category !== "vapes";
+      });
     }
 
     if (onlyInStock) {
