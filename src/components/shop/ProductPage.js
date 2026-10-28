@@ -48,12 +48,28 @@ function parseImages(raw) {
 // ── Normalise specs depuis l'API (JSON string ou array) ──────────────────────
 function parseSpecs(raw) {
   if (!raw) return [];
-  if (Array.isArray(raw)) return raw;
+  const hideInternal = (specs) => specs.filter((spec) => spec.label !== "__mtech_iphone_color_images");
+  if (Array.isArray(raw)) return hideInternal(raw);
   try {
-    return JSON.parse(raw) || [];
+    const parsed = JSON.parse(raw) || [];
+    return Array.isArray(parsed) ? hideInternal(parsed) : [];
   } catch {
     return [];
   }
+}
+
+function parseColorImages(raw) {
+  let specs = raw;
+  if (typeof specs === "string") {
+    try { specs = JSON.parse(specs); } catch { return []; }
+  }
+  if (!Array.isArray(specs)) return [];
+  const metadata = specs.find((spec) => spec.label === "__mtech_iphone_color_images");
+  if (!metadata?.value) return [];
+  try {
+    const images = JSON.parse(metadata.value);
+    return Array.isArray(images) ? images : [];
+  } catch { return []; }
 }
 
 // ── Normalise le statut ───────────────────────────────────────────────────────
@@ -166,6 +182,7 @@ export default function ProductPage({ slug }) {
         ...baseProduct,
         images: parseImages(baseProduct.images),
         specs: parseSpecs(baseProduct.specs),
+        colorImages: parseColorImages(baseProduct.specs),
         status: getStatus(baseProduct),
         videoUrl: baseProduct.videoUrl || null,
       }
@@ -222,8 +239,12 @@ export default function ProductPage({ slug }) {
   // Use its videoUrl in priority over the store cache which can be up to 5 min stale.
   // Galerie unifiée : les photos, puis la vidéo à la fin s'il y en a une —
   // activeImage indexe ce tableau, balayable comme les photos.
+  const selectedColorImage = product.colorImages.find((item) => item.color === selectedVariants.Couleur)?.imageUrl;
   const media = [
-    ...product.images.map((url) => ({ type: "image", url })),
+    ...product.images.map((url, index) => ({
+      type: "image",
+      url: index === 0 ? selectedColorImage || url : url,
+    })),
     ...(videoUrl ? [{ type: "video", url: videoUrl }] : []),
   ];
   // Filet de sécurité : si les données du produit se rafraîchissent avec
@@ -538,12 +559,13 @@ export default function ProductPage({ slug }) {
                       return (
                         <button
                           key={opt.id}
-                          onClick={() =>
+                          onClick={() => {
                             setSelectedVariants((prev) => ({
                               ...prev,
                               [vType.name]: isSelected ? undefined : opt.value,
-                            }))
-                          }
+                            }));
+                            if (vType.name.toLowerCase() === "couleur") setActiveImage(0);
+                          }}
                           className="px-4 py-2 rounded-2xl text-[13px] font-semibold transition-all duration-150"
                           style={
                             isSelected

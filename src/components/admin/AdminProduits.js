@@ -102,7 +102,21 @@ function parseSpecs(raw) {
   if (!raw) return [];
   try {
     const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((spec) => spec.label !== "__mtech_iphone_color_images")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function getInternalSpecs(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed)
+      ? parsed.filter((spec) => spec.label === "__mtech_iphone_color_images")
+      : [];
   } catch {
     return [];
   }
@@ -515,7 +529,7 @@ export default function AdminProduits({ smartphoneOnly = false }) {
       featured: form.featured,
       images: JSON.stringify(imageUrls),
       videoUrl: videoMedia ? videoMedia.url : null,
-      specs: form.specs?.length ? form.specs : [],
+      specs: [...(form.specs || []), ...getInternalSpecs(editingProduct?.specs)],
     };
     try {
       if (editingProduct)
