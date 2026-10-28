@@ -66,6 +66,7 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
+      { protocol: "https", hostname: "cdsassets.apple.com" },
       { protocol: "https", hostname: "cdn.youcan.shop" },
       { protocol: "https", hostname: "assets.youcan.shop" },
       { protocol: "https", hostname: "images.unsplash.com" },
