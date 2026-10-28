@@ -48,14 +48,14 @@ export default function CataloguePage({ initialCategory = "tous" }) {
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [maxPrice, setMaxPrice] = useState(500000);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const isVapesCategory = ["vape", "vapes"].includes(
+  const isAgeRestrictedCategory = ["vape", "vapes", "sextoy", "sextoys"].includes(
     String(selectedCategory).toLowerCase(),
   );
-  const showAgeGate = isVapesCategory && !ageVerified;
+  const showAgeGate = isAgeRestrictedCategory && !ageVerified;
 
   useEffect(() => {
-    if (!isVapesCategory) setAgeVerified(false);
-  }, [isVapesCategory]);
+    if (!isAgeRestrictedCategory) setAgeVerified(false);
+  }, [isAgeRestrictedCategory]);
 
   useEffect(() => {
     if (!showAgeGate) return undefined;
@@ -82,7 +82,7 @@ export default function CataloguePage({ initialCategory = "tous" }) {
     } else {
       list = list.filter((p) => {
         const category = String(p.categorySlug || p.category || "").toLowerCase();
-        return category !== "vape" && category !== "vapes";
+        return !["vape", "vapes", "sextoy", "sextoys"].includes(category);
       });
     }
 
@@ -334,7 +334,7 @@ export default function CataloguePage({ initialCategory = "tous" }) {
             Cette catégorie est réservée aux adultes
           </h2>
           <p id="age-gate-description" className="mt-3 text-sm leading-6 text-apple-mid">
-            Confirme que tu as 18 ans ou plus pour consulter les produits de la catégorie Vapes.
+            Confirme que tu as 18 ans ou plus pour consulter les produits de cette catégorie.
           </p>
           <button
             type="button"
