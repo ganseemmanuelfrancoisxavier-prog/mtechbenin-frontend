@@ -81,7 +81,8 @@
 
 .accessoriesImage,
 .earbudsImage,
-.sextoysImage {
+.sextoysImage,
+.speakerImage {
   object-fit: contain;
   padding: 7px;
 }
