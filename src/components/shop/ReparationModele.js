@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { faqApi, reparationApi, reviewsApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
-import { modeleIphoneSecours } from "@/lib/reparationModeles";
+import { imageIphone, modeleIphoneSecours } from "@/lib/reparationModeles";
 import styles from "./ReparationModele.module.css";
 
 // Estime un délai en heures pour comparer deux libellés en texte libre —
@@ -50,13 +50,7 @@ function prixMini(options) {
 function imageModele(slug, espace) {
   const normalise = String(slug || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   if (normalise.includes("iphone")) {
-    const n = normalise.match(/iphone(17|16|15|14|13|12)/)?.[1];
-    const suffixe = normalise.includes("promax")
-      ? "pro-max"
-      : normalise.includes("pro")
-        ? "pro"
-        : "";
-    if (n) return `/images/reparation/models/iphone-${n}${suffixe ? `-${suffixe}` : ""}.jpg`;
+    return imageIphone(normalise);
   }
   if (espace === "android") return "/images/reparation/devices/android.png";
   if (espace === "pc") return "/images/reparation/devices/computer.png";
@@ -233,7 +227,7 @@ export default function ReparationModele({ espace, slug }) {
   if (erreur || !donnees) {
     const modeleSecours = espace === "apple" ? modeleIphoneSecours(slug) : null;
     if (modeleSecours) {
-      const imageSecours = `/images/reparation/models/${modeleSecours.image}`;
+      const imageSecours = modeleSecours.image;
       const messageWhatsapp = encodeURIComponent(`Bonjour MTECHBENIN, je souhaite un diagnostic et un devis pour mon ${modeleSecours.name}.`);
       return (
         <div className={styles.page}>
