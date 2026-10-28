@@ -196,6 +196,10 @@ const CATEGORY_CONTENT = {
     image: "/images/categories/vapes.webp",
     description: "Vapes et cigarettes électroniques.",
   },
+  sextoys: {
+    image: "/images/categories/sextoys.svg",
+    description: "Bien-être intime et accessoires pour adultes.",
+  },
 };
 
 const CATEGORY_ORDER = [
