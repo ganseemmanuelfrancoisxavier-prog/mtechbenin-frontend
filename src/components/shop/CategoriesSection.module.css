@@ -80,7 +80,8 @@
 }
 
 .accessoriesImage,
-.earbudsImage {
+.earbudsImage,
+.sextoysImage {
   object-fit: contain;
   padding: 7px;
 }
