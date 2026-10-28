@@ -139,11 +139,11 @@ const CATEGORY_CONTENT = {
     description: "Netflix, Apple Music, iCloud+, Apple TV, etc.",
   },
   accessoires: {
-    image: "/images/categories/accessoires.jpg",
+    image: "/images/categories/accessoires-magsafe.svg",
     description: "Chargeurs, câbles, coques, protections, MagSafe...",
   },
   ecouteurs: {
-    image: "/images/categories/ecouteurs.jpg",
+    image: "/images/categories/ecouteurs-airpods-casque.svg",
     description: "AirPods, écouteurs Bluetooth, accessoires audio...",
   },
   enceintes: {
