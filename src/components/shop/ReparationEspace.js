@@ -5,25 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import { reparationApi } from "@/lib/api";
-import { MODELES_IPHONE } from "@/lib/reparationModeles";
+import { MODELES_IPHONE, imageIphone } from "@/lib/reparationModeles";
 import styles from "./ReparationEspace.module.css";
 
 const NOMS_ESPACE = { apple: "iPhone", android: "Android", pc: "Mac / PC" };
-
-const IPHONE_IMAGES = [
-  ["iphone17promax", "iphone-17-pro-max"],
-  ["iphone17pro", "iphone-17-pro"],
-  ["iphone17", "iphone-17"],
-  ["iphone16promax", "iphone-16-pro-max"],
-  ["iphone16pro", "iphone-16-pro"],
-  ["iphone16", "iphone-16"],
-  ["iphone15promax", "iphone-15-pro-max"],
-  ["iphone15pro", "iphone-15-pro"],
-  ["iphone15", "iphone-15"],
-  ["iphone14", "iphone-14"],
-  ["iphone13", "iphone-13"],
-  ["iphone12", "iphone-12"],
-];
 
 function normaliserTexte(value) {
   return String(value || "")
@@ -36,9 +21,7 @@ function normaliserTexte(value) {
 function imageModele(modele, espace) {
   const nom = normaliserTexte(`${modele.name} ${modele.slug}`);
   if (espace === "apple") {
-    const entree = IPHONE_IMAGES.find(([cle]) => nom.includes(cle));
-    if (entree) return `/images/reparation/models/${entree[1]}.jpg`;
-    return "/images/categories/smartphone-tablette.jpg";
+    return imageIphone(nom);
   }
   if (espace === "android") return "/images/reparation/devices/android.png";
   return "/images/reparation/devices/computer.png";
@@ -82,7 +65,7 @@ export default function ReparationEspace({ espace }) {
           visibles = MODELES_IPHONE.map((modele) => ({
             ...modele,
             id: modele.slug,
-            image: `/images/reparation/models/${modele.image}`,
+            image: modele.image,
             family: { name: "iPhone" },
             catalogueSecours: true,
           }));
