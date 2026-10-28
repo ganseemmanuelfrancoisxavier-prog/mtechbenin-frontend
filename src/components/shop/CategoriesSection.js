@@ -274,7 +274,9 @@ function CategoryRevealCard({ item }) {
         ? styles.earbudsImage
         : slug === "sextoys"
           ? styles.sextoysImage
-          : "";
+          : slug === "enceintes"
+            ? styles.speakerImage
+            : "";
 
   return (
     <div className={styles.reveal}>
