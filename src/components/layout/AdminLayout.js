@@ -32,6 +32,7 @@ import {
   X,
   Smile,
   Megaphone,
+  QrCode,
 } from "lucide-react";
 
 const navItems = [
@@ -42,6 +43,7 @@ const navItems = [
   { href: "/admin/categories", icon: LayoutGrid, label: "Catégories" },
   { href: "/admin/commandes", icon: ShoppingBag, label: "Commandes" },
   { href: "/admin/abonnements", icon: Tv, label: "Abonnements" },
+  { href: "/admin/whatsapp", icon: QrCode, label: "WhatsApp" },
   { href: "/admin/codes-otp", icon: KeyRound, label: "Journal des codes" },
   { href: "/admin/reparations", icon: Wrench, label: "Réparations" },
   { href: "/admin/clients", icon: Users, label: "Clients" },
@@ -64,6 +66,7 @@ const pageLabels = {
   "/admin/categories": "Catégories",
   "/admin/commandes": "Commandes",
   "/admin/abonnements": "Abonnements",
+  "/admin/whatsapp": "WhatsApp",
   "/admin/clients": "Clients",
   "/admin/avis": "Avis",
   "/admin/contacts": "Contacts",
