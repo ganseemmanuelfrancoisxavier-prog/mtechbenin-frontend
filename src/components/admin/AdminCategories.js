@@ -71,7 +71,7 @@ export default function AdminCategories() {
       label: cat.label || cat.name,
       slug: cat.slug,
       active: cat.active,
-      imageUrl: imageParts.slice(1).join("::catalogue::"),
+      imageUrl: imageParts.join("::catalogue::"),
     });
     setShowModal(true);
   };
