@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import useCategoryStore from "@/store/categoryStore";
 import useProductStore from "@/store/productStore";
 import { categories as staticCategories } from "@/lib/categories";
