@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 import useCategoryStore from "@/store/categoryStore";
 import useProductStore from "@/store/productStore";
 import { categories as staticCategories } from "@/lib/categories";
-import { isCatalogueCategory } from "@/lib/catalogueCategories";
+import { isCatalogueCategory, isRepairCategory } from "@/lib/catalogueCategories";
 import { readCatalogueCategoryMeta } from "@/lib/catalogueCategoryMeta";
 import styles from "./CategoriesSection.module.css";
 
@@ -187,11 +187,13 @@ export default function CategoriesSection() {
       return {
         slug: cat.slug,
         label,
-        href: cat.slug === "abonnements"
-          ? "/abonnements"
-          : isSmartphoneCategory(cat.slug)
-            ? "/smartphones"
-            : `/catalogue/${cat.slug}`,
+        href: isRepairCategory(cat)
+          ? "/reparation"
+          : cat.slug === "abonnements"
+            ? "/abonnements"
+            : isSmartphoneCategory(cat.slug)
+              ? "/smartphones"
+              : `/catalogue/${cat.slug}`,
         ...content,
         image: catalogueImage || content.image || productImage,
         description: catalogueDescription || getCategoryDescription(cat.slug, label),

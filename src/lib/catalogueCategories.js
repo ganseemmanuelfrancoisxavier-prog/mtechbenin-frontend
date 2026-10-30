@@ -7,12 +7,15 @@ function normaliser(value) {
     .replace(/^-|-$/g, "");
 }
 
-export function isCatalogueCategory(category) {
+export function isRepairCategory(category) {
   const slug = normaliser(category?.slug);
   const label = normaliser(category?.label || category?.name);
-  const searchable = `${slug}-${label}`;
+  return /(^|-)repar/.test(`${slug}-${label}`);
+}
+
+export function isCatalogueCategory(category) {
+  const searchable = `${normaliser(category?.slug)}-${normaliser(category?.label || category?.name)}`;
   return !(
-    /(^|-)repar/.test(searchable) ||
     /(^|-)suivi($|-)/.test(searchable) ||
     /order-tracking/.test(searchable)
   );
