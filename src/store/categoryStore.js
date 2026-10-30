@@ -38,7 +38,7 @@ const useCategoryStore = create(
                 slug: c.slug,
                 name: c.name,
                 label: c.label || c.name,
-                icon: c.icon || "📦",
+                icon: c.icon || "",
                 sortOrder: c.sortOrder || 0,
                 active: c.active,
               }));
