@@ -13,8 +13,9 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { categoriesApi } from "@/lib/api";
+import MediaUploader from "@/components/admin/MediaUploader";
 
-const emptyForm = { label: "", slug: "", icon: "📦", active: true };
+const emptyForm = { label: "", slug: "", icon: "📦", active: true, imageUrl: "" };
 
 function generateSlug(label) {
   return label
@@ -80,11 +81,13 @@ export default function AdminCategories() {
 
   const openEdit = (cat) => {
     setEditingCat(cat);
+    const [icon, ...imageParts] = String(cat.icon || "📦").split("::catalogue::");
     setForm({
       label: cat.label || cat.name,
       slug: cat.slug,
-      icon: cat.icon || "📦",
+      icon: icon || "📦",
       active: cat.active,
+      imageUrl: imageParts.join("::catalogue::"),
     });
     setShowModal(true);
   };
@@ -92,8 +95,12 @@ export default function AdminCategories() {
   const handleSave = async () => {
     if (!form.label) return;
     setSaving(true);
+    const { imageUrl, ...categoryForm } = form;
     const data = {
-      ...form,
+      ...categoryForm,
+      icon: imageUrl
+        ? `${categoryForm.icon}::catalogue::${imageUrl}`
+        : categoryForm.icon,
       name: form.label,
       slug: form.slug || generateSlug(form.label),
     };
@@ -205,7 +212,7 @@ export default function AdminCategories() {
               >
                 <GripVertical className="w-4 h-4 text-apple-mid/40 flex-shrink-0" />
                 <span className="text-xl flex-shrink-0">
-                  {cat.icon || "📦"}
+                  {String(cat.icon || "📦").split("::catalogue::")[0]}
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -332,6 +339,14 @@ export default function AdminCategories() {
                   ))}
                 </div>
               </div>
+              <MediaUploader
+                value={form.imageUrl}
+                onChange={(url) => updateForm("imageUrl", url)}
+                folder="mtechbenin/categories"
+                accept="image/*"
+                label="Photo du catalogue"
+                hideUrlTab
+              />
               <div className="flex items-center justify-between p-4 bg-apple-gray rounded-2xl">
                 <div>
                   <p className="font-medium text-apple-black text-sm">
