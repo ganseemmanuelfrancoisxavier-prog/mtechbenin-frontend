@@ -290,9 +290,9 @@ export default function AdminCategories() {
                 className={`flex items-center gap-4 px-5 py-4 hover:bg-apple-gray/30 transition ${!cat.active ? "opacity-40" : ""}`}
               >
                 <div className="w-10 h-10 flex-shrink-0 rounded-xl bg-black/[0.04] overflow-hidden">
-                  {String(cat.icon || "").split("::catalogue::").slice(1).join("::catalogue::") ? (
+                  {readCatalogueCategoryMeta(cat.icon).imageUrl ? (
                     <img
-                      src={String(cat.icon).split("::catalogue::").slice(1).join("::catalogue::")}
+                      src={readCatalogueCategoryMeta(cat.icon).imageUrl}
                       alt=""
                       className="h-full w-full object-cover"
                     />
