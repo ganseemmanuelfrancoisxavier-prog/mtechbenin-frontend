@@ -8,6 +8,7 @@ import useCategoryStore from "@/store/categoryStore";
 import useProductStore from "@/store/productStore";
 import { categories as staticCategories } from "@/lib/categories";
 import { isCatalogueCategory } from "@/lib/catalogueCategories";
+import { readCatalogueCategoryMeta } from "@/lib/catalogueCategoryMeta";
 import styles from "./CategoriesSection.module.css";
 
 const CATEGORIES_AFFICHÉES = 8;
@@ -179,10 +180,8 @@ export default function CategoriesSection() {
     .filter((cat) => isCatalogueCategory(cat))
     .map((cat) => {
       const label = cat.label || cat.name;
-      const catalogueImage = String(cat.icon || "")
-        .split("::catalogue::")
-        .slice(1)
-        .join("::catalogue::");
+      const { imageUrl: catalogueImage, description: catalogueDescription } =
+        readCatalogueCategoryMeta(cat.icon);
       const content = getCategoryContent(cat.slug);
       const productImage = featuredProducts.find(
         (product) => product.category === cat.slug && product.image,
@@ -197,19 +196,9 @@ export default function CategoriesSection() {
             : `/catalogue/${cat.slug}`,
         ...content,
         image: catalogueImage || content.image || productImage,
-        description: getCategoryDescription(cat.slug, label),
+        description: catalogueDescription || getCategoryDescription(cat.slug, label),
       };
     });
-
-  if (!allItems.some((item) => item.slug === "abonnements")) {
-    allItems.push({
-      slug: "abonnements",
-      label: "Abonnements",
-      href: "/abonnements",
-      ...getCategoryContent("abonnements"),
-      description: getCategoryDescription("abonnements", "Abonnements"),
-    });
-  }
 
   const visibleItems = allItems.slice(0, CATEGORIES_AFFICHÉES);
 
