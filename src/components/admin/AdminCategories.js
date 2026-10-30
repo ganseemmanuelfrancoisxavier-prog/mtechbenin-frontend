@@ -38,6 +38,7 @@ export default function AdminCategories() {
   const [editingCat, setEditingCat] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -48,28 +49,7 @@ export default function AdminCategories() {
     setLoading(true);
     try {
       const data = await categoriesApi.getAllAdmin();
-      let allCategories = data.categories || [];
-      if (!allCategories.some((category) => category.slug === "abonnements")) {
-        const sortOrder = Math.max(
-          -1,
-          ...allCategories.map((category) => Number(category.sortOrder) || 0),
-        ) + 1;
-        try {
-          const created = await categoriesApi.create({
-            name: "Abonnements",
-            label: "Abonnements",
-            slug: "abonnements",
-            icon: writeCatalogueCategoryMeta(),
-            active: true,
-            sortOrder,
-          });
-          if (created.category) allCategories = [...allCategories, created.category];
-        } catch (createError) {
-          console.error("Erreur création de la catégorie Abonnements", createError.message);
-          const refreshed = await categoriesApi.getAllAdmin();
-          allCategories = refreshed.categories || allCategories;
-        }
-      }
+      const allCategories = data.categories || [];
       setCategories(allCategories);
       const publicCategories = allCategories
         .filter((category) => category.active)
@@ -166,13 +146,30 @@ export default function AdminCategories() {
   };
 
   const handleDelete = async (id) => {
+    const deletedCategory = categories.find((category) => category.id === id);
+    setDeleteError("");
+    setCategories((previous) => previous.filter((category) => category.id !== id));
+    useCategoryStore.setState((state) => ({
+      categories: state.categories.filter((category) => category.id !== id),
+      _lastFetch: Date.now(),
+    }));
+    setDeleteConfirm(null);
+
     try {
       await categoriesApi.delete(id);
       await loadAll();
     } catch (err) {
       console.error("Erreur delete catégorie", err.message);
+      setDeleteError("La catégorie n’a pas pu être supprimée. " + (err.message || ""));
+      if (deletedCategory) {
+        setCategories((previous) =>
+          previous.some((category) => category.id === id)
+            ? previous
+            : [...previous, deletedCategory],
+        );
+      }
+      await loadAll();
     }
-    setDeleteConfirm(null);
   };
 
   // ── Toggle optimiste — met à jour localement SANS recharger ──────────────
@@ -260,6 +257,12 @@ export default function AdminCategories() {
           </button>
         </div>
       </div>
+
+      {deleteError && (
+        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+          {deleteError}
+        </p>
+      )}
 
       <div className="glass-card rounded-3xl overflow-hidden">
         <div className="divide-y divide-black/5">
