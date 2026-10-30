@@ -11,8 +11,11 @@ import {
   ToggleRight,
   GripVertical,
   RefreshCw,
+  ChevronsUp,
+  ChevronsDown,
 } from "lucide-react";
 import { categoriesApi } from "@/lib/api";
+import useCategoryStore from "@/store/categoryStore";
 import MediaUploader from "@/components/admin/MediaUploader";
 
 const emptyForm = { label: "", slug: "", icon: "📦", active: true, imageUrl: "" };
@@ -53,6 +56,7 @@ export default function AdminCategories() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [orderingCategory, setOrderingCategory] = useState(null);
 
   // ── Charge TOUTES les catégories (actives + inactives) via l'endpoint admin ──
   const loadAll = async () => {
@@ -81,11 +85,11 @@ export default function AdminCategories() {
 
   const openEdit = (cat) => {
     setEditingCat(cat);
-    const [icon, ...imageParts] = String(cat.icon || "📦").split("::catalogue::");
+    const [icon, ...imageParts] = String(cat.icon || "").split("::catalogue::");
     setForm({
       label: cat.label || cat.name,
       slug: cat.slug,
-      icon: icon || "📦",
+      icon: icon || "",
       active: cat.active,
       imageUrl: imageParts.join("::catalogue::"),
     });
@@ -151,6 +155,36 @@ export default function AdminCategories() {
     (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0),
   );
 
+  const moveCategoryToEdge = async (category, edge) => {
+    if (sortedCategories.length < 2) return;
+    const edgeCategory = edge === "first"
+      ? sortedCategories[0]
+      : sortedCategories[sortedCategories.length - 1];
+    const nextSortOrder = edge === "first"
+      ? Number(edgeCategory.sortOrder || 0) - 1
+      : Number(edgeCategory.sortOrder || 0) + 1;
+
+    setOrderingCategory(category.id);
+    try {
+      await categoriesApi.update(category.id, { sortOrder: nextSortOrder });
+      setCategories((current) =>
+        current.map((item) => item.id === category.id
+          ? { ...item, sortOrder: nextSortOrder }
+          : item),
+      );
+      useCategoryStore.setState((state) => ({
+        categories: state.categories.map((item) => item.id === category.id
+          ? { ...item, sortOrder: nextSortOrder }
+          : item),
+        _lastFetch: Date.now(),
+      }));
+    } catch (err) {
+      console.error("Erreur déplacement catégorie", err.message);
+    } finally {
+      setOrderingCategory(null);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
@@ -212,7 +246,7 @@ export default function AdminCategories() {
               >
                 <GripVertical className="w-4 h-4 text-apple-mid/40 flex-shrink-0" />
                 <span className="text-xl flex-shrink-0">
-                  {String(cat.icon || "📦").split("::catalogue::")[0]}
+                  {String(cat.icon || "").split("::catalogue::")[0]}
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -240,6 +274,24 @@ export default function AdminCategories() {
                   {cat.active ? "Active" : "Inactive"}
                 </span>
                 <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => moveCategoryToEdge(cat, "first")}
+                    disabled={orderingCategory !== null}
+                    className="p-2 rounded-xl hover:bg-apple-gray transition text-apple-mid hover:text-apple-black disabled:opacity-40"
+                    title="Mettre en première position"
+                    aria-label={`Mettre ${cat.label || cat.name} en première position`}
+                  >
+                    <ChevronsUp className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => moveCategoryToEdge(cat, "last")}
+                    disabled={orderingCategory !== null}
+                    className="p-2 rounded-xl hover:bg-apple-gray transition text-apple-mid hover:text-apple-black disabled:opacity-40"
+                    title="Mettre en dernière position"
+                    aria-label={`Mettre ${cat.label || cat.name} en dernière position`}
+                  >
+                    <ChevronsDown className="w-4 h-4" />
+                  </button>
                   <button
                     onClick={() => handleToggle(cat)}
                     className="p-2 rounded-xl hover:bg-apple-gray transition text-apple-mid hover:text-apple-black"
@@ -324,6 +376,17 @@ export default function AdminCategories() {
                   Icône
                 </label>
                 <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
+                  <button
+                    type="button"
+                    onClick={() => updateForm("icon", "")}
+                    className={`min-h-10 rounded-xl border px-3 text-xs font-medium transition-all ${
+                      !form.icon
+                        ? "border-apple-black bg-apple-black text-white"
+                        : "border-black/[0.06] bg-apple-gray text-apple-mid hover:bg-black/[0.07]"
+                    }`}
+                  >
+                    Aucune icône
+                  </button>
                   {iconOptions.map((icon) => (
                     <button
                       key={icon}
