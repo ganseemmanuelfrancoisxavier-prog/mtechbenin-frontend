@@ -412,7 +412,7 @@ export default function ProductPage({ slug }) {
                 src={media[safeActiveImage].url}
                 alt={product.name}
                 fill
-                className="object-contain pointer-events-none p-3 md:p-5"
+                className="object-cover pointer-events-none"
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 draggable={false}
               />
@@ -619,14 +619,6 @@ export default function ProductPage({ slug }) {
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2 text-sm">
-            <span className={"mt-1.5 h-2.5 w-2.5 rounded-full " + (isRupture ? "bg-red-500" : "bg-green-500")} />
-            <div>
-              <p className={"font-semibold " + (isRupture ? "text-red-600" : "text-green-700")}>{isRupture ? "Rupture de stock" : "En stock"}</p>
-              {!isRupture && <p className="text-xs text-apple-mid">{product.stock > 50 ? "Plus de 50 articles disponibles" : product.stock + " article" + (product.stock > 1 ? "s" : "") + " disponible" + (product.stock > 1 ? "s" : "")}</p>}
             </div>
           </div>
 
