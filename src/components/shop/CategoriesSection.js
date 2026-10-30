@@ -332,6 +332,8 @@ export default function CategoriesSection() {
       .filter((cat) => cat.slug !== "abonnements" && isCatalogueCategory(cat))
       .map((cat) => {
         const label = cat.label || cat.name;
+        const [categoryIcon, ...imageParts] = String(cat.icon || "📦").split("::catalogue::");
+        const catalogueImage = imageParts.join("::catalogue::");
         const content = getCategoryContent(cat.slug);
         const productImage = featuredProducts.find(
           (product) => product.category === cat.slug && product.image,
@@ -339,12 +341,12 @@ export default function CategoriesSection() {
         return {
           slug: cat.slug,
           label,
-          Icon: emojiToIcon[cat.icon] || DefaultIcon,
+          Icon: emojiToIcon[categoryIcon] || DefaultIcon,
           href: isSmartphoneCategory(cat.slug)
             ? "/smartphones"
             : `/catalogue/${cat.slug}`,
           ...content,
-          image: content.image || productImage,
+          image: catalogueImage || content.image || productImage,
           description: getCategoryDescription(cat.slug, label),
         };
       }),
