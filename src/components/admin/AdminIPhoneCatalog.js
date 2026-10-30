@@ -17,7 +17,7 @@ const emptyForm = {
   colors: [{ value: "", delta: "0", imageUrl: "" }],
 };
 const fieldClass = "w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-black/40";
-const COLOR_IMAGES_SPEC = "__mtech_iphone_color_images";
+const COLOR_IMAGES_SPEC = "__mtech_variant_color_images";
 const isIPhone = (product) => /iphone[\s-]*\d+/i.test(`${product?.name || ""} ${product?.slug || ""}`);
 const slugify = (value) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
@@ -31,7 +31,7 @@ function parseColorImages(raw) {
     try { specs = JSON.parse(specs); } catch { return []; }
   }
   if (!Array.isArray(specs)) return [];
-  const metadata = specs.find((spec) => spec.label === COLOR_IMAGES_SPEC);
+  const metadata = specs.find((spec) => spec.label === COLOR_IMAGES_SPEC || spec.label === "__mtech_iphone_color_images");
   if (!metadata?.value) return [];
   try {
     const images = JSON.parse(metadata.value);
@@ -126,7 +126,7 @@ export default function AdminIPhoneCatalog() {
           ? storage.options.map((option) => ({ value: option.value, price: String(Number(product.price || 0) + Number(option.priceDelta || 0)) }))
           : [{ value: "", price: String(product.price || "") }],
         colors: color?.options?.length
-          ? color.options.map((option) => ({ value: option.value, delta: String(option.priceDelta || 0), imageUrl: colorImages.find((item) => item.color === option.value)?.imageUrl || "" }))
+          ? color.options.map((option) => ({ value: option.value, delta: String(option.priceDelta || 0), imageUrl: colorImages.find((item) => (item.value || item.color) === option.value)?.imageUrl || "" }))
           : [{ value: "", delta: "0", imageUrl: "" }]
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -191,7 +191,7 @@ export default function AdminIPhoneCatalog() {
       const slug = (form.slug.trim() || slugify(form.name)).toLowerCase();
       const colorImages = cleanColors
         .filter((row) => row.imageUrl)
-        .map((row) => ({ color: row.value.trim(), imageUrl: row.imageUrl }));
+        .map((row) => ({ typeName: "Couleur", value: row.value.trim(), imageUrl: row.imageUrl }));
       const payload = {
         name: form.name.trim(), slug, categorySlug: "smartphone-tablette", price: minPrice,
         stock: Number(form.stock), status: Number(form.stock) > 0 ? "En stock" : "Rupture de stock",
