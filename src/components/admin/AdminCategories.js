@@ -71,6 +71,21 @@ export default function AdminCategories() {
         }
       }
       setCategories(allCategories);
+      const publicCategories = allCategories
+        .filter((category) => category.active)
+        .map((category) => ({
+          id: category.id,
+          slug: category.slug,
+          name: category.name,
+          label: category.label || category.name,
+          icon: category.icon || "",
+          sortOrder: category.sortOrder || 0,
+          active: category.active,
+        }));
+      useCategoryStore.setState({
+        categories: publicCategories,
+        _lastFetch: Date.now(),
+      });
     } catch (err) {
       console.error("Erreur chargement catégories", err.message);
     }
