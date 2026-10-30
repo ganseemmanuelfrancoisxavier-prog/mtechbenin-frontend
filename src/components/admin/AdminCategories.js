@@ -9,16 +9,15 @@ import {
   Check,
   ToggleLeft,
   ToggleRight,
-  GripVertical,
   RefreshCw,
-  ChevronsUp,
-  ChevronsDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { categoriesApi } from "@/lib/api";
 import useCategoryStore from "@/store/categoryStore";
 import MediaUploader from "@/components/admin/MediaUploader";
 
-const emptyForm = { label: "", slug: "", icon: "📦", active: true, imageUrl: "" };
+const emptyForm = { label: "", slug: "", active: true, imageUrl: "" };
 
 function generateSlug(label) {
   return label
@@ -28,24 +27,6 @@ function generateSlug(label) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
-
-const iconOptions = [
-  "🎧", "🔊", "💨", "💄", "📦", "🎮",
-  "📱", "💻", "⌚", "🎵", "📷", "🖥️",
-  "🎤", "🎹", "🥁", "🎸", "🎺", "🎻",
-  "🕹️", "🃏", "🎲", "🧩", "🏆", "⚽",
-  "🏀", "🎾", "🎳", "🎯", "🎪", "🎭",
-  "🖨️", "🖱️", "🖲️", "💾", "💿", "📀",
-  "📺", "📡", "🔋", "🔌", "💡", "🔦",
-  "🧲", "🔧", "🔩", "⚙️", "🛠️", "🔬",
-  "🔭", "🧪", "🧬", "🌐", "📡", "🛰️",
-  "🚗", "🏍️", "🚲", "✈️", "🚀", "⛵",
-  "👟", "👜", "🕶️", "💍", "👑", "🪆",
-  "🛍️", "🎁", "🎀", "🧸", "🪅", "🪄",
-  "🌸", "🌿", "🌴", "🍎", "🍕", "☕",
-  "🧴", "🪥", "🧹", "🪑", "🛋️", "🪴",
-  "💎", "🪙", "💰", "🏅", "🥇", "⭐",
-];
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
@@ -85,13 +66,12 @@ export default function AdminCategories() {
 
   const openEdit = (cat) => {
     setEditingCat(cat);
-    const [icon, ...imageParts] = String(cat.icon || "").split("::catalogue::");
+    const imageUrl = String(cat.icon || "").split("::catalogue::").slice(1).join("::catalogue::");
     setForm({
       label: cat.label || cat.name,
       slug: cat.slug,
-      icon: icon || "",
       active: cat.active,
-      imageUrl: imageParts.join("::catalogue::"),
+      imageUrl,
     });
     setShowModal(true);
   };
@@ -102,15 +82,35 @@ export default function AdminCategories() {
     const { imageUrl, ...categoryForm } = form;
     const data = {
       ...categoryForm,
-      icon: imageUrl
-        ? `${categoryForm.icon}::catalogue::${imageUrl}`
-        : categoryForm.icon,
+      icon: imageUrl ? `::catalogue::${imageUrl}` : "",
       name: form.label,
       slug: form.slug || generateSlug(form.label),
     };
     try {
-      if (editingCat) await categoriesApi.update(editingCat.id, data);
-      else await categoriesApi.create(data);
+      const result = editingCat
+        ? await categoriesApi.update(editingCat.id, data)
+        : await categoriesApi.create(data);
+      const category = result.category;
+      if (category) {
+        useCategoryStore.setState((state) => {
+          const savedCategory = {
+            id: category.id,
+            slug: category.slug,
+            name: category.name,
+            label: category.label || category.name,
+            icon: category.icon || "",
+            sortOrder: category.sortOrder || 0,
+            active: category.active,
+          };
+          const exists = state.categories.some((item) => item.id === category.id);
+          return {
+            categories: exists
+              ? state.categories.map((item) => item.id === category.id ? savedCategory : item)
+              : [...state.categories, savedCategory],
+            _lastFetch: Date.now(),
+          };
+        });
+      }
       await loadAll();
       setSaved(true);
       setTimeout(() => {
@@ -155,31 +155,34 @@ export default function AdminCategories() {
     (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0),
   );
 
-  const moveCategoryToEdge = async (category, edge) => {
-    if (sortedCategories.length < 2) return;
-    const edgeCategory = edge === "first"
-      ? sortedCategories[0]
-      : sortedCategories[sortedCategories.length - 1];
-    const nextSortOrder = edge === "first"
-      ? Number(edgeCategory.sortOrder || 0) - 1
-      : Number(edgeCategory.sortOrder || 0) + 1;
+  const moveCategory = async (category, direction) => {
+    const currentIndex = sortedCategories.findIndex((item) => item.id === category.id);
+    const nextIndex = currentIndex + direction;
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= sortedCategories.length) return;
+
+    const reordered = [...sortedCategories];
+    const [selected] = reordered.splice(currentIndex, 1);
+    reordered.splice(nextIndex, 0, selected);
 
     setOrderingCategory(category.id);
     try {
-      await categoriesApi.update(category.id, { sortOrder: nextSortOrder });
-      setCategories((current) =>
-        current.map((item) => item.id === category.id
-          ? { ...item, sortOrder: nextSortOrder }
-          : item),
+      await Promise.all(
+        reordered.map((item, index) =>
+          categoriesApi.update(item.id, { sortOrder: index }),
+        ),
       );
+      const updated = reordered.map((item, index) => ({ ...item, sortOrder: index }));
+      setCategories(updated);
       useCategoryStore.setState((state) => ({
-        categories: state.categories.map((item) => item.id === category.id
-          ? { ...item, sortOrder: nextSortOrder }
-          : item),
+        categories: state.categories.map((item) => {
+          const movedItem = updated.find((categoryItem) => categoryItem.id === item.id);
+          return movedItem ? { ...item, sortOrder: movedItem.sortOrder } : item;
+        }),
         _lastFetch: Date.now(),
       }));
     } catch (err) {
       console.error("Erreur déplacement catégorie", err.message);
+      await loadAll();
     } finally {
       setOrderingCategory(null);
     }
@@ -244,10 +247,15 @@ export default function AdminCategories() {
                 key={cat.id}
                 className={`flex items-center gap-4 px-5 py-4 hover:bg-apple-gray/30 transition ${!cat.active ? "opacity-40" : ""}`}
               >
-                <GripVertical className="w-4 h-4 text-apple-mid/40 flex-shrink-0" />
-                <span className="text-xl flex-shrink-0">
-                  {String(cat.icon || "").split("::catalogue::")[0]}
-                </span>
+                <div className="w-10 h-10 flex-shrink-0 rounded-xl bg-black/[0.04] overflow-hidden">
+                  {String(cat.icon || "").split("::catalogue::").slice(1).join("::catalogue::") ? (
+                    <img
+                      src={String(cat.icon).split("::catalogue::").slice(1).join("::catalogue::")}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : null}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-apple-black text-sm">
@@ -275,22 +283,22 @@ export default function AdminCategories() {
                 </span>
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => moveCategoryToEdge(cat, "first")}
-                    disabled={orderingCategory !== null}
+                    onClick={() => moveCategory(cat, -1)}
+                    disabled={orderingCategory !== null || sortedCategories[0]?.id === cat.id}
                     className="p-2 rounded-xl hover:bg-apple-gray transition text-apple-mid hover:text-apple-black disabled:opacity-40"
-                    title="Mettre en première position"
-                    aria-label={`Mettre ${cat.label || cat.name} en première position`}
+                    title="Monter d’une position"
+                    aria-label={`Monter ${cat.label || cat.name} d’une position`}
                   >
-                    <ChevronsUp className="w-4 h-4" />
+                    <ArrowUp className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => moveCategoryToEdge(cat, "last")}
-                    disabled={orderingCategory !== null}
+                    onClick={() => moveCategory(cat, 1)}
+                    disabled={orderingCategory !== null || sortedCategories[sortedCategories.length - 1]?.id === cat.id}
                     className="p-2 rounded-xl hover:bg-apple-gray transition text-apple-mid hover:text-apple-black disabled:opacity-40"
-                    title="Mettre en dernière position"
-                    aria-label={`Mettre ${cat.label || cat.name} en dernière position`}
+                    title="Descendre d’une position"
+                    aria-label={`Descendre ${cat.label || cat.name} d’une position`}
                   >
-                    <ChevronsDown className="w-4 h-4" />
+                    <ArrowDown className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleToggle(cat)}
@@ -370,37 +378,6 @@ export default function AdminCategories() {
                 <p className="text-xs text-apple-mid mt-1">
                   Généré automatiquement depuis le nom
                 </p>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-apple-mid mb-2 block">
-                  Icône
-                </label>
-                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
-                  <button
-                    type="button"
-                    onClick={() => updateForm("icon", "")}
-                    className={`min-h-10 rounded-xl border px-3 text-xs font-medium transition-all ${
-                      !form.icon
-                        ? "border-apple-black bg-apple-black text-white"
-                        : "border-black/[0.06] bg-apple-gray text-apple-mid hover:bg-black/[0.07]"
-                    }`}
-                  >
-                    Aucune icône
-                  </button>
-                  {iconOptions.map((icon) => (
-                    <button
-                      key={icon}
-                      onClick={() => updateForm("icon", icon)}
-                      className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center transition-all ${
-                        form.icon === icon
-                          ? "bg-apple-black ring-2 ring-apple-black ring-offset-2"
-                          : "bg-apple-gray hover:bg-black/[0.07]"
-                      }`}
-                    >
-                      {icon}
-                    </button>
-                  ))}
-                </div>
               </div>
               <MediaUploader
                 value={form.imageUrl}
