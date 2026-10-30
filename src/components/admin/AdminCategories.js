@@ -16,8 +16,12 @@ import {
 import { categoriesApi } from "@/lib/api";
 import useCategoryStore from "@/store/categoryStore";
 import MediaUploader from "@/components/admin/MediaUploader";
+import {
+  readCatalogueCategoryMeta,
+  writeCatalogueCategoryMeta,
+} from "@/lib/catalogueCategoryMeta";
 
-const emptyForm = { label: "", slug: "", active: true, imageUrl: "" };
+const emptyForm = { label: "", slug: "", active: true, imageUrl: "", description: "" };
 
 function generateSlug(label) {
   return label
@@ -44,7 +48,29 @@ export default function AdminCategories() {
     setLoading(true);
     try {
       const data = await categoriesApi.getAllAdmin();
-      setCategories(data.categories || []);
+      let allCategories = data.categories || [];
+      if (!allCategories.some((category) => category.slug === "abonnements")) {
+        const sortOrder = Math.max(
+          -1,
+          ...allCategories.map((category) => Number(category.sortOrder) || 0),
+        ) + 1;
+        try {
+          const created = await categoriesApi.create({
+            name: "Abonnements",
+            label: "Abonnements",
+            slug: "abonnements",
+            icon: writeCatalogueCategoryMeta(),
+            active: true,
+            sortOrder,
+          });
+          if (created.category) allCategories = [...allCategories, created.category];
+        } catch (createError) {
+          console.error("Erreur création de la catégorie Abonnements", createError.message);
+          const refreshed = await categoriesApi.getAllAdmin();
+          allCategories = refreshed.categories || allCategories;
+        }
+      }
+      setCategories(allCategories);
     } catch (err) {
       console.error("Erreur chargement catégories", err.message);
     }
@@ -66,12 +92,13 @@ export default function AdminCategories() {
 
   const openEdit = (cat) => {
     setEditingCat(cat);
-    const imageUrl = String(cat.icon || "").split("::catalogue::").slice(1).join("::catalogue::");
+    const meta = readCatalogueCategoryMeta(cat.icon);
     setForm({
       label: cat.label || cat.name,
       slug: cat.slug,
       active: cat.active,
-      imageUrl,
+      imageUrl: meta.imageUrl,
+      description: meta.description,
     });
     setShowModal(true);
   };
@@ -79,10 +106,10 @@ export default function AdminCategories() {
   const handleSave = async () => {
     if (!form.label) return;
     setSaving(true);
-    const { imageUrl, ...categoryForm } = form;
+    const { imageUrl, description, ...categoryForm } = form;
     const data = {
       ...categoryForm,
-      icon: imageUrl ? `::catalogue::${imageUrl}` : "",
+      icon: writeCatalogueCategoryMeta({ imageUrl, description }),
       name: form.label,
       slug: form.slug || generateSlug(form.label),
     };
@@ -378,6 +405,18 @@ export default function AdminCategories() {
                 <p className="text-xs text-apple-mid mt-1">
                   Généré automatiquement depuis le nom
                 </p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-apple-mid mb-1.5 block">
+                  Description affichée sous le nom
+                </label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => updateForm("description", e.target.value)}
+                  placeholder="Ex. Chargeurs, câbles, coques et protections..."
+                  rows={3}
+                  className="w-full resize-y bg-apple-gray rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
               </div>
               <MediaUploader
                 value={form.imageUrl}
