@@ -293,7 +293,7 @@ export default function AdminCategories() {
                     <ChevronsDown className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => handleToggle(cat)
+                    onClick={() => handleToggle(cat)}
                     className="p-2 rounded-xl hover:bg-apple-gray transition text-apple-mid hover:text-apple-black"
                     title={cat.active ? "Désactiver" : "Activer"}
                   >
