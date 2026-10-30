@@ -14,9 +14,11 @@ import {
   ChevronDown,
   AlertCircle,
   RefreshCw,
+  ImagePlus,
+  LoaderCircle,
 } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { productsApi, categoriesApi, variantsApi, characteristicsApi } from "@/lib/api";
+import { productsApi, categoriesApi, variantsApi, characteristicsApi, uploadApi } from "@/lib/api";
 import MediaUploader from "@/components/admin/MediaUploader";
 
 const statusOptions = ["En stock", "Stock limité", "Rupture"];
@@ -103,7 +105,7 @@ function parseSpecs(raw) {
   try {
     const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
     return Array.isArray(parsed)
-      ? parsed.filter((spec) => spec.label !== "__mtech_iphone_color_images")
+      ? parsed.filter((spec) => !spec.label?.startsWith("__mtech_"))
       : [];
   } catch {
     return [];
@@ -115,11 +117,63 @@ function getInternalSpecs(raw) {
   try {
     const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
     return Array.isArray(parsed)
-      ? parsed.filter((spec) => spec.label === "__mtech_iphone_color_images")
+      ? parsed.filter((spec) => spec.label?.startsWith("__mtech_"))
       : [];
   } catch {
     return [];
   }
+}
+
+function parseVariantColorImages(raw) {
+  const metadata = getInternalSpecs(raw).find((spec) => spec.label === "__mtech_variant_color_images" || spec.label === "__mtech_iphone_color_images");
+  if (!metadata?.value) return [];
+  try {
+    const images = JSON.parse(metadata.value);
+    return Array.isArray(images) ? images : [];
+  } catch { return []; }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function VariantColorImageField({ value, label, onChange }) {
+  const inputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleUpload = async (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return setError("Choisissez une image.");
+    if (file.size > 25 * 1024 * 1024) return setError("Image limitée à 25 Mo.");
+    setUploading(true);
+    setError("");
+    try {
+      const result = await uploadApi.upload(await fileToBase64(file), "mtechbenin/products/variant-colors");
+      await onChange(result.url);
+    } catch (err) {
+      setError(err.message || "Envoi de l’image impossible.");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(event) => handleUpload(event.target.files?.[0])} />
+      {value && <img src={value} alt={"Couleur " + label} className="h-9 w-9 rounded-lg border border-black/10 bg-white object-cover" />}
+      <button type="button" disabled={uploading} onClick={() => inputRef.current?.click()} title={"Photo de la couleur " + label} className="flex h-9 items-center gap-1 rounded-lg border border-black/10 bg-white px-2 text-[11px] font-semibold hover:bg-neutral-100 disabled:opacity-50">
+        {uploading ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}{value ? "Changer" : "Photo"}
+      </button>
+      {error && <span role="alert" className="max-w-32 text-[10px] text-red-600">{error}</span>}
+    </div>
+  );
 }
 
 // Analyse le texte saisi pour le supplément : entier signé strict.
@@ -544,6 +598,26 @@ export default function AdminProduits({ smartphoneOnly = false }) {
     } catch (err) {
       console.error("Erreur save produit", err.message);
     }
+  };
+
+  const saveVariantColorImage = async (typeName, value, imageUrl) => {
+    if (!editingProduct) return;
+    const images = parseVariantColorImages(editingProduct.specs).filter((item) =>
+      !((item.typeName || "Couleur") === typeName && (item.value || item.color) === value),
+    );
+    if (imageUrl) images.push({ typeName, value, imageUrl });
+    const otherInternal = getInternalSpecs(editingProduct.specs)
+      .filter((spec) => spec.label !== "__mtech_variant_color_images" && spec.label !== "__mtech_iphone_color_images");
+    const nextSpecs = [
+      ...parseSpecs(editingProduct.specs),
+      ...otherInternal,
+      ...(images.length ? [{ label: "__mtech_variant_color_images", value: JSON.stringify(images) }] : []),
+    ];
+    await productsApi.update(editingProduct.id, { specs: nextSpecs });
+    const updatedProduct = { ...editingProduct, specs: nextSpecs };
+    setEditingProduct(updatedProduct);
+    setProducts((current) => current.map((product) => product.id === updatedProduct.id ? updatedProduct : product));
+    await refreshPublicCatalog();
   };
 
   const handleDelete = async (id) => {
@@ -1267,9 +1341,18 @@ export default function AdminProduits({ smartphoneOnly = false }) {
                               key={opt.id}
                               className="flex items-start justify-between gap-2 bg-black/[0.05] rounded-xl pl-3 pr-2 py-1.5"
                             >
-                              <span className="text-[12px] text-apple-black truncate pt-1.5">
-                                {opt.value}
-                              </span>
+                              <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
+                                <span className="max-w-full truncate pt-1.5 text-[12px] text-apple-black">{opt.value}</span>
+                                {/(couleur|color)/i.test(vType.name) && (
+                                  <VariantColorImageField
+                                    label={opt.value}
+                                    value={parseVariantColorImages(editingProduct.specs).find((item) =>
+                                      (item.typeName || "Couleur") === vType.name && (item.value || item.color) === opt.value
+                                    )?.imageUrl || ""}
+                                    onChange={(imageUrl) => saveVariantColorImage(vType.name, opt.value, imageUrl)}
+                                  />
+                                )}
+                              </div>
                               <div className="flex items-start gap-2 flex-shrink-0">
                                 <span className="text-[11px] text-apple-mid whitespace-nowrap hidden sm:inline pt-1.5">
                                   Supplément (F CFA)

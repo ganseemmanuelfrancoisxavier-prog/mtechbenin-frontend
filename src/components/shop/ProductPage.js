@@ -48,7 +48,7 @@ function parseImages(raw) {
 // ── Normalise specs depuis l'API (JSON string ou array) ──────────────────────
 function parseSpecs(raw) {
   if (!raw) return [];
-  const hideInternal = (specs) => specs.filter((spec) => spec.label !== "__mtech_iphone_color_images");
+  const hideInternal = (specs) => specs.filter((spec) => !spec.label?.startsWith("__mtech_"));
   if (Array.isArray(raw)) return hideInternal(raw);
   try {
     const parsed = JSON.parse(raw) || [];
@@ -64,7 +64,7 @@ function parseColorImages(raw) {
     try { specs = JSON.parse(specs); } catch { return []; }
   }
   if (!Array.isArray(specs)) return [];
-  const metadata = specs.find((spec) => spec.label === "__mtech_iphone_color_images");
+  const metadata = specs.find((spec) => spec.label === "__mtech_variant_color_images" || spec.label === "__mtech_iphone_color_images");
   if (!metadata?.value) return [];
   try {
     const images = JSON.parse(metadata.value);
@@ -239,7 +239,7 @@ export default function ProductPage({ slug }) {
   // Use its videoUrl in priority over the store cache which can be up to 5 min stale.
   // Galerie unifiée : les photos, puis la vidéo à la fin s'il y en a une —
   // activeImage indexe ce tableau, balayable comme les photos.
-  const selectedColorImage = product.colorImages.find((item) => item.color === selectedVariants.Couleur)?.imageUrl;
+  const selectedColorImage = product.colorImages.find((item) => item.typeName ? selectedVariants[item.typeName] === item.value : selectedVariants.Couleur === (item.value || item.color))?.imageUrl;
   const media = [
     ...product.images.map((url, index) => ({
       type: "image",
@@ -387,7 +387,7 @@ export default function ProductPage({ slug }) {
         {/* Galerie */}
         <div className="space-y-3">
           <div
-            className="relative aspect-square bg-neutral-100 rounded-3xl overflow-hidden select-none"
+            className="relative aspect-square bg-white rounded-3xl overflow-hidden select-none"
             style={{ touchAction: "pan-y" }}
             onTouchStart={handleSwipeStart}
             onTouchEnd={handleSwipeEnd}
@@ -412,7 +412,7 @@ export default function ProductPage({ slug }) {
                 src={media[safeActiveImage].url}
                 alt={product.name}
                 fill
-                className="object-cover pointer-events-none"
+                className="object-contain pointer-events-none p-3 md:p-5"
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 draggable={false}
               />
@@ -539,7 +539,7 @@ export default function ProductPage({ slug }) {
           {/* ── Variantes ── */}
           {variantTypes.length > 0 && (
             <div className="space-y-4">
-              {variantTypes.map((vType) => (
+              {[...variantTypes].sort((a, b) => Number(/couleur|color/i.test(b.name)) - Number(/couleur|color/i.test(a.name))).map((vType) => (
                 <div key={vType.id}>
                   <p className="text-[12px] font-semibold text-apple-mid uppercase tracking-widest mb-2.5">
                     {vType.name}
@@ -549,9 +549,11 @@ export default function ProductPage({ slug }) {
                       <span className="normal-case font-normal text-apple-mid/60 ml-1.5">(optionnel)</span>
                     )}
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className={/couleur|color/i.test(vType.name) ? "flex gap-3 overflow-x-auto pb-2" : "flex flex-wrap gap-2"}>
                     {vType.options.map((opt) => {
                       const isSelected = selectedVariants[vType.name] === opt.value;
+                      const isColor = /couleur|color/i.test(vType.name);
+                      const optionImage = product.colorImages.find((item) => item.typeName ? item.typeName === vType.name && item.value === opt.value : isColor && (item.value || item.color) === opt.value)?.imageUrl;
                       // Le supplément n'est délibérément pas affiché à côté de
                       // l'option : le client lit le prix total au-dessus, qui
                       // se recalcule à chaque choix. Le montant du supplément
@@ -564,24 +566,25 @@ export default function ProductPage({ slug }) {
                               ...prev,
                               [vType.name]: isSelected ? undefined : opt.value,
                             }));
-                            if (vType.name.toLowerCase() === "couleur") setActiveImage(0);
+                            if (isColor) setActiveImage(0);
                           }}
-                          className="px-4 py-2 rounded-2xl text-[13px] font-semibold transition-all duration-150"
-                          style={
-                            isSelected
-                              ? {
-                                  background: "rgba(29,29,31,0.92)",
-                                  color: "#fff",
-                                  border: "2px solid rgba(29,29,31,0.92)",
-                                }
-                              : {
-                                  background: "rgba(0,0,0,0.03)",
-                                  color: "#1D1D1F",
-                                  border: "2px solid rgba(0,0,0,0.10)",
-                                }
-                          }
+                          className={isColor
+                            ? "flex min-w-[76px] flex-col items-center gap-1.5 rounded-2xl p-1 text-[12px] font-medium transition-all duration-150"
+                            : "px-4 py-2 rounded-2xl text-[13px] font-semibold transition-all duration-150"}
+                          style={isColor
+                            ? { background: "transparent", color: "#1D1D1F", border: "2px solid transparent" }
+                            : isSelected
+                              ? { background: "rgba(29,29,31,0.92)", color: "#fff", border: "2px solid rgba(29,29,31,0.92)" }
+                              : { background: "rgba(0,0,0,0.03)", color: "#1D1D1F", border: "2px solid rgba(0,0,0,0.10)" }}
                         >
-                          {opt.value}
+                          {isColor && (
+                            <span className={"relative block h-[68px] w-[68px] overflow-hidden rounded-xl border-2 bg-neutral-50 " + (isSelected ? "border-apple-black" : "border-black/[0.08]")}>
+                              {optionImage
+                                ? <Image src={optionImage} alt="" fill unoptimized className="object-cover" sizes="68px" />
+                                : <span className="absolute inset-0 flex items-center justify-center text-2xl" aria-hidden="true">{opt.value.slice(0, 1)}</span>}
+                            </span>
+                          )}
+                          <span className={isColor ? "max-w-[80px] truncate text-center" : ""}>{opt.value}</span>
                         </button>
                       );
                     })}
@@ -600,10 +603,10 @@ export default function ProductPage({ slug }) {
             <p className="text-[12px] font-semibold text-apple-mid uppercase tracking-widest mb-2.5">
               Quantité
             </p>
-            <div className="inline-flex items-center gap-3 bg-black/[0.04] rounded-2xl p-1">
+            <div className="inline-flex items-center gap-3 bg-black/[0.04] rounded-full p-1.5">
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center hover:bg-neutral-50 transition"
+                className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center hover:bg-neutral-50 transition"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
@@ -616,6 +619,14 @@ export default function ProductPage({ slug }) {
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2 text-sm">
+            <span className={"mt-1.5 h-2.5 w-2.5 rounded-full " + (isRupture ? "bg-red-500" : "bg-green-500")} />
+            <div>
+              <p className={"font-semibold " + (isRupture ? "text-red-600" : "text-green-700")}>{isRupture ? "Rupture de stock" : "En stock"}</p>
+              {!isRupture && <p className="text-xs text-apple-mid">{product.stock > 50 ? "Plus de 50 articles disponibles" : product.stock + " article" + (product.stock > 1 ? "s" : "") + " disponible" + (product.stock > 1 ? "s" : "")}</p>}
             </div>
           </div>
 
