@@ -66,12 +66,12 @@ export default function AdminCategories() {
 
   const openEdit = (cat) => {
     setEditingCat(cat);
-    const [icon, ...imageParts] = String(cat.icon || "").split("::catalogue::");
+    const imageUrl = String(cat.icon || "").split("::catalogue::").slice(1).join("::catalogue::");
     setForm({
       label: cat.label || cat.name,
       slug: cat.slug,
       active: cat.active,
-      imageUrl: imageParts.join("::catalogue::"),
+      imageUrl,
     });
     setShowModal(true);
   };
