@@ -167,8 +167,8 @@ function VariantColorImageField({ value, label, onChange }) {
   return (
     <div className="flex items-center gap-1.5">
       <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(event) => handleUpload(event.target.files?.[0])} />
-      {value && <img src={value} alt={"Couleur " + label} className="h-9 w-9 rounded-lg border border-black/10 bg-white object-cover" />}
-      <button type="button" disabled={uploading} onClick={() => inputRef.current?.click()} title={"Photo de la couleur " + label} className="flex h-9 items-center gap-1 rounded-lg border border-black/10 bg-white px-2 text-[11px] font-semibold hover:bg-neutral-100 disabled:opacity-50">
+      {value && <img src={value} alt={"Illustration de " + label} className="h-9 w-9 rounded-lg border border-black/10 bg-white object-cover" />}
+      <button type="button" disabled={uploading} onClick={() => inputRef.current?.click()} title={"Image pour " + label} className="flex h-9 items-center gap-1 rounded-lg border border-black/10 bg-white px-2 text-[11px] font-semibold hover:bg-neutral-100 disabled:opacity-50">
         {uploading ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}{value ? "Changer" : "Photo"}
       </button>
       {error && <span role="alert" className="max-w-32 text-[10px] text-red-600">{error}</span>}
@@ -1343,7 +1343,7 @@ export default function AdminProduits({ smartphoneOnly = false }) {
                             >
                               <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
                                 <span className="max-w-full truncate pt-1.5 text-[12px] text-apple-black">{opt.value}</span>
-                                {/(couleur|color)/i.test(vType.name) && (
+                                {true && (
                                   <VariantColorImageField
                                     label={opt.value}
                                     value={parseVariantColorImages(editingProduct.specs).find((item) =>
