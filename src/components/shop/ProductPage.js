@@ -554,6 +554,7 @@ export default function ProductPage({ slug }) {
                       const isSelected = selectedVariants[vType.name] === opt.value;
                       const isColor = /couleur|color/i.test(vType.name);
                       const optionImage = product.colorImages.find((item) => item.typeName ? item.typeName === vType.name && item.value === opt.value : isColor && (item.value || item.color) === opt.value)?.imageUrl;
+                      const showImage = Boolean(optionImage);
                       // Le supplément n'est délibérément pas affiché à côté de
                       // l'option : le client lit le prix total au-dessus, qui
                       // se recalcule à chaque choix. Le montant du supplément
@@ -568,23 +569,23 @@ export default function ProductPage({ slug }) {
                             }));
                             if (isColor) setActiveImage(0);
                           }}
-                          className={isColor
+                          className={showImage
                             ? "flex min-w-[76px] flex-col items-center gap-1.5 rounded-2xl p-1 text-[12px] font-medium transition-all duration-150"
                             : "px-4 py-2 rounded-2xl text-[13px] font-semibold transition-all duration-150"}
-                          style={isColor
+                          style={showImage
                             ? { background: "transparent", color: "#1D1D1F", border: "2px solid transparent" }
                             : isSelected
                               ? { background: "rgba(29,29,31,0.92)", color: "#fff", border: "2px solid rgba(29,29,31,0.92)" }
                               : { background: "rgba(0,0,0,0.03)", color: "#1D1D1F", border: "2px solid rgba(0,0,0,0.10)" }}
                         >
-                          {isColor && (
+                          {showImage && (
                             <span className={"relative block h-[68px] w-[68px] overflow-hidden rounded-xl border-2 bg-neutral-50 " + (isSelected ? "border-apple-black" : "border-black/[0.08]")}>
                               {optionImage
                                 ? <Image src={optionImage} alt="" fill unoptimized className="object-cover" sizes="68px" />
                                 : <span className="absolute inset-0 flex items-center justify-center text-2xl" aria-hidden="true">{opt.value.slice(0, 1)}</span>}
                             </span>
                           )}
-                          <span className={isColor ? "max-w-[80px] truncate text-center" : ""}>{opt.value}</span>
+                          <span className={showImage ? "max-w-[80px] truncate text-center" : ""}>{opt.value}</span>
                         </button>
                       );
                     })}
