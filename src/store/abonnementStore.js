@@ -19,16 +19,24 @@ const withDefaults = (services) =>
     category: s.category || "family",
     totalPlaces: s.totalPlaces !== undefined ? s.totalPlaces : 0,
   }));
+const DEFAULT_CATEGORY_ORDER = ["family", "link_access"];
+const normalizeCategoryOrder = (order) =>
+  Array.isArray(order) && order.length === 2 && new Set(order).size === 2 &&
+  order.every((category) => DEFAULT_CATEGORY_ORDER.includes(category))
+    ? order
+    : DEFAULT_CATEGORY_ORDER;
 let servicesFetchPromise = null;
 
 const useAbonnementStore = create(
   persist(
     (set, get) => ({
       services: withDefaults(initialServices),
+      categoryOrder: DEFAULT_CATEGORY_ORDER,
       _hasHydrated: false,
       _lastFetch: null,
 
       setHasHydrated: (state) => set({ _hasHydrated: state }),
+      setCategoryOrder: (order) => set({ categoryOrder: normalizeCategoryOrder(order) }),
 
       // ── Charge les services depuis l'API ──────────────────────────────────
       fetchServices: async () => {
@@ -38,6 +46,8 @@ const useAbonnementStore = create(
         servicesFetchPromise = (async () => {
           try {
             const data = await apiFetch("/api/subscriptions");
+            const categoryOrder = normalizeCategoryOrder(data.categoryOrder);
+            set({ categoryOrder });
             if (data.services && data.services.length > 0) {
             const normalized = data.services.map((s) => ({
               // Champs API
@@ -200,9 +210,14 @@ const useAbonnementStore = create(
         })),
 
       // ── Getters ───────────────────────────────────────────────────────────
-      getActiveServices: () => get().services.filter((s) => s.available),
+      getActiveServices: () => {
+        const order = normalizeCategoryOrder(get().categoryOrder);
+        return get().services.filter((s) => s.available).sort(
+          (a, b) => order.indexOf(a.category || "family") - order.indexOf(b.category || "family"),
+        );
+      },
       getServiceBySlug: (slug) => get().services.find((s) => s.slug === slug),
-      getPublicServices: () => get().services.filter((s) => s.available),
+      getPublicServices: () => get().getActiveServices(),
     }),
     {
       name: "mtechbenin-abonnements",

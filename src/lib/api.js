@@ -284,6 +284,13 @@ export const subscriptionsApi = {
   getAdminDashboard: () => apiFetch("/api/subscriptions/admin/dashboard"),
   getAdminOrders: (params = {}) =>
     apiFetch(`/api/subscriptions/admin/orders${buildQuery(params)}`),
+  deleteOrder: (id) =>
+    apiFetch(`/api/subscriptions/admin/orders/${id}`, { method: "DELETE" }),
+  updateCategoryOrder: (categoryOrder) =>
+    apiFetch("/api/subscriptions/admin/category-order", {
+      method: "PATCH",
+      body: JSON.stringify({ categoryOrder }),
+    }),
   createService: (data) =>
     apiFetch("/api/subscriptions/admin/services", {
       method: "POST",
@@ -337,6 +344,8 @@ export const subscriptionsApi = {
     }),
   getLinkClients: (planId) =>
     apiFetch(`/api/subscriptions/admin/plans/${planId}/link-clients`),
+  deleteLinkClient: (id) =>
+    apiFetch(`/api/subscriptions/admin/link-clients/${id}`, { method: "DELETE" }),
   addLinkClient: (planId, data) =>
     apiFetch(`/api/subscriptions/admin/plans/${planId}/link-clients`, {
       method: "POST",

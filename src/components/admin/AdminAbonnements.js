@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { formatPrice, libelleDuree } from "@/lib/format";
 import { subscriptionsApi } from "@/lib/api";
+import useAbonnementStore from "@/store/abonnementStore";
 import AdminComptesPartages from "./AdminComptesPartages";
 import MediaUploader from "@/components/admin/MediaUploader";
 
@@ -186,6 +187,15 @@ export default function AdminAbonnements() {
   // ── Vue principale : services ou commandes d'abonnement ───────────────────
   const [viewMode, setViewMode] = useState("services");
   const [orders, setOrders] = useState([]);
+  const [categoryOrder, setCategoryOrder] = useState(["family", "link_access"]);
+  const [categoryOrderSaving, setCategoryOrderSaving] = useState(false);
+  const [categoryOrderError, setCategoryOrderError] = useState("");
+  const [deleteOrderConfirm, setDeleteOrderConfirm] = useState(null);
+  const [deleteOrderError, setDeleteOrderError] = useState("");
+  const [deleteOrderSaving, setDeleteOrderSaving] = useState(false);
+  const [deleteLinkClientConfirm, setDeleteLinkClientConfirm] = useState(null);
+  const [deleteLinkClientError, setDeleteLinkClientError] = useState("");
+  const [deleteLinkClientSaving, setDeleteLinkClientSaving] = useState(false);
   const [orderSearch, setOrderSearch] = useState("");
   const [expiryDrafts, setExpiryDrafts] = useState({});
   const [expiryErrors, setExpiryErrors] = useState({});
@@ -270,6 +280,7 @@ export default function AdminAbonnements() {
         subscriptionsApi.getAdminOrders({ limit: 500 }),
       ]);
       setApiData(data);
+      setCategoryOrder(data.categoryOrder || ["family", "link_access"]);
       setOrders(ordersRes.orders || []);
     } catch (err) {
       console.error("Erreur chargement abonnements", err.message);
@@ -485,6 +496,50 @@ export default function AdminAbonnements() {
     }
     setExpirySavingId(null);
     setClearExpiryConfirm(null);
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!deleteOrderConfirm) return;
+    setDeleteOrderSaving(true);
+    setDeleteOrderError("");
+    try {
+      await subscriptionsApi.deleteOrder(deleteOrderConfirm.id);
+      await loadAll();
+      setDeleteOrderConfirm(null);
+    } catch (err) {
+      setDeleteOrderError(err.message || "Suppression impossible");
+    }
+    setDeleteOrderSaving(false);
+  };
+
+  const handleDeleteLinkClient = async () => {
+    if (!deleteLinkClientConfirm) return;
+    setDeleteLinkClientSaving(true);
+    setDeleteLinkClientError("");
+    try {
+      await subscriptionsApi.deleteLinkClient(deleteLinkClientConfirm.id);
+      await loadAll();
+      setDeleteLinkClientConfirm(null);
+    } catch (err) {
+      setDeleteLinkClientError(err.message || "Suppression impossible");
+    }
+    setDeleteLinkClientSaving(false);
+  };
+
+  const handleCategoryOrderChange = async (firstCategory) => {
+    const next = [firstCategory, firstCategory === "family" ? "link_access" : "family"];
+    const previous = categoryOrder;
+    setCategoryOrder(next);
+    setCategoryOrderSaving(true);
+    setCategoryOrderError("");
+    try {
+      await subscriptionsApi.updateCategoryOrder(next);
+      useAbonnementStore.getState().setCategoryOrder(next);
+    } catch (err) {
+      setCategoryOrder(previous);
+      setCategoryOrderError(err.message || "Enregistrement impossible");
+    }
+    setCategoryOrderSaving(false);
   };
 
   // ── Handlers — tous via API ───────────────────────────────────────────────
@@ -869,14 +924,14 @@ export default function AdminAbonnements() {
     }
   };
 
-  const fermerDesactivationService = () => {
+  const fermerSuppressionService = () => {
     setDeleteServiceConfirm(null);
     setDeleteServiceError("");
   };
 
-  // Meme defaut que la suppression d'une formule : le refus partait dans
-  // `console.error`, la modale se fermait, et le service etait desselectionne
-  // — l'admin croyait l'action reussie sans qu'aucun ecran ne le contredise.
+  // La suppression est définitive côté serveur et s'exécute dans une
+  // transaction : aucun service ne disparaît si le nettoyage de ses données
+  // liées rencontre un conflit.
   const handleDeleteService = async (serviceId, slug) => {
     setDeleteServiceSaving(true);
     setDeleteServiceError("");
@@ -952,6 +1007,29 @@ export default function AdminAbonnements() {
 
       {viewMode === "services" && (
       <>
+      <div className="glass-card rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-[13px] font-semibold text-apple-black">Ordre des catégories sur le site</p>
+          <p className="text-[11px] text-apple-mid mt-0.5">Choisis celle qui apparaît en premier.</p>
+        </div>
+        <div className="flex gap-2">
+          {[
+            { value: "family", label: "Famille en premier" },
+            { value: "link_access", label: "Accès par lien en premier" },
+          ].map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              disabled={categoryOrderSaving}
+              onClick={() => handleCategoryOrderChange(option.value)}
+              className={`rounded-xl border px-3 py-2 text-[11px] font-semibold transition disabled:opacity-50 ${categoryOrder[0] === option.value ? "border-apple-black bg-apple-black text-white" : "border-black/[0.08] text-apple-mid hover:bg-black/[0.03]"}`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {categoryOrderError && <p className="w-full text-[11px] text-red-600">{categoryOrderError}</p>}
+      </div>
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
@@ -1150,7 +1228,7 @@ export default function AdminAbonnements() {
                         slug: service.slug,
                       });
                     }}
-                    title="Désactiver ce service"
+                    title="Supprimer définitivement ce service"
                     className="p-2 rounded-xl hover:bg-red-50 transition text-apple-mid hover:text-red-500"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -1302,6 +1380,13 @@ export default function AdminAbonnements() {
                       )}
                     </div>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => { setDeleteOrderError(""); setDeleteOrderConfirm(order); }}
+                    className="ml-auto inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3 py-2 text-[11px] font-semibold text-red-600 transition hover:bg-red-50"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Supprimer
+                  </button>
                 </div>
                 {expiryErrors[order.id] && (
                   <p className="text-[11px] text-cta font-medium mt-2">
@@ -2082,6 +2167,14 @@ export default function AdminAbonnements() {
                                             Renvoyer
                                           </button>
                                         )}
+                                        <button
+                                          type="button"
+                                          aria-label={`Supprimer ${client.name}`}
+                                          onClick={() => { setDeleteLinkClientError(""); setDeleteLinkClientConfirm(client); }}
+                                          className="ml-auto rounded-lg p-2 text-apple-mid transition hover:bg-red-50 hover:text-red-500"
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
                                       </div>
                                     </div>
                                   );
@@ -2759,30 +2852,27 @@ export default function AdminAbonnements() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={fermerDesactivationService}
+            onClick={fermerSuppressionService}
           />
           <div className="relative bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm text-center max-h-[90vh] overflow-y-auto">
             <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-7 h-7 text-red-500" />
             </div>
             <h3 className="font-display font-bold text-lg text-apple-black mb-2">
-              Désactiver ce service ?
+              Supprimer définitivement ce service ?
             </h3>
-            {/* Cette action n'a JAMAIS supprimé quoi que ce soit : la route
-                pose `available: false`. Le texte annonçait pourtant « Toutes
-                les données seront supprimées » — un admin pouvait donc croire
-                avoir détruit ses comptes, ou croire le service parti alors
-                qu'il n'était que masqué. */}
             <p className="text-apple-mid text-sm mb-6">
-              Le service disparaît de la boutique. Ses formules, comptes et
-              commandes sont conservés, et il peut être réactivé.
+              Le service, ses formules, comptes, profils, clients, liens et
+              commandes seront supprimés, avec les journaux de codes associés.
+              Les paiements resteront dans l&apos;historique comptable. Cette
+              action est irréversible.
             </p>
             {deleteServiceError && (
               <p className="text-sm text-red-500 mb-4">{deleteServiceError}</p>
             )}
             <div className="flex gap-3">
               <button
-                onClick={fermerDesactivationService}
+                onClick={fermerSuppressionService}
                 className="flex-1 py-3 rounded-2xl bg-black/[0.04] text-apple-black font-semibold text-sm"
               >
                 {deleteServiceError ? "Fermer" : "Annuler"}
@@ -2797,7 +2887,7 @@ export default function AdminAbonnements() {
                 disabled={deleteServiceSaving}
                 className="flex-1 py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-semibold text-sm disabled:opacity-40"
               >
-                {deleteServiceSaving ? "Désactivation…" : "Désactiver"}
+                {deleteServiceSaving ? "Suppression…" : "Supprimer définitivement"}
               </button>
             </div>
           </div>
@@ -2930,6 +3020,40 @@ export default function AdminAbonnements() {
               >
                 Effacer
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteOrderConfirm && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+          <button aria-label="Fermer" className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteOrderConfirm(null)} />
+          <div className="relative w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
+              <AlertCircle className="h-7 w-7 text-red-500" />
+            </div>
+            <h3 className="mb-2 font-display text-lg font-bold text-apple-black">Supprimer cette commande ?</h3>
+            <p className="mb-5 text-sm text-apple-mid">
+              La commande de <strong>{deleteOrderConfirm.clientName}</strong> et son accès seront supprimés. La trace du paiement restera conservée pour la comptabilité.
+            </p>
+            {deleteOrderError && <p className="mb-4 text-[12px] text-red-600">{deleteOrderError}</p>}
+            <div className="flex gap-3">
+              <button type="button" disabled={deleteOrderSaving} onClick={() => setDeleteOrderConfirm(null)} className="flex-1 rounded-2xl bg-black/[0.04] py-3 text-sm font-semibold text-apple-black">Annuler</button>
+              <button type="button" disabled={deleteOrderSaving} onClick={handleDeleteOrder} className="flex-1 rounded-2xl bg-red-500 py-3 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50">{deleteOrderSaving ? "Suppression…" : "Supprimer"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteLinkClientConfirm && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+          <button aria-label="Fermer" className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteLinkClientConfirm(null)} />
+          <div className="relative w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50"><AlertCircle className="h-7 w-7 text-red-500" /></div>
+            <h3 className="mb-2 font-display text-lg font-bold text-apple-black">Supprimer ce client ?</h3>
+            <p className="mb-5 text-sm text-apple-mid">L&apos;entrée de <strong>{deleteLinkClientConfirm.name}</strong> et le lien associé seront supprimés.</p>
+            {deleteLinkClientError && <p className="mb-4 text-[12px] text-red-600">{deleteLinkClientError}</p>}
+            <div className="flex gap-3">
+              <button type="button" disabled={deleteLinkClientSaving} onClick={() => setDeleteLinkClientConfirm(null)} className="flex-1 rounded-2xl bg-black/[0.04] py-3 text-sm font-semibold text-apple-black">Annuler</button>
+              <button type="button" disabled={deleteLinkClientSaving} onClick={handleDeleteLinkClient} className="flex-1 rounded-2xl bg-red-500 py-3 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50">{deleteLinkClientSaving ? "Suppression…" : "Supprimer"}</button>
             </div>
           </div>
         </div>
