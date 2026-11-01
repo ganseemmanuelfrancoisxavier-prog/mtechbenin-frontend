@@ -2081,7 +2081,6 @@ export default function AdminAbonnements() {
                                         <div className="flex items-center gap-1">
                                           <button type="button" onClick={() => handleEditPoolLink(plan.id, l)} disabled={poolLinkEnCours[plan.id]} aria-label="Modifier ce lien" title="Modifier ce lien" className="p-2 rounded-xl text-apple-mid hover:text-apple-black hover:bg-black/[0.04] transition flex-shrink-0 disabled:opacity-50"><Pencil className="w-3.5 h-3.5" /></button>
                                           {dispo && <button
-                                          <button
                                             type="button"
                                             onClick={() =>
                                               setDeletePoolLinkConfirm({
