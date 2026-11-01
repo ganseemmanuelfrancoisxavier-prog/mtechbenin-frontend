@@ -34,7 +34,7 @@ export default function IPhoneCatalogue() {
   const iphones = useMemo(() => products
     .filter((product) => {
       const label = `${product.name} ${product.slug}`;
-      const isPhoneModel = /iphone[\\s-]*(?:x(?:r|s(?:[\\s-]*max)?)?|\\d{1,2})(?=$|[\\s-])/i.test(label);
+      const isPhoneModel = /iphone[\s-]*(?:x(?:r|s(?:[\s-]*max)?)?|\d{1,2})(?=$|[\s-])/i.test(label);
       const isAccessory = /coque|étui|etui|chargeur|câble|cable|protection|vitre|film|case|cover|adaptateur/i.test(label);
       const category = String(product.category || product.categorySlug || "").toLowerCase();
       const isSmartphoneCategory = !category || /smartphone|telephone|téléphone|iphone/.test(category);
