@@ -162,6 +162,7 @@ function CategoryRevealCard({ item }) {
 
 export default function CategoriesSection() {
   const [mounted, setMounted] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
   const { getActiveCategories, fetchCategories } = useCategoryStore();
   const featuredProducts = useProductStore((state) => state.featuredProducts);
 
@@ -200,7 +201,7 @@ export default function CategoriesSection() {
       };
     });
 
-  const visibleItems = allItems;
+  const visibleItems = showAllCategories ? allItems : allItems.slice(0, 8);
 
   return (
     <section className={styles.section}>
@@ -233,7 +234,14 @@ export default function CategoriesSection() {
         </div>
       )}
 
-
+      {mounted && allItems.length > 8 && (
+        <div className={styles.more}>
+          <button type="button" onClick={() => setShowAllCategories((value) => !value)} className={styles.moreLink}>
+            {showAllCategories ? "Voir moins" : "Voir plus de catégories"}
+            <ArrowRight className={styles.moreChevron} />
+          </button>
+        </div>
+      )}
     </section>
   );
 }
