@@ -32,6 +32,7 @@ const useAbonnementStore = create(
     (set, get) => ({
       services: withDefaults(initialServices),
       categoryOrder: DEFAULT_CATEGORY_ORDER,
+      serviceOrder: [],
       _hasHydrated: false,
       _lastFetch: null,
 
@@ -47,7 +48,8 @@ const useAbonnementStore = create(
           try {
             const data = await apiFetch("/api/subscriptions");
             const categoryOrder = normalizeCategoryOrder(data.categoryOrder);
-            set({ categoryOrder });
+            const serviceOrder = Array.isArray(data.serviceOrder) ? data.serviceOrder : get().serviceOrder;
+            set({ categoryOrder, serviceOrder });
             if (data.services && data.services.length > 0) {
             const normalized = data.services.map((s) => ({
               // Champs API
@@ -211,10 +213,16 @@ const useAbonnementStore = create(
 
       // ── Getters ───────────────────────────────────────────────────────────
       getActiveServices: () => {
-        const order = normalizeCategoryOrder(get().categoryOrder);
-        return get().services.filter((s) => s.available).sort(
-          (a, b) => order.indexOf(a.category || "family") - order.indexOf(b.category || "family"),
-        );
+        const order = get().serviceOrder || [];
+        const position = new Map(order.map((id, index) => [id, index]));
+        return get().services.filter((s) => s.available).sort((a, b) => {
+          const ai = position.get(a.id) ?? position.get(a.slug);
+          const bi = position.get(b.id) ?? position.get(b.slug);
+          if (ai === undefined && bi === undefined) return 0;
+          if (ai === undefined) return 1;
+          if (bi === undefined) return -1;
+          return ai - bi;
+        });
       },
       getServiceBySlug: (slug) => get().services.find((s) => s.slug === slug),
       getPublicServices: () => get().getActiveServices(),
