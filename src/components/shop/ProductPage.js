@@ -527,14 +527,19 @@ export default function ProductPage({ slug }) {
 
           <div className="flex items-baseline gap-3">
             <span className="font-display font-black text-3xl text-apple-black tracking-tight">
-              {formatPrice(prixAffiche)}
+              {formatPrice(prixAffiche * quantity)}
             </span>
             {product.comparePrice > prixAffiche && (
               <span className="text-apple-mid text-lg line-through">
-                {formatPrice(product.comparePrice)}
+                {formatPrice(product.comparePrice * quantity)}
               </span>
             )}
           </div>
+          {quantity > 1 && (
+            <p className="-mt-4 text-sm text-apple-mid">
+              {formatPrice(prixAffiche)} × {quantity} articles
+            </p>
+          )}
 
           {/* ── Variantes ── */}
           {variantTypes.length > 0 && (
