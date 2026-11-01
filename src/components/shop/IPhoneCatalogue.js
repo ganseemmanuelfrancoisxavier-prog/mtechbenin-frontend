@@ -15,7 +15,8 @@ function getImage(product) {
 
 function getModelOrder(product) {
   const model = `${product.name} ${product.slug}`.toLowerCase();
-  const generation = Number(model.match(/iphone[\s-]*(\d+)/)?.[1] || 0);
+  const generationMatch = model.match(/iphone[\\s-]*(x(?:r|s(?:[\\s-]*max)?)?|\\d{1,2})/);
+  const generation = generationMatch?.[1]?.startsWith("x") ? 10 : Number(generationMatch?.[1] || 0);
   const pro = /pro/.test(model) ? 1 : 0;
   const max = /max/.test(model) ? 1 : 0;
   return generation * 100 + pro * 10 + max;
@@ -33,7 +34,7 @@ export default function IPhoneCatalogue() {
   const iphones = useMemo(() => products
     .filter((product) => {
       const label = `${product.name} ${product.slug}`;
-      const isPhoneModel = /iphone[\s-]*\d+/i.test(label);
+      const isPhoneModel = /iphone[\\s-]*(?:x(?:r|s(?:[\\s-]*max)?)?|\\d{1,2})(?=$|[\\s-])/i.test(label);
       const isAccessory = /coque|étui|etui|chargeur|câble|cable|protection|vitre|film|case|cover|adaptateur/i.test(label);
       const category = String(product.category || product.categorySlug || "").toLowerCase();
       const isSmartphoneCategory = !category || /smartphone|telephone|téléphone|iphone/.test(category);
