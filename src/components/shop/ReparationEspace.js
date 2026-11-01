@@ -93,8 +93,8 @@ export default function ReparationEspace({ espace }) {
 
   return (
     <div className={styles.page}>
-      <Link href="/reparation" className={styles.back}>
-        <ArrowLeft /> Réparation
+      <Link href={espace === "apple" ? "/reparation/apple" : "/reparation"} className={styles.back}>
+        <ArrowLeft /> {espace === "apple" ? "Choisir un service" : "Réparation"}
       </Link>
 
       <label className={styles.search}>

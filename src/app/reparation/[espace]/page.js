@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import ShopLayout from "@/components/layout/ShopLayout";
 import ReparationEspace from "@/components/shop/ReparationEspace";
+import ReparationAppleChoix from "@/components/shop/ReparationAppleChoix";
 
 // Les espaces sont figés côté serveur (`enum RepairSpace`, voir
 // ReparationHub) : une valeur hors de cette liste ne correspond à rien que
@@ -15,7 +16,7 @@ export default function ReparationEspacePage({ params }) {
 
   return (
     <ShopLayout>
-      <ReparationEspace espace={espace} />
+      {espace === "apple" ? <ReparationAppleChoix /> : <ReparationEspace espace={espace} />}
     </ShopLayout>
   );
 }
