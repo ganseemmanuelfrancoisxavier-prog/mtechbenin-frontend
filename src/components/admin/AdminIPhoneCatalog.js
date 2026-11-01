@@ -18,7 +18,7 @@ const emptyForm = {
 };
 const fieldClass = "w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-black/40";
 const COLOR_IMAGES_SPEC = "__mtech_variant_color_images";
-const isIPhone = (product) => /iphone[\\s-]*(?:x(?:r|s(?:[\\s-]*max)?)?|\\d{1,2})(?=$|[\\s-])/i.test(`${product?.name || ""} ${product?.slug || ""}`);
+const isIPhone = (product) => /iphone[\s-]*(?:x(?:r|s(?:[\s-]*max)?)?|\d{1,2})(?=$|[\s-])/i.test(`${product?.name || ""} ${product?.slug || ""}`);
 const slugify = (value) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 function variantByName(types, name) {
