@@ -8,9 +8,22 @@ export const MODELES_IPHONE = [
   { name: "iPhone 15 Pro Max", slug: "iphone-15-pro-max", image: "https://cdsassets.apple.com/live/7WUAS350/images/tech-specs/iphone-15-pro-max.png" },
   { name: "iPhone 15 Pro", slug: "iphone-15-pro", image: "https://cdsassets.apple.com/live/7WUAS350/images/tech-specs/iphone_15_pro.png" },
   { name: "iPhone 15", slug: "iphone-15", image: "https://cdsassets.apple.com/live/7WUAS350/images/tech-specs/iphone_15_hero.png" },
+  { name: "iPhone 14 Pro Max", slug: "iphone-14-pro-max", image: "https://cdsassets.apple.com/live/SZLF0YNV/images/sp/111850_iphone-14_1.png" },
+  { name: "iPhone 14 Pro", slug: "iphone-14-pro", image: "https://cdsassets.apple.com/live/SZLF0YNV/images/sp/111850_iphone-14_1.png" },
   { name: "iPhone 14", slug: "iphone-14", image: "https://cdsassets.apple.com/live/SZLF0YNV/images/sp/111850_iphone-14_1.png" },
+  { name: "iPhone 13 Pro Max", slug: "iphone-13-pro-max", image: "https://cdsassets.apple.com/live/SZLF0YNV/images/sp/111872_iphone13-colors-480.png" },
+  { name: "iPhone 13 Pro", slug: "iphone-13-pro", image: "https://cdsassets.apple.com/live/SZLF0YNV/images/sp/111872_iphone13-colors-480.png" },
   { name: "iPhone 13", slug: "iphone-13", image: "https://cdsassets.apple.com/live/SZLF0YNV/images/sp/111872_iphone13-colors-480.png" },
+  { name: "iPhone 12 Pro Max", slug: "iphone-12-pro-max", image: "https://cdsassets.apple.com/live/SZLF0YNV/images/sp/111876_sp830-iphone12-ios14-2x.png" },
+  { name: "iPhone 12 Pro", slug: "iphone-12-pro", image: "https://cdsassets.apple.com/live/SZLF0YNV/images/sp/111876_sp830-iphone12-ios14-2x.png" },
   { name: "iPhone 12", slug: "iphone-12", image: "https://cdsassets.apple.com/live/SZLF0YNV/images/sp/111876_sp830-iphone12-ios14-2x.png" },
+  { name: "iPhone 11 Pro Max", slug: "iphone-11-pro-max", image: "/images/categories/smartphone-tablette.jpg" },
+  { name: "iPhone 11 Pro", slug: "iphone-11-pro", image: "/images/categories/smartphone-tablette.jpg" },
+  { name: "iPhone 11", slug: "iphone-11", image: "/images/categories/smartphone-tablette.jpg" },
+  { name: "iPhone XS Max", slug: "iphone-xs-max", image: "/images/categories/smartphone-tablette.jpg" },
+  { name: "iPhone XS", slug: "iphone-xs", image: "/images/categories/smartphone-tablette.jpg" },
+  { name: "iPhone XR", slug: "iphone-xr", image: "/images/categories/smartphone-tablette.jpg" },
+  { name: "iPhone X", slug: "iphone-x", image: "/images/categories/smartphone-tablette.jpg" },
 ];
 
 export function imageIphone(identifier) {
