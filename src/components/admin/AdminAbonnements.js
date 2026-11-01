@@ -1043,29 +1043,6 @@ export default function AdminAbonnements() {
 
       {viewMode === "services" && (
       <>
-      <div className="glass-card rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-[13px] font-semibold text-apple-black">Ordre des catégories sur le site</p>
-          <p className="text-[11px] text-apple-mid mt-0.5">Choisis celle qui apparaît en premier.</p>
-        </div>
-        <div className="flex gap-2">
-          {[
-            { value: "family", label: "Famille en premier" },
-            { value: "link_access", label: "Accès par lien en premier" },
-          ].map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              disabled={categoryOrderSaving}
-              onClick={() => handleCategoryOrderChange(option.value)}
-              className={`rounded-xl border px-3 py-2 text-[11px] font-semibold transition disabled:opacity-50 ${categoryOrder[0] === option.value ? "border-apple-black bg-apple-black text-white" : "border-black/[0.08] text-apple-mid hover:bg-black/[0.03]"}`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-        {categoryOrderError && <p className="w-full text-[11px] text-red-600">{categoryOrderError}</p>}
-      </div>
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
