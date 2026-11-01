@@ -14,44 +14,7 @@ const reviewsApiLocal = {
   delete: (id) => apiFetch(`/api/reviews/admin/${id}`, { method: "DELETE" }),
 };
 
-const initialReviews = [
-  {
-    id: 1,
-    productSlug: "airpod-pro-2",
-    productName: "AirPod Pro 2ème génération",
-    name: "Koffi Mensah",
-    city: "Cotonou",
-    rating: 5,
-    text: "Livraison ultra rapide ! J'ai reçu mes AirPods Pro en moins de 2h.",
-    date: "Mai 2026",
-    approved: true,
-    featured: true,
-  },
-  {
-    id: 2,
-    productSlug: "netflix",
-    productName: "Netflix Premium",
-    name: "Aïcha Dossou",
-    city: "Abomey-Calavi",
-    rating: 5,
-    text: "Mon abonnement Netflix activé en 5 minutes. Service impeccable !",
-    date: "Mai 2026",
-    approved: true,
-    featured: true,
-  },
-  {
-    id: 3,
-    productSlug: "jbl-boombox-4",
-    productName: "JBL Boombox 4ème génération",
-    name: "Rodrigue Agossou",
-    city: "Cotonou",
-    rating: 5,
-    text: "La JBL Boombox est authentique, son incroyable.",
-    date: "Avril 2026",
-    approved: true,
-    featured: true,
-  },
-];
+const initialReviews = [];
 
 const useReviewStore = create(
   persist(
@@ -89,14 +52,12 @@ const useReviewStore = create(
       fetchFeaturedReviews: async () => {
         try {
           const data = await reviewsApiLocal.getFeatured();
-          if (data.reviews?.length > 0) {
-            set((state) => ({
-              reviews: [
-                ...state.reviews.filter((r) => !r.featured),
-                ...data.reviews,
-              ],
-            }));
-          }
+          set((state) => ({
+            reviews: [
+              ...state.reviews.filter((r) => !r.featured),
+              ...(data.reviews || []),
+            ],
+          }));
           // Sert à décider si le bouton « Voir tous les avis » a quelque chose
           // de plus à montrer que les avis à la une déjà affichés.
           if (typeof data.totalApprouves === "number") {
