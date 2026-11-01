@@ -201,7 +201,7 @@ export default function CategoriesSection() {
       };
     });
 
-  const visibleItems = showAllCategories ? allItems : allItems.slice(0, 8);
+  const visibleItems = showAllCategories ? allItems : allItems.slice(0, 6);
 
   return (
     <section className={styles.section}>
@@ -234,10 +234,10 @@ export default function CategoriesSection() {
         </div>
       )}
 
-      {mounted && allItems.length > 8 && (
+      {mounted && allItems.length > 6 && (
         <div className={styles.more}>
           <button type="button" onClick={() => setShowAllCategories((value) => !value)} className={styles.moreLink}>
-            {showAllCategories ? "Voir moins" : "Voir plus de catégories"}
+            {showAllCategories ? "Voir moins" : "Voir plus"}
             <ArrowRight className={styles.moreChevron} />
           </button>
         </div>
