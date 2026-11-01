@@ -286,6 +286,8 @@ export const subscriptionsApi = {
     apiFetch(`/api/subscriptions/admin/orders${buildQuery(params)}`),
   deleteOrder: (id) =>
     apiFetch(`/api/subscriptions/admin/orders/${id}`, { method: "DELETE" }),
+  updateServiceOrder: (serviceOrder) =>
+    apiFetch("/api/subscriptions/admin/service-order", { method: "PATCH", body: JSON.stringify({ serviceOrder }) }),
   updateCategoryOrder: (categoryOrder) =>
     apiFetch("/api/subscriptions/admin/category-order", {
       method: "PATCH",
@@ -358,6 +360,8 @@ export const subscriptionsApi = {
     }),
   getPoolLinks: (planId) =>
     apiFetch(`/api/subscriptions/admin/plans/${planId}/pool-links`),
+  updatePoolLink: (id, link) =>
+    apiFetch(`/api/subscriptions/admin/pool-links/${id}`, { method: "PATCH", body: JSON.stringify({ link }) }),
   addPoolLink: (planId, link) =>
     apiFetch(`/api/subscriptions/admin/plans/${planId}/pool-links`, {
       method: "POST",
