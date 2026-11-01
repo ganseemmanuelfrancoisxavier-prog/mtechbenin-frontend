@@ -18,6 +18,8 @@ import {
   Eye,
   EyeOff,
   ChevronDown,
+  ArrowUp,
+  ArrowDown,
   AlertCircle,
   Lock,
   Link as LinkIcon,
@@ -190,6 +192,8 @@ export default function AdminAbonnements() {
   const [categoryOrder, setCategoryOrder] = useState(["family", "link_access"]);
   const [categoryOrderSaving, setCategoryOrderSaving] = useState(false);
   const [categoryOrderError, setCategoryOrderError] = useState("");
+  const [serviceOrderSaving, setServiceOrderSaving] = useState(false);
+  const [serviceOrderError, setServiceOrderError] = useState("");
   const [deleteOrderConfirm, setDeleteOrderConfirm] = useState(null);
   const [deleteOrderError, setDeleteOrderError] = useState("");
   const [deleteOrderSaving, setDeleteOrderSaving] = useState(false);
@@ -542,6 +546,25 @@ export default function AdminAbonnements() {
     setCategoryOrderSaving(false);
   };
 
+  const handleMoveService = async (service, direction, event) => {
+    event.stopPropagation();
+    if (serviceOrderSaving) return;
+    const ordered = services.map((item) => item.id);
+    const index = ordered.indexOf(service.id);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= ordered.length) return;
+    [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
+    const previous = services;
+    setApiData((data) => ({ ...data, services: ordered.map((id) => data.services.find((item) => item.id === id)) }));
+    setServiceOrderSaving(true);
+    setServiceOrderError("");
+    try { await subscriptionsApi.updateServiceOrder(ordered); }
+    catch (err) {
+      setApiData((data) => ({ ...data, services: previous }));
+      setServiceOrderError(err.message || "Impossible d’enregistrer l’ordre");
+    } finally { setServiceOrderSaving(false); }
+  };
+
   // ── Handlers — tous via API ───────────────────────────────────────────────
 
   const handleToggleService = async (svc) => {
@@ -844,6 +867,19 @@ export default function AdminAbonnements() {
     setPoolLinkEnCours((p) => ({ ...p, [planId]: false }));
   };
 
+  const handleEditPoolLink = async (planId, item) => {
+    const value = window.prompt("Modifier le lien", item.link);
+    if (value === null || value.trim() === item.link) return;
+    setPoolLinkEnCours((p) => ({ ...p, [planId]: true }));
+    setPoolLinkErreurs((p) => ({ ...p, [planId]: null }));
+    try {
+      await subscriptionsApi.updatePoolLink(item.id, value.trim());
+      await loadAll();
+    } catch (err) {
+      setPoolLinkErreurs((p) => ({ ...p, [planId]: err.message || "Modification impossible" }));
+    } finally { setPoolLinkEnCours((p) => ({ ...p, [planId]: false })); }
+  };
+
   const handleDeletePoolLink = async (planId, linkId) => {
     setPoolLinkEnCours((p) => ({ ...p, [planId]: true }));
     setPoolLinkErreurs((p) => ({ ...p, [planId]: null }));
@@ -1122,6 +1158,7 @@ export default function AdminAbonnements() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((service) => {
+            const serviceIndex = services.findIndex((item) => item.id === service.id);
             const Icon = serviceIcons[service.slug] || Globe;
             const dispo = getServiceDispo(service);
             const ssc =
@@ -1151,6 +1188,10 @@ export default function AdminAbonnements() {
                     />
                   </div>
                   <div className="flex flex-col items-end gap-1">
+                    <div className="flex gap-1">
+                      <button type="button" aria-label={`Monter ${service.name}`} title="Monter" disabled={serviceOrderSaving || serviceIndex === 0} onClick={(event) => handleMoveService(service, -1, event)} className="rounded-lg border border-black/10 p-1.5 text-apple-mid hover:bg-black/[0.04] disabled:opacity-30"><ArrowUp className="h-3.5 w-3.5" /></button>
+                      <button type="button" aria-label={`Descendre ${service.name}`} title="Descendre" disabled={serviceOrderSaving || serviceIndex === services.length - 1} onClick={(event) => handleMoveService(service, 1, event)} className="rounded-lg border border-black/10 p-1.5 text-apple-mid hover:bg-black/[0.04] disabled:opacity-30"><ArrowDown className="h-3.5 w-3.5" /></button>
+                    </div>
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${ssc.bg} ${ssc.color}`}
                     >
@@ -2037,7 +2078,9 @@ export default function AdminAbonnements() {
                                             {dispo ? "Disponible" : "Attribué à un client"}
                                           </p>
                                         </div>
-                                        {dispo ? (
+                                        <div className="flex items-center gap-1">
+                                          <button type="button" onClick={() => handleEditPoolLink(plan.id, l)} disabled={poolLinkEnCours[plan.id]} aria-label="Modifier ce lien" title="Modifier ce lien" className="p-2 rounded-xl text-apple-mid hover:text-apple-black hover:bg-black/[0.04] transition flex-shrink-0 disabled:opacity-50"><Pencil className="w-3.5 h-3.5" /></button>
+                                          {dispo && <button
                                           <button
                                             type="button"
                                             onClick={() =>
@@ -2051,10 +2094,8 @@ export default function AdminAbonnements() {
                                             className="p-2 rounded-xl text-apple-mid hover:text-red-500 hover:bg-red-500/[0.06] transition flex-shrink-0"
                                           >
                                             <Trash2 className="w-3.5 h-3.5" />
-                                          </button>
-                                        ) : (
-                                          <Lock className="w-3.5 h-3.5 text-apple-mid/50 flex-shrink-0" />
-                                        )}
+                                          </button>}
+                                        </div>
                                       </div>
                                     );
                                   })}
