@@ -15,7 +15,7 @@ function getImage(product) {
 
 function getModelOrder(product) {
   const model = `${product.name} ${product.slug}`.toLowerCase();
-  const generationMatch = model.match(/iphone[\\s-]*(x(?:r|s(?:[\\s-]*max)?)?|\\d{1,2})/);
+  const generationMatch = model.match(/iphone[\s-]*(x(?:r|s(?:[\s-]*max)?)?|\d{1,2})/);
   const generation = generationMatch?.[1]?.startsWith("x") ? 10 : Number(generationMatch?.[1] || 0);
   const pro = /pro/.test(model) ? 1 : 0;
   const max = /max/.test(model) ? 1 : 0;
