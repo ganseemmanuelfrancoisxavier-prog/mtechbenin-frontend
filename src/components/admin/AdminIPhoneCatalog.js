@@ -180,7 +180,6 @@ export default function AdminIPhoneCatalog() {
     if (!form.name.trim() || !isIPhone({ name: form.name })) return setError("Saisissez le nom complet du modèle, par exemple iPhone 17 Pro.");
     if (!form.image.trim()) return setError("Ajoutez l’adresse de l’image du téléphone.");
     if (!cleanStorages.length || cleanStorages.some((row) => !/^\d+$/.test(row.price) || Number(row.price) <= 0)) return setError("Ajoutez au moins un stockage avec son prix en FCFA.");
-    if (!cleanColors.length) return setError("Ajoutez au moins une couleur.");
     if (cleanColors.some((row) => !/^-?\d+$/.test(row.delta.trim()))) return setError("Le supplément de couleur doit être un nombre entier en FCFA (0 si le prix ne change pas).");
     if (!/^\d+$/.test(String(form.stock)) || Number(form.stock) < 0) return setError("Le stock doit être un nombre entier positif ou nul.");
 
@@ -194,7 +193,7 @@ export default function AdminIPhoneCatalog() {
         .map((row) => ({ typeName: "Couleur", value: row.value.trim(), imageUrl: row.imageUrl }));
       const payload = {
         name: form.name.trim(), slug, categorySlug: "smartphone-tablette", price: minPrice,
-        stock: Number(form.stock), status: Number(form.stock) > 0 ? "En stock" : "Rupture de stock",
+        stock: Number(form.stock), status: Number(form.stock) > 0 ? "En stock" : "Rupture",
         description: `Achetez ${form.name.trim()} chez MTECHBENIN. Choisissez le stockage et la couleur.`,
         active: form.active, featured: false, images: JSON.stringify([form.image.trim()]), videoUrl: null,
         specs: [{ label: COLOR_IMAGES_SPEC, value: JSON.stringify(colorImages) }],
@@ -259,7 +258,7 @@ export default function AdminIPhoneCatalog() {
         </section>
 
         <section className="rounded-2xl bg-neutral-50 p-4 sm:p-5">
-          <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="font-bold">Couleurs</h3><p className="text-xs text-neutral-500">Ajoutez un supplément en FCFA si une couleur coûte plus cher, sinon laissez 0. Vous pouvez aussi ajouter une photo à chaque couleur.</p></div><button type="button" onClick={() => addRow("colors", { value: "", delta: "0", imageUrl: "" })} className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-bold"><Plus size={14} /> Couleur</button></div>
+          <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="font-bold">Couleurs (facultatif)</h3><p className="text-xs text-neutral-500">Ajoutez un supplément en FCFA si une couleur coûte plus cher, sinon laissez 0. Vous pouvez aussi ajouter une photo à chaque couleur.</p></div><button type="button" onClick={() => addRow("colors", { value: "", delta: "0", imageUrl: "" })} className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-bold"><Plus size={14} /> Couleur</button></div>
           <div className="space-y-2">
             {form.colors.map((row, index) => <div key={`color-${index}`} className="space-y-2 rounded-xl border border-black/[.06] bg-white p-3"><div className="grid grid-cols-[1fr_1fr_auto] gap-2"><input className={fieldClass} aria-label="Couleur" placeholder="Titane naturel" value={row.value} onChange={(e) => updateRow("colors", index, "value", e.target.value)} /><input className={fieldClass} aria-label="Supplément de prix couleur en FCFA" type="number" step="1" placeholder="Supplément FCFA" value={row.delta} onChange={(e) => updateRow("colors", index, "delta", e.target.value)} /><button type="button" aria-label="Supprimer cette couleur" onClick={() => removeRow("colors", index)} className="rounded-xl px-2 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={17} /></button></div><ColorImageInput color={row.value} value={row.imageUrl} onChange={(imageUrl) => updateRow("colors", index, "imageUrl", imageUrl)} /></div>)}
           </div>
