@@ -98,9 +98,11 @@ export default function ReparationAppleChoix() {
 
   return (
     <main className={styles.page}>
-      <Link href="/reparation" className={styles.back}>
-        <ArrowLeft aria-hidden="true" /> Services de réparation
-      </Link>
+      {etape === "choix" && (
+        <Link href="/reparation" className={styles.back}>
+          <ArrowLeft aria-hidden="true" /> Services de réparation
+        </Link>
+      )}
 
       {etape === "choix" ? (
         <>
