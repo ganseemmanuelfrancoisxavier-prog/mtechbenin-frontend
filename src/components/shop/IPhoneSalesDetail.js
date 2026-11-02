@@ -18,7 +18,12 @@ export default function IPhoneSalesDetail({ product, variantTypes, selectedVaria
       variantTypes,
       selected: buildOrderVariantsArray(variantTypes, selection),
     });
-    return result.ok ? result.unitPrice : product.price + Number(option.priceDelta || 0);
+    const visiblePrice = variantTypes.reduce((total, variantType) => {
+      const value = selection[variantType.name];
+      const selectedOption = variantType.options?.find((item) => item.value === value);
+      return total + Number(selectedOption?.priceDelta || 0);
+    }, Number(product.price || 0));
+    return result.ok ? result.unitPrice : visiblePrice;
   };
 
   return (
@@ -69,7 +74,8 @@ export default function IPhoneSalesDetail({ product, variantTypes, selectedVaria
               <div className="flex flex-wrap gap-2">
                 {type.options.map((option) => {
                   const active = selectedVariants[type.name] === option.value;
-                  return <button key={option.id || option.value} type="button" onClick={() => onSelectVariant(type.name, option.value)} aria-pressed={active} className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition ${active ? "border-neutral-950 bg-neutral-950 text-white" : "border-black/10 bg-white text-neutral-800 hover:border-black/40"}`}>{option.value}</button>;
+                  const stateOption = /état|etat|condition/i.test(type.name);
+                  return <button key={option.id || option.value} type="button" onClick={() => onSelectVariant(type.name, option.value)} aria-pressed={active} className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${active ? "border-neutral-950 bg-neutral-950 text-white" : "border-black/10 bg-white text-neutral-800 hover:border-black/40"}`}><span className="block">{option.value}</span>{stateOption && <span className={`mt-1 block text-xs font-medium ${active ? "text-white/75" : "text-neutral-500"}`}>{formatPrice(priceForOption(type, option))}</span>}</button>;
                 })}
               </div>
             </fieldset>
