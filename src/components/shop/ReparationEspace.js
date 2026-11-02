@@ -235,13 +235,14 @@ export default function ReparationEspace({ espace }) {
               className={styles.card}
             >
               <span className={styles.imageFrame}>
-                {espace === "apple" && (modele.imagePanel || imageFondEcran(modele)) ? (
+                {espace === "apple" && (modele.image || modele.imagePanel || imageFondEcran(modele)) ? (
                   <Image
-                    src={modele.imagePanel || imageFondEcran(modele)}
+                    src={modele.image || modele.imagePanel || imageFondEcran(modele)}
                     alt={`Écran de ${modele.name}`}
                     fill
                     sizes="(max-width: 640px) 45vw, 260px"
                     className={styles.image}
+                    unoptimized
                   />
                 ) : espace === "apple" ? (
                   <EcranTelephone nom={modele.name} />
