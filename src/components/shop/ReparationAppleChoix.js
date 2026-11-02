@@ -5,16 +5,9 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
-  Building2,
   Check,
-  Cpu,
   HelpCircle,
-  LockKeyhole,
   MessageCircle,
-  ShieldCheck,
-  Signal,
-  WifiOff,
-  Wrench,
 } from "lucide-react";
 import styles from "./ReparationAppleChoix.module.css";
 
@@ -22,8 +15,7 @@ const DEBLOCAGES = [
   {
     id: "bypass_wifi",
     titre: "Bypass sans réseau",
-    detail: "Accès à l’appareil en Wi-Fi",
-    Icon: WifiOff,
+    detail: "Déblocage iCloud / Activation sans connexion Internet",
     options: [
       { id: "wifi_6_x", nom: "iPhone 6 à iPhone X", prix: "5 000 FCFA" },
       { id: "wifi_xr_17", nom: "iPhone XR à iPhone 17 Pro Max", prix: "10 000 FCFA" },
@@ -32,8 +24,7 @@ const DEBLOCAGES = [
   {
     id: "bypass_signal",
     titre: "Bypass avec réseau",
-    detail: "Appels, SMS et carte SIM",
-    Icon: Signal,
+    detail: "Déblocage iCloud (appels, SMS et carte SIM)",
     options: [
       { id: "sig_6_x", nom: "iPhone 6s à iPhone X", prix: "15 000 FCFA" },
       { id: "sig_xr_15", nom: "iPhone XR à iPhone 15 Pro Max", prix: "Sur devis" },
@@ -43,8 +34,7 @@ const DEBLOCAGES = [
   {
     id: "mdm",
     titre: "Gestion MDM",
-    detail: "iPhone, iPad ou Mac géré à distance",
-    Icon: Building2,
+    detail: "Suppression de la gestion à distance (iPhone, iPad et Mac)",
     options: [
       { id: "mdm_iphone", nom: "iPhone MDM · tous modèles", prix: "8 000 FCFA" },
       { id: "mdm_mac", nom: "MacBook ou iMac MDM", prix: "15 000 FCFA" },
@@ -53,8 +43,7 @@ const DEBLOCAGES = [
   {
     id: "esim",
     titre: "eSIM & désimlockage",
-    detail: "Verrouillage opérateur ou demande spéciale",
-    Icon: Cpu,
+    detail: "Déverrouillage opérateur et activation eSIM",
     options: [
       { id: "esim_lock", nom: "Déblocage eSIM", prix: "Sur devis" },
       { id: "other_unlock", nom: "Autre déblocage spécifique", prix: "Sur devis" },
@@ -113,29 +102,23 @@ export default function ReparationAppleChoix() {
 
       {etape === "choix" ? (
         <>
-          <header className={styles.hero}>
-            <span className={styles.heroGlow} aria-hidden="true" />
-            <span className={styles.heroTag}><span /> Service Apple</span>
-            <h1>Comment pouvons-nous vous aider&nbsp;?</h1>
-            <p>Choisissez votre besoin. Nous vous guiderons vers la bonne solution.</p>
-            <div className={styles.heroNote}><ShieldCheck aria-hidden="true" /> Diagnostic et accompagnement par notre équipe</div>
+          <header className={styles.heading}>
+            <p>Réparation Apple</p>
+            <h1>Réparation ou déblocage&nbsp;?</h1>
+            <span>Choisissez le service adapté à votre appareil.</span>
           </header>
 
           <section className={styles.grid} aria-label="Services Apple">
             <Link href="/reparation/apple/reparation" className={styles.card}>
-              <span className={`${styles.icon} ${styles.iconRepair}`}><Wrench aria-hidden="true" /></span>
               <span className={styles.cardTitle}>Réparation</span>
               <span className={styles.description}>Écran, batterie, système, vitre arrière et plus encore.</span>
               <span className={styles.action}>Choisir un modèle <ArrowRight aria-hidden="true" /></span>
-              <span className={styles.cardAccent} aria-hidden="true" />
             </Link>
 
             <button type="button" onClick={() => setEtape("categories")} className={`${styles.card} ${styles.cardButton}`}>
-              <span className={`${styles.icon} ${styles.iconUnlock}`}><LockKeyhole aria-hidden="true" /></span>
               <span className={styles.cardTitle}>Déblocage</span>
               <span className={styles.description}>Bypass, MDM, eSIM ou désimlockage : trouvez votre prestation.</span>
               <span className={styles.action}>Découvrir les services <ArrowRight aria-hidden="true" /></span>
-              <span className={`${styles.cardAccent} ${styles.unlockAccent}`} aria-hidden="true" />
             </button>
           </section>
           <p className={styles.footnote}>Vous ne savez pas quelle option choisir&nbsp;? Nous vous aiderons à identifier le service adapté.</p>
@@ -160,11 +143,10 @@ export default function ReparationAppleChoix() {
                 <span>Sélectionnez la prestation qui correspond à votre appareil.</span>
               </header>
               <div className={styles.categoryGrid}>
-                {DEBLOCAGES.map(({ id, titre, detail, Icon }) => (
+                {DEBLOCAGES.map(({ id, titre, detail }) => (
                   <button type="button" key={id} className={styles.categoryCard} onClick={() => choisirCategorie(id)}>
-                    <span className={styles.categoryIcon}><Icon aria-hidden="true" /></span>
                     <span className={styles.categoryText}><strong>{titre}</strong><small>{detail}</small></span>
-                    <ArrowRight className={styles.categoryArrow} aria-hidden="true" />
+                    <span className={styles.categoryArrow}><ArrowRight aria-hidden="true" /></span>
                   </button>
                 ))}
               </div>
