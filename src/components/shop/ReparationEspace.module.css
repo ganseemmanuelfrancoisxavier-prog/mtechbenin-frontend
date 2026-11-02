@@ -88,21 +88,22 @@
   max-width: none;
   min-height: 68vh;
   padding: 24px max(22px, calc((100vw - 1080px) / 2)) 80px;
-  background: #202127;
-  color: #f7f7f8;
+  background: #fff;
+  color: #17181c;
 }
-.applePage .back { color: #c5c6ca; }
+.applePage .back { color: #747780; }
+.applePage .back:hover { color: #17181c; }
 .applePage .search {
-  border-color: rgba(255, 255, 255, .12);
-  background: #292a31;
-  box-shadow: none;
+  border-color: #e8e9ec;
+  background: #fff;
+  box-shadow: 0 5px 18px rgba(20, 20, 24, .045);
 }
-.applePage .search svg,
-.applePage .search input { color: #f5f5f6; }
-.applePage .search input::placeholder { color: #a6a7ad; }
+.applePage .search input { color: #17181c; }
+.applePage .search svg { color: #777a83; }
+.applePage .search input::placeholder { color: #999ca4; }
 .applePage .heading { margin: 34px 0 22px; }
-.applePage .heading p { color: #a6a7ad; }
-.applePage .heading h1 { color: #f7f7f8; }
+.applePage .heading p { color: #777a83; }
+.applePage .heading h1 { color: #17181c; }
 .applePage .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 48px; row-gap: 70px; }
 .applePage .card {
   align-items: center;
@@ -116,10 +117,10 @@
 .applePage .imageFrame { width: 100%; height: clamp(190px, 25vw, 300px); background: transparent; }
 .applePage .image { padding: 4px 12px; }
 .applePage .cardFooter { min-height: 42px; padding: 14px 4px 0; text-align: center; }
-.applePage .modelName { color: #d8d9de; font-size: clamp(16px, 2vw, 22px); font-weight: 450; }
+.applePage .modelName { color: #454750; font-size: clamp(16px, 2vw, 22px); font-weight: 450; }
 .applePage .family,
 .applePage .arrow { display: none; }
-.applePage .message { color: #c5c6ca; }
+.applePage .message { color: #747780; }
 
 @media (max-width: 700px) {
   .applePage { padding: 14px 20px 56px; }
