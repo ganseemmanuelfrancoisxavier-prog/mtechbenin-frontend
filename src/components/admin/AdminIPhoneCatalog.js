@@ -13,12 +13,13 @@ const emptyForm = {
   image: "",
   stock: "1",
   active: true,
-  storages: [{ value: "", price: "" }],
-  states: [{ value: "Scellé", delta: "0" }, { value: "Venu", delta: "0" }],
+  storages: [{ value: "", supplement: "" }],
+  states: [{ value: "Scellé", price: "" }, { value: "Venu", price: "" }],
   colors: [{ value: "", delta: "0", imageUrl: "" }],
 };
 const fieldClass = "w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-black/40";
 const COLOR_IMAGES_SPEC = "__mtech_variant_color_images";
+const IPHONE_PRICING_SPEC = "__mtech_iphone_pricing";
 const isIPhone = (product) => /iphone[\s-]*(?:x(?:r|s(?:[\s-]*max)?)?|\d{1,2})(?=$|[\s-])/i.test(`${product?.name || ""} ${product?.slug || ""}`);
 const slugify = (value) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
@@ -38,6 +39,16 @@ function parseColorImages(raw) {
     const images = JSON.parse(metadata.value);
     return Array.isArray(images) ? images : [];
   } catch { return []; }
+}
+
+function parseIPhonePricing(raw) {
+  let specs = raw;
+  if (typeof specs === "string") {
+    try { specs = JSON.parse(specs); } catch { return {}; }
+  }
+  const metadata = Array.isArray(specs) ? specs.find((spec) => spec.label === IPHONE_PRICING_SPEC) : null;
+  if (!metadata?.value) return {};
+  try { return JSON.parse(metadata.value) || {}; } catch { return {}; }
 }
 
 function fileToBase64(file) {
@@ -161,6 +172,10 @@ export default function AdminIPhoneCatalog() {
       const storage = variantByName(variantTypes, "Stockage");
       const color = variantByName(variantTypes, "Couleur");
       const phoneState = variantTypes.find((type) => /^(état|etat|condition)$/i.test(type.name.trim()));
+      const pricingMetadata = parseIPhonePricing(product.specs);
+      const storageOffset = storage?.options?.length
+        ? Number(pricingMetadata.minStorageSupplement ?? Math.min(...storage.options.map((option) => Number(option.priceDelta || 0))))
+        : 0;
       const colorImages = parseColorImages(product.specs);
       setForm({
         id: product.id,
@@ -170,11 +185,11 @@ export default function AdminIPhoneCatalog() {
         stock: String(product.stock ?? 0),
         active: product.active !== false,
         storages: storage?.options?.length
-          ? storage.options.map((option) => ({ value: option.value, price: String(Number(product.price || 0) + Number(option.priceDelta || 0)) }))
-          : [{ value: "", price: String(product.price || "") }],
+          ? storage.options.map((option) => ({ value: option.value, supplement: String(Number(option.priceDelta || 0) + storageOffset) }))
+          : [{ value: "", supplement: "0" }],
         states: phoneState?.options?.length
-          ? phoneState.options.map((option) => ({ value: option.value, delta: String(option.priceDelta || 0) }))
-          : emptyForm.states,
+          ? phoneState.options.map((option) => ({ value: option.value, price: String(Number(product.price || 0) - storageOffset + Number(option.priceDelta || 0)) }))
+          : [{ value: "Scellé", price: String(Number(product.price || 0) - storageOffset) }, { value: "Venu", price: String(Number(product.price || 0) - storageOffset) }],
         colors: color?.options?.length
           ? color.options.map((option) => ({ value: option.value, delta: String(option.priceDelta || 0), imageUrl: colorImages.find((item) => (item.value || item.color) === option.value)?.imageUrl || "" }))
           : [{ value: "", delta: "0", imageUrl: "" }],
@@ -230,25 +245,30 @@ export default function AdminIPhoneCatalog() {
     const cleanColors = form.colors.filter((row) => row.value.trim());
     if (!form.name.trim() || !isIPhone({ name: form.name })) return setError("Saisissez le nom complet du modèle, par exemple iPhone 17 Pro.");
     if (!form.image.trim()) return setError("Ajoutez l’adresse de l’image du téléphone.");
-    if (!cleanStorages.length || cleanStorages.some((row) => !/^\d+$/.test(row.price) || Number(row.price) <= 0)) return setError("Ajoutez au moins un stockage avec son prix en FCFA.");
-    if (cleanStates.length < 2 || cleanStates.some((row) => !/^-?\d+$/.test(row.delta.trim()))) return setError("Ajoutez les deux états du téléphone et leur ajustement de prix en FCFA.");
+    if (!cleanStorages.length || cleanStorages.some((row) => !/^\d+$/.test(row.supplement) || Number(row.supplement) < 0)) return setError("Ajoutez au moins un stockage avec son complément de prix en FCFA (0 ou plus).");
+    if (cleanStates.length < 2 || cleanStates.some((row) => !/^\d+$/.test(row.price) || Number(row.price) <= 0)) return setError("Ajoutez les prix de base pour les deux états du téléphone.");
     if (cleanColors.some((row) => !/^-?\d+$/.test(row.delta.trim()))) return setError("Le supplément de couleur doit être un nombre entier en FCFA (0 si le prix ne change pas).");
     if (!/^\d+$/.test(String(form.stock)) || Number(form.stock) < 0) return setError("Le stock doit être un nombre entier positif ou nul.");
 
     setSaving(true);
     let savedProduct = null;
     try {
-      const minPrice = Math.min(...cleanStorages.map((row) => Number(row.price)));
+      const minStatePrice = Math.min(...cleanStates.map((row) => Number(row.price)));
+      const minStorageSupplement = Math.min(...cleanStorages.map((row) => Number(row.supplement)));
+      const basePrice = minStatePrice + minStorageSupplement;
       const slug = (form.slug.trim() || slugify(form.name)).toLowerCase();
       const colorImages = cleanColors
         .filter((row) => row.imageUrl)
     .map((row) => ({ typeName: "Couleur", value: row.value.trim(), imageUrl: row.imageUrl }));
       const payload = {
-        name: form.name.trim(), slug, categorySlug: "smartphone-tablette", price: minPrice,
+        name: form.name.trim(), slug, categorySlug: "smartphone-tablette", price: basePrice,
         stock: Number(form.stock), status: Number(form.stock) > 0 ? "En stock" : "Rupture",
-        description: `Achetez ${form.name.trim()} chez MTECHBENIN. Choisissez le stockage et la couleur.`,
+        description: `Achetez ${form.name.trim()} chez MTECHBENIN. Choisissez l’état et le stockage.`,
         active: form.active, featured: false, images: JSON.stringify([form.image.trim()]), videoUrl: null,
-        specs: [{ label: COLOR_IMAGES_SPEC, value: JSON.stringify(colorImages) }],
+        specs: [
+          { label: COLOR_IMAGES_SPEC, value: JSON.stringify(colorImages) },
+          { label: IPHONE_PRICING_SPEC, value: JSON.stringify({ minStorageSupplement }) },
+        ],
       };
       if (form.id) {
         const result = await productsApi.update(form.id, payload);
@@ -259,8 +279,8 @@ export default function AdminIPhoneCatalog() {
       }
       const productId = savedProduct.id || form.id;
       const { variantTypes = [] } = await variantsApi.getAll(productId);
-      await syncType(productId, variantTypes, "Stockage", cleanStorages, (row) => Number(row.price) - minPrice);
-      await syncType(productId, variantTypes, "État", cleanStates, (row) => Number(row.delta));
+      await syncType(productId, variantTypes, "Stockage", cleanStorages, (row) => Number(row.supplement) - minStorageSupplement);
+      await syncType(productId, variantTypes, "État", cleanStates, (row) => Number(row.price) - minStatePrice);
       await syncType(productId, variantTypes, "Couleur", cleanColors, (row) => Number(row.delta));
       setSuccess("Modèle enregistré. Les options sont disponibles sur la boutique.");
       setForm(emptyForm);
@@ -308,16 +328,16 @@ export default function AdminIPhoneCatalog() {
         </div>
 
         <section className="rounded-2xl bg-neutral-50 p-4 sm:p-5">
-          <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="font-bold">Stockages et prix</h3><p className="text-xs text-neutral-500">Indiquez le prix final de chaque capacité.</p></div><button type="button" onClick={() => addRow("storages", { value: "", price: "" })} className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-bold"><Plus size={14} /> Capacité</button></div>
+          <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="font-bold">État du téléphone</h3><p className="text-xs text-neutral-500">Définissez le prix de base pour chaque état. Le complément du stockage sera ajouté ensuite.</p></div><button type="button" onClick={() => addRow("states", { value: "", price: "" })} className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-bold"><Plus size={14} /> État</button></div>
           <div className="space-y-2">
-            {form.storages.map((row, index) => <div key={`storage-${index}`} className="grid grid-cols-[1fr_1fr_auto] gap-2"><input className={fieldClass} aria-label="Capacité" placeholder="128 Go" value={row.value} onChange={(e) => updateRow("storages", index, "value", e.target.value)} /><input className={fieldClass} aria-label="Prix final en FCFA" type="number" min="1" placeholder="Prix en FCFA" value={row.price} onChange={(e) => updateRow("storages", index, "price", e.target.value)} /><button type="button" aria-label="Supprimer cette capacité" onClick={() => removeRow("storages", index)} className="rounded-xl px-2 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={17} /></button></div>)}
+            {form.states.map((row, index) => <div key={`state-${index}`} className="grid grid-cols-[1fr_1fr_auto] gap-2"><input className={fieldClass} aria-label="État du téléphone" placeholder={index === 0 ? "Scellé" : "Venu"} value={row.value} onChange={(e) => updateRow("states", index, "value", e.target.value)} /><input className={fieldClass} aria-label="Prix de base de cet état en FCFA" type="number" min="1" step="1" placeholder="Prix de base FCFA" value={row.price} onChange={(e) => updateRow("states", index, "price", e.target.value)} /><button type="button" aria-label="Supprimer cet état" onClick={() => removeRow("states", index)} className="rounded-xl px-2 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={17} /></button></div>)}
           </div>
         </section>
 
         <section className="rounded-2xl bg-neutral-50 p-4 sm:p-5">
-          <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="font-bold">État du téléphone</h3><p className="text-xs text-neutral-500">Le client choisira « Scellé » ou « Venu ». Ajustez le prix par rapport au tarif du stockage; une valeur négative baisse le prix.</p></div><button type="button" onClick={() => addRow("states", { value: "", delta: "0" })} className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-bold"><Plus size={14} /> État</button></div>
+          <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="font-bold">Compléments de stockage</h3><p className="text-xs text-neutral-500">Ce montant s’ajoute au prix de base de l’état choisi.</p></div><button type="button" onClick={() => addRow("storages", { value: "", supplement: "0" })} className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-bold"><Plus size={14} /> Capacité</button></div>
           <div className="space-y-2">
-            {form.states.map((row, index) => <div key={`state-${index}`} className="grid grid-cols-[1fr_1fr_auto] gap-2"><input className={fieldClass} aria-label="État du téléphone" placeholder={index === 0 ? "Scellé" : "Venu"} value={row.value} onChange={(e) => updateRow("states", index, "value", e.target.value)} /><input className={fieldClass} aria-label="Ajustement du prix selon l’état en FCFA" type="number" step="1" placeholder="Ajustement FCFA" value={row.delta} onChange={(e) => updateRow("states", index, "delta", e.target.value)} /><button type="button" aria-label="Supprimer cet état" onClick={() => removeRow("states", index)} className="rounded-xl px-2 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={17} /></button></div>)}
+            {form.storages.map((row, index) => <div key={`storage-${index}`} className="grid grid-cols-[1fr_1fr_auto] gap-2"><input className={fieldClass} aria-label="Capacité" placeholder="128 Go" value={row.value} onChange={(e) => updateRow("storages", index, "value", e.target.value)} /><input className={fieldClass} aria-label="Complément de stockage en FCFA" type="number" min="0" step="1" placeholder="Complément FCFA" value={row.supplement} onChange={(e) => updateRow("storages", index, "supplement", e.target.value)} /><button type="button" aria-label="Supprimer cette capacité" onClick={() => removeRow("storages", index)} className="rounded-xl px-2 text-neutral-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={17} /></button></div>)}
           </div>
         </section>
 

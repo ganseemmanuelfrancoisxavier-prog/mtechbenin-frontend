@@ -4,28 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ChevronRight, Minus, Plus, ShoppingBag } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { computeUnitPrice } from "@/lib/pricing";
-import { buildOrderVariantsArray } from "@/lib/variants";
 
 export default function IPhoneSalesDetail({ product, variantTypes, selectedVariants, onSelectVariant, quantity, setQuantity, price, canBuy, onBuy }) {
   const storageType = variantTypes.find((type) => /stockage|capacit[ée]/i.test(type.name));
   const stateTypes = variantTypes.filter((type) => type !== storageType && /état|etat|condition/i.test(type.name));
   const otherTypes = variantTypes.filter((type) => type !== storageType && !stateTypes.includes(type));
-
-  const priceForOption = (type, option) => {
-    const selection = { ...selectedVariants, [type.name]: option.value };
-    const result = computeUnitPrice({
-      basePrice: product.price,
-      variantTypes,
-      selected: buildOrderVariantsArray(variantTypes, selection),
-    });
-    const visiblePrice = variantTypes.reduce((total, variantType) => {
-      const value = selection[variantType.name];
-      const selectedOption = variantType.options?.find((item) => item.value === value);
-      return total + Number(selectedOption?.priceDelta || 0);
-    }, Number(product.price || 0));
-    return result.ok ? result.unitPrice : visiblePrice;
-  };
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 pb-36 pt-6 md:pb-20 md:pt-10">
@@ -58,7 +41,7 @@ export default function IPhoneSalesDetail({ product, variantTypes, selectedVaria
               <div className="flex flex-wrap gap-2">
                 {type.options.map((option) => {
                   const active = selectedVariants[type.name] === option.value;
-                  return <button key={option.id || option.value} type="button" onClick={() => onSelectVariant(type.name, option.value)} aria-pressed={active} className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${active ? "border-neutral-950 bg-neutral-950 text-white" : "border-black/10 bg-white text-neutral-800 hover:border-black/40"}`}><span className="block">{option.value}</span><span className={`mt-1 block text-xs font-medium ${active ? "text-white/75" : "text-neutral-500"}`}>{formatPrice(priceForOption(type, option))}</span></button>;
+                  return <button key={option.id || option.value} type="button" onClick={() => onSelectVariant(type.name, option.value)} aria-pressed={active} className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${active ? "border-neutral-950 bg-neutral-950 text-white" : "border-black/10 bg-white text-neutral-800 hover:border-black/40"}`}>{option.value}</button>;
                 })}
               </div>
             </fieldset>
@@ -72,7 +55,6 @@ export default function IPhoneSalesDetail({ product, variantTypes, selectedVaria
                   const active = selectedVariants[storageType.name] === option.value;
                   return <button key={option.id || option.value} type="button" onClick={() => onSelectVariant(storageType.name, option.value)} aria-pressed={active} className={`rounded-2xl border p-4 text-left transition ${active ? "border-neutral-950 bg-neutral-950 text-white shadow-md" : "border-black/10 bg-white hover:border-black/40"}`}>
                     <span className="block text-base font-bold">{option.value}</span>
-                    <span className={`mt-2 block text-sm ${active ? "text-white/75" : "text-neutral-500"}`}>{formatPrice(priceForOption(storageType, option))}</span>
                   </button>;
                 })}
               </div>
@@ -87,8 +69,7 @@ export default function IPhoneSalesDetail({ product, variantTypes, selectedVaria
               <div className="flex flex-wrap gap-2">
                 {type.options.map((option) => {
                   const active = selectedVariants[type.name] === option.value;
-                  const stateOption = /état|etat|condition/i.test(type.name);
-                  return <button key={option.id || option.value} type="button" onClick={() => onSelectVariant(type.name, option.value)} aria-pressed={active} className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${active ? "border-neutral-950 bg-neutral-950 text-white" : "border-black/10 bg-white text-neutral-800 hover:border-black/40"}`}><span className="block">{option.value}</span>{stateOption && <span className={`mt-1 block text-xs font-medium ${active ? "text-white/75" : "text-neutral-500"}`}>{formatPrice(priceForOption(type, option))}</span>}</button>;
+                  return <button key={option.id || option.value} type="button" onClick={() => onSelectVariant(type.name, option.value)} aria-pressed={active} className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${active ? "border-neutral-950 bg-neutral-950 text-white" : "border-black/10 bg-white text-neutral-800 hover:border-black/40"}`}>{option.value}</button>;
                 })}
               </div>
             </fieldset>
