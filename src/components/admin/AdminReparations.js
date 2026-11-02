@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import {
   Layers,
   ClipboardList,
@@ -915,6 +916,21 @@ export default function AdminReparations() {
               <Plus className="w-4 h-4" /> Nouvelle famille
             </button>
           </div>
+
+          {espace === "APPLE" && (
+            <section className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-black/[.06] bg-white p-4 shadow-sm sm:p-5">
+              <div className="flex items-start gap-3">
+                <span className="grid h-11 w-11 flex-shrink-0 place-items-center rounded-2xl bg-black/[.04]"><Smartphone className="h-5 w-5 text-apple-black" /></span>
+                <div>
+                  <h2 className="text-sm font-bold text-apple-black">Images des modèles iPhone</h2>
+                  <p className="mt-1 max-w-xl text-xs leading-5 text-apple-mid">Ajoutez l’image dans le catalogue iPhone avec le même nom de modèle. Elle s’affichera automatiquement dans le choix de réparation.</p>
+                </div>
+              </div>
+              <Link href="/admin/iphone" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-apple-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800">
+                <Pencil className="h-4 w-4" /> Gérer les images <ArrowRight className="h-4 w-4" />
+              </Link>
+            </section>
+          )}
 
           {catalogueLoading && familles.length === 0 ? (
             <div className="text-center py-16">
