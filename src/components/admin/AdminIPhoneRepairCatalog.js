@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, Eye, EyeOff, ImagePlus, LoaderCircle, Pencil, Plus, Search, Smartphone, Wrench, X } from "lucide-react";
+import { Check, Eye, EyeOff, ImagePlus, LoaderCircle, Pencil, Plus, Search, Smartphone, Trash2, Wrench, X } from "lucide-react";
 import { reparationAdminApi, uploadApi } from "@/lib/api";
 import { compareIPhoneGeneration } from "@/lib/iphoneProducts";
 import { formatPrice } from "@/lib/format";
@@ -129,6 +129,16 @@ export default function AdminIPhoneRepairCatalog() {
     finally { setSaving(false); }
   };
 
+  const deleteModel = async (model) => {
+    if (!window.confirm(`Supprimer définitivement ${model.name} et ses réparations ?`)) return;
+    setError(""); setSuccess("");
+    try {
+      await reparationAdminApi.supprimerModele(model.id);
+      setSuccess(`${model.name} supprimé.`);
+      await load();
+    } catch (err) { setError(err.message || "Impossible de supprimer ce modèle."); }
+  };
+
   const toggleModel = async (model) => {
     setError(""); setSuccess("");
     try { await reparationAdminApi.modifierModele(model.id, { active: !model.active }); setSuccess(`${model.name} ${model.active ? "désactivé" : "activé"}.`); await load(); }
@@ -185,7 +195,7 @@ export default function AdminIPhoneRepairCatalog() {
               <div className="flex gap-4 p-4 sm:p-5">
                 <div className="grid h-28 w-24 flex-shrink-0 place-items-center overflow-hidden rounded-2xl bg-neutral-50">{image ? <img src={image} alt={model.name} className="h-full w-full object-contain p-2"/> : <Smartphone size={30} className="text-neutral-300"/>}</div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-start justify-between gap-2"><div><p className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">{model.family?.name || "iPhone"}</p><h3 className="mt-1 text-lg font-extrabold text-neutral-950">{model.name}</h3><p className={`mt-1 text-xs font-semibold ${model.active === false ? "text-neutral-400" : "text-green-700"}`}>{model.active === false ? "Désactivé" : "Actif"}</p></div><div className="flex gap-1"><button type="button" title="Modifier le nom et la photo" onClick={() => beginEditModel(model)} className="rounded-xl p-2 text-neutral-500 hover:bg-neutral-100 hover:text-black"><Pencil size={17}/></button><button type="button" title={model.active === false ? "Activer" : "Désactiver"} onClick={() => toggleModel(model)} className="rounded-xl p-2 text-neutral-500 hover:bg-neutral-100 hover:text-black">{model.active === false ? <Eye size={17}/> : <EyeOff size={17}/>}</button></div></div>
+                  <div className="flex flex-wrap items-start justify-between gap-2"><div><p className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">{model.family?.name || "iPhone"}</p><h3 className="mt-1 text-lg font-extrabold text-neutral-950">{model.name}</h3><p className={`mt-1 text-xs font-semibold ${model.active === false ? "text-neutral-400" : "text-green-700"}`}>{model.active === false ? "Désactivé" : "Actif"}</p></div><div className="flex gap-1"><button type="button" title="Modifier le nom et la photo" onClick={() => beginEditModel(model)} className="rounded-xl p-2 text-neutral-500 hover:bg-neutral-100 hover:text-black"><Pencil size={17}/></button><button type="button" title={model.active === false ? "Activer" : "Désactiver"} onClick={() => toggleModel(model)} className="rounded-xl p-2 text-neutral-500 hover:bg-neutral-100 hover:text-black">{model.active === false ? <Eye size={17}/> : <EyeOff size={17}/>}</button><button type="button" title="Supprimer le modèle" onClick={() => deleteModel(model)} className="rounded-xl p-2 text-neutral-500 hover:bg-red-50 hover:text-red-600"><Trash2 size={17}/></button></div></div>
                   <div className="mt-3 space-y-2 border-t border-black/[.06] pt-3">
                     <div className="flex items-center justify-between gap-2"><p className="text-xs font-bold uppercase tracking-wider text-neutral-500">Réparations et tarifs</p><button type="button" onClick={() => beginAddJob(model)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold hover:bg-neutral-100"><Plus size={14}/> Ajouter</button></div>
                     {(model.jobs || []).length === 0 ? <p className="text-xs text-neutral-400">Aucun tarif enregistré.</p> : (model.jobs || []).map((job) => <div key={job.id} className={`flex items-start gap-2 rounded-xl bg-neutral-50 px-3 py-2 ${job.active === false ? "opacity-50" : ""}`}><Wrench size={14} className="mt-0.5 flex-shrink-0 text-neutral-500"/><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{job.name}</p><div className="flex flex-wrap gap-x-2 text-xs text-neutral-500">{(job.options || []).map((option) => <span key={option.id}>{(job.options || []).length > 1 ? `${option.label} · ` : ""}{formatPrice(option.price)}</span>)}{!job.options?.length && <span>Tarif à saisir</span>}</div></div><button type="button" title="Modifier le type ou le tarif" onClick={() => beginEditJob(model, job)} className="rounded-lg p-1.5 text-neutral-500 hover:bg-white"><Pencil size={14}/></button><button type="button" title={job.active === false ? "Activer" : "Désactiver"} onClick={() => toggleJob(job)} className="rounded-lg p-1.5 text-neutral-500 hover:bg-white">{job.active === false ? <Eye size={14}/> : <EyeOff size={14}/>}</button></div>)}
