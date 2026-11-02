@@ -27,6 +27,67 @@ function imageModele(modele, espace) {
   return "/images/reparation/devices/computer.png";
 }
 
+const ICONE_COULEURS = [
+  ["#45c66b", "#3988f5", "#f3a341", "#eb5a55"],
+  ["#50b4e9", "#aa71db", "#f1cf52", "#51c7b2"],
+  ["#e76b9a", "#557de7", "#f17b45", "#8176dc"],
+  ["#53b96e", "#e6b850", "#ed6862", "#4d9cdf"],
+  ["#6883e8", "#57c3bd", "#e88452", "#b273d2"],
+];
+
+function EcranTelephone({ nom }) {
+  return (
+    <span className={styles.phoneIllustration}>
+      <svg viewBox="0 0 154 310" role="img" aria-label={`Écran allumé de ${nom}`}>
+        <defs>
+          <linearGradient id="iphone-wallpaper" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#f7a54c" />
+            <stop offset=".48" stopColor="#ee5e62" />
+            <stop offset="1" stopColor="#7056cd" />
+          </linearGradient>
+          <linearGradient id="iphone-glow" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#fff" stopOpacity=".25" />
+            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <rect x="8" y="2" width="138" height="306" rx="31" fill="#17181b" stroke="#777980" strokeWidth="2" />
+        <rect x="14" y="8" width="126" height="294" rx="26" fill="url(#iphone-wallpaper)" />
+        <path d="M16 184c30-31 53-34 77-8s35 24 47 6v94c0 14-11 26-26 26H40c-14 0-24-11-24-25z" fill="#263e9a" opacity=".76" />
+        <path d="M16 213c26-24 48-22 71 2s34 28 53 4v59c0 14-11 24-26 24H40c-14 0-24-11-24-25z" fill="#f25b70" opacity=".7" />
+        <rect x="55" y="8" width="44" height="16" rx="9" fill="#111216" />
+        <text x="25" y="22" fill="#fff" fontSize="8" fontFamily="Arial, sans-serif" fontWeight="700">9:41</text>
+        <g fill="#fff" opacity=".95">
+          <rect x="115" y="15" width="3" height="5" rx="1" />
+          <rect x="120" y="13" width="3" height="7" rx="1" />
+          <rect x="125" y="11" width="3" height="9" rx="1" />
+          <rect x="131" y="13" width="6" height="7" rx="1.5" />
+        </g>
+        {ICONE_COULEURS.map((row, rowIndex) =>
+          row.map((couleur, columnIndex) => {
+            const x = 25 + columnIndex * 28;
+            const y = 43 + rowIndex * 39;
+            return (
+              <g key={`${rowIndex}-${columnIndex}`}>
+                <rect x={x} y={y} width="21" height="21" rx="6" fill={couleur} />
+                <circle cx={x + 10.5} cy={y + 10.5} r="5" fill="#fff" opacity=".86" />
+                <rect x={x + 8} y={y + 8} width="5" height="5" rx="1.5" fill={couleur} />
+              </g>
+            );
+          }),
+        )}
+        <rect x="22" y="252" width="110" height="34" rx="16" fill="#ffffff" fillOpacity=".3" />
+        {["#45c66b", "#3988f5", "#51c7b2", "#eb5a55"].map((couleur, index) => (
+          <g key={couleur}>
+            <rect x={28 + index * 26} y="258" width="21" height="21" rx="6" fill={couleur} />
+            <circle cx={38.5 + index * 26} cy="268.5" r="5" fill="#fff" opacity=".9" />
+          </g>
+        ))}
+        <rect x="62" y="294" width="42" height="3" rx="2" fill="#fff" opacity=".9" />
+      </svg>
+    </span>
+  );
+}
+
 export default function ReparationEspace({ espace }) {
   const espaceApi = espace.toUpperCase();
   const nomEspace = NOMS_ESPACE[espace] || espace;
@@ -129,13 +190,17 @@ export default function ReparationEspace({ espace }) {
               className={styles.card}
             >
               <span className={styles.imageFrame}>
-                <Image
-                  src={imageModele(modele, espace)}
-                  alt={modele.name}
-                  fill
-                  sizes="(max-width: 640px) 30vw, (max-width: 1024px) 30vw, 260px"
-                  className={styles.image}
-                />
+                {espace === "apple" ? (
+                  <EcranTelephone nom={modele.name} />
+                ) : (
+                  <Image
+                    src={imageModele(modele, espace)}
+                    alt={modele.name}
+                    fill
+                    sizes="(max-width: 640px) 30vw, (max-width: 1024px) 30vw, 260px"
+                    className={styles.image}
+                  />
+                )}
               </span>
               <span className={styles.cardFooter}>
                 <span className={styles.modelName}>{modele.name}</span>
