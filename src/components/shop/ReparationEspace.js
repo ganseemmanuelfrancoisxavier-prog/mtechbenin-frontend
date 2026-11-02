@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
@@ -35,25 +35,35 @@ const ICONE_COULEURS = [
   ["#6883e8", "#57c3bd", "#e88452", "#b273d2"],
 ];
 
+const FONDS_ECRAN = {
+  12: { standard: ["#f9ad4b", "#e94c39", "#304c9a"], pro: ["#d7e5df", "#df7046", "#273c70"] },
+  13: { standard: ["#ffd26f", "#ee513e", "#294e9f"], pro: ["#c6d5ec", "#5795dc", "#202e62"] },
+  14: { standard: ["#f9bc74", "#e95f70", "#5945bd"], pro: ["#c5e5ef", "#7582ec", "#572d9f"] },
+  15: { standard: ["#ffd0a3", "#f47b50", "#d64e82"], pro: ["#e5dfd4", "#c59b80", "#555d72"] },
+  16: { standard: ["#f4b8d1", "#d66bc5", "#568cda"], pro: ["#e6d6bd", "#c38a5c", "#3b4b6b"] },
+  17: { standard: ["#9ce0ee", "#8b6aec", "#ef7796"], pro: ["#f4b964", "#e66d55", "#454362"] },
+};
+
 function EcranTelephone({ nom }) {
+  const reactId = useId().replace(/:/g, "");
+  const generation = Number(nom.match(/iPhone\s*(\d+)/i)?.[1]) || 13;
+  const theme = FONDS_ECRAN[generation] || FONDS_ECRAN[13];
+  const couleurs = /\bPro\b/i.test(nom) ? theme.pro : theme.standard;
+  const wallpaperId = `iphone-wallpaper-${reactId}`;
   return (
     <span className={styles.phoneIllustration}>
       <svg viewBox="0 0 154 310" role="img" aria-label={`Écran allumé de ${nom}`}>
         <defs>
-          <linearGradient id="iphone-wallpaper" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#f7a54c" />
-            <stop offset=".48" stopColor="#ee5e62" />
-            <stop offset="1" stopColor="#7056cd" />
-          </linearGradient>
-          <linearGradient id="iphone-glow" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#fff" stopOpacity=".25" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          <linearGradient id={wallpaperId} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor={couleurs[0]} />
+            <stop offset=".5" stopColor={couleurs[1]} />
+            <stop offset="1" stopColor={couleurs[2]} />
           </linearGradient>
         </defs>
         <rect x="8" y="2" width="138" height="306" rx="31" fill="#17181b" stroke="#777980" strokeWidth="2" />
-        <rect x="14" y="8" width="126" height="294" rx="26" fill="url(#iphone-wallpaper)" />
-        <path d="M16 184c30-31 53-34 77-8s35 24 47 6v94c0 14-11 26-26 26H40c-14 0-24-11-24-25z" fill="#263e9a" opacity=".76" />
-        <path d="M16 213c26-24 48-22 71 2s34 28 53 4v59c0 14-11 24-26 24H40c-14 0-24-11-24-25z" fill="#f25b70" opacity=".7" />
+        <rect x="14" y="8" width="126" height="294" rx="26" fill={`url(#${wallpaperId})`} />
+        <path d="M16 184c30-31 53-34 77-8s35 24 47 6v94c0 14-11 26-26 26H40c-14 0-24-11-24-25z" fill={couleurs[2]} opacity=".76" />
+        <path d="M16 213c26-24 48-22 71 2s34 28 53 4v59c0 14-11 24-26 24H40c-14 0-24-11-24-25z" fill={couleurs[1]} opacity=".7" />
         <rect x="55" y="8" width="44" height="16" rx="9" fill="#111216" />
         <text x="25" y="22" fill="#fff" fontSize="8" fontFamily="Arial, sans-serif" fontWeight="700">9:41</text>
         <g fill="#fff" opacity=".95">
