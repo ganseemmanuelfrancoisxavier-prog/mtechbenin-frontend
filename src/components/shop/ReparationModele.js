@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -20,7 +19,7 @@ import {
 } from "lucide-react";
 import { faqApi, reparationApi, reviewsApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
-import { imageIphone, modeleIphoneSecours } from "@/lib/reparationModeles";
+import { modeleIphoneSecours } from "@/lib/reparationModeles";
 import styles from "./ReparationModele.module.css";
 
 // Estime un délai en heures pour comparer deux libellés en texte libre —
@@ -47,23 +46,6 @@ function prixMini(options) {
   return prix.length ? Math.min(...prix) : 0;
 }
 
-function imageModele(slug, espace) {
-  const normalise = String(slug || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-  if (normalise.includes("iphone")) {
-    return imageIphone(normalise);
-  }
-  if (espace === "android") return "/images/reparation/devices/android.png";
-  if (espace === "pc") return "/images/reparation/devices/computer.png";
-  return "/images/categories/smartphone-tablette.jpg";
-}
-
-function imagesDetail(slug, espace) {
-  if (String(slug).toLowerCase().includes("iphone-15-pro-max") || String(slug).toLowerCase().includes("iphone15promax")) {
-    return [1, 2, 3].map((numero) => `/images/reparation/models/iphone-15-pro-max-thumb-${numero}.jpg`);
-  }
-  return [imageModele(slug, espace)];
-}
-
 export default function ReparationModele({ espace, slug }) {
   const router = useRouter();
 
@@ -82,7 +64,6 @@ export default function ReparationModele({ espace, slug }) {
   const [devisEnvoi, setDevisEnvoi] = useState(false);
   const [devisResultat, setDevisResultat] = useState(null); // { ok, message }
   const [onglet, setOnglet] = useState("description");
-  const [imageActive, setImageActive] = useState(0);
   const [faq, setFaq] = useState([]);
   const [avis, setAvis] = useState([]);
 
@@ -227,7 +208,6 @@ export default function ReparationModele({ espace, slug }) {
   if (erreur || !donnees) {
     const modeleSecours = espace === "apple" ? modeleIphoneSecours(slug) : null;
     if (modeleSecours) {
-      const imageSecours = modeleSecours.image;
       const messageWhatsapp = encodeURIComponent(`Bonjour MTECHBENIN, je souhaite un diagnostic et un devis pour mon ${modeleSecours.name}.`);
       return (
         <div className={styles.page}>
@@ -235,7 +215,6 @@ export default function ReparationModele({ espace, slug }) {
             <Link href="/">Accueil</Link><ChevronRight /><Link href="/reparation">Réparation</Link><ChevronRight /><Link href="/reparation/apple">iPhone</Link><ChevronRight /><span>{modeleSecours.name}</span>
           </nav>
           <section className={styles.product}>
-            <div className={styles.gallery}><div className={styles.mainImage}><Image src={imageSecours} alt={modeleSecours.name} fill priority sizes="(max-width: 700px) 80vw, 440px" /></div></div>
             <div className={styles.summary}>
               <p className={styles.eyebrow}>Service de réparation</p>
               <h1>Réparation {modeleSecours.name}</h1>
@@ -278,15 +257,6 @@ export default function ReparationModele({ espace, slug }) {
 
   const { modele, famille } = donnees;
 
-  const photos = imagesDetail(slug, espace);
-  const photosDetail = photos.map((src, index) =>
-    index === 0 && photos.length > 1
-      ? "/images/reparation/models/iphone-15-pro-max-repair.jpg"
-      : src,
-  );
-  const reparationVedette = reparations.find((job) => /écran|ecran/i.test(job.name)) || reparations[0];
-  const prixDepart = prixMini(reparationVedette?.options);
-  const nomReparation = reparationVedette?.name || "Réparation";
   const faqAffichees = faq
     .filter((item) => /répar|repar|appareil|technicien/i.test(`${item.category || ""} ${item.question || ""}`))
     .slice(0, 6);
@@ -300,41 +270,34 @@ export default function ReparationModele({ espace, slug }) {
         <span>{modele?.name}</span>
       </nav>
 
-      <section className={styles.product}>
-        <div className={styles.gallery}>
-          {photosDetail.length > 1 && (
-            <div className={styles.thumbnails}>
-              {photosDetail.map((src, index) => (
-                <button key={src} className={`${styles.thumbnail} ${imageActive === index ? styles.thumbnailActive : ""}`} onClick={() => setImageActive(index)} aria-label={`Voir la photo ${index + 1}`}>
-                  <Image src={src} alt="" fill sizes="72px" />
-                </button>
-              ))}
-            </div>
-          )}
-          <div className={styles.mainImage}>
-            <Image src={photosDetail[imageActive] || photosDetail[0]} alt={modele?.name || "Appareil à réparer"} fill priority sizes="(max-width: 700px) 80vw, 440px" />
+      <section className={styles.repairPanel}>
+        <header className={styles.repairPanelHeading}>
+          <p className={styles.eyebrow}>Service de réparation · {modele?.name}</p>
+          <h1>Réparations disponibles</h1>
+          <span>Choisissez une réparation et le type de pièce avec son prix.</span>
+        </header>
+        {reparations.length === 0 ? (
+          <div className={styles.empty}>Aucune réparation disponible pour ce modèle pour le moment.</div>
+        ) : (
+          <div className={styles.repairList}>
+            {reparations.map((job) => {
+              const checked = selections[job.id] !== undefined;
+              const optionUnique = job.options.length === 1;
+              const selectedOptionId = selections[job.id];
+              return (
+                <div key={job.id} className={styles.repairCard}>
+                  <button onClick={() => toggleReparation(job)} className={styles.repairSelect} aria-pressed={checked}>
+                    <span className={`${styles.checkbox} ${checked ? styles.checkboxChecked : ""}`}>{checked && <Check />}</span>
+                    <span className={styles.repairText}><strong>{job.name}</strong>{job.delay && <small><Clock /> {job.delay}</small>}</span>
+                    <strong className={styles.repairPrice}>{optionUnique ? formatPrice(job.options[0]?.price || 0) : `dès ${formatPrice(prixMini(job.options))}`}</strong>
+                  </button>
+                  {!optionUnique && <div className={styles.options}>{job.options.map((option) => <button type="button" key={option.id} onClick={() => choisirOption(job.id, option.id)} className={selectedOptionId === option.id ? styles.optionSelected : ""}><span>{option.label}</span><strong>{formatPrice(option.price)}</strong></button>)}</div>}
+                </div>
+              );
+            })}
           </div>
-        </div>
-
-        <div className={styles.summary}>
-          <p className={styles.eyebrow}>Service de réparation</p>
-          <h1>{nomReparation} {modele?.name}</h1>
-          <div className={styles.badges}>
-            <span><BadgeCheck /> Pièce de qualité</span>
-            <span><ShieldCheck /> Garantie 3 jours</span>
-            <span><Clock /> Réparation rapide</span>
-          </div>
-          {prixDepart > 0 && (
-            <div className={styles.priceBox}><span>À partir de</span><strong>{formatPrice(prixDepart)}</strong></div>
-          )}
-        </div>
+        )}
       </section>
-
-      <div className={styles.benefits}>
-        <div><Clock /><span>Délai estimé<strong>{reparationVedette?.delay || "Selon la réparation"}</strong></span></div>
-        <div><ShieldCheck /><span>Garantie<strong>3 jours</strong></span></div>
-        <div><BadgeCheck /><span>Pièce<strong>Qualité proposée au choix</strong></span></div>
-      </div>
 
       <div className={styles.tabs} role="tablist" aria-label="Informations réparation">
         {[["description", "Description"], ["faq", "FAQ"], ["avis", "Avis"]].map(([key, label]) => (
@@ -346,28 +309,6 @@ export default function ReparationModele({ espace, slug }) {
         <section className={styles.tabPanel}>
           <h2>Description du service</h2>
           <p className={styles.description}>Choisissez la réparation souhaitée et la qualité de pièce disponible. Le prix est affiché avant votre demande et la réparation est réalisée par nos techniciens.</p>
-          <h3 className={styles.repairHeading}>Réparations disponibles</h3>
-          {reparations.length === 0 ? (
-            <div className={styles.empty}>Aucune réparation disponible pour ce modèle pour le moment.</div>
-          ) : (
-            <div className={styles.repairList}>
-              {reparations.map((job) => {
-                const checked = selections[job.id] !== undefined;
-                const optionUnique = job.options.length === 1;
-                const selectedOptionId = selections[job.id];
-                return (
-                  <div key={job.id} className={styles.repairCard}>
-                    <button onClick={() => toggleReparation(job)} className={styles.repairSelect} aria-pressed={checked}>
-                      <span className={`${styles.checkbox} ${checked ? styles.checkboxChecked : ""}`}>{checked && <Check />}</span>
-                      <span className={styles.repairText}><strong>{job.name}</strong>{job.delay && <small><Clock /> {job.delay}</small>}</span>
-                      <strong className={styles.repairPrice}>{optionUnique ? formatPrice(job.options[0]?.price || 0) : `dès ${formatPrice(prixMini(job.options))}`}</strong>
-                    </button>
-                    {checked && !optionUnique && <div className={styles.options}>{job.options.map((option) => <button key={option.id} onClick={() => choisirOption(job.id, option.id)} className={selectedOptionId === option.id ? styles.optionSelected : ""}><span>{option.label}</span><strong>{formatPrice(option.price)}</strong></button>)}</div>}
-                  </div>
-                );
-              })}
-            </div>
-          )}
           <Link href={`/reparation/diagnostic?modele=${encodeURIComponent(slug)}`} className={styles.diagnostic}><Stethoscope /> Pas sûr du problème ? Lancer un diagnostic <ArrowRight /></Link>
         </section>
       )}
