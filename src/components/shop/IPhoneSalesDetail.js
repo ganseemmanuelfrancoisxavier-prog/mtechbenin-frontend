@@ -9,7 +9,8 @@ import { buildOrderVariantsArray } from "@/lib/variants";
 
 export default function IPhoneSalesDetail({ product, variantTypes, selectedVariants, onSelectVariant, quantity, setQuantity, price, canBuy, onBuy }) {
   const storageType = variantTypes.find((type) => /stockage|capacit[ée]/i.test(type.name));
-  const otherTypes = variantTypes.filter((type) => type !== storageType);
+  const stateTypes = variantTypes.filter((type) => type !== storageType && /état|etat|condition/i.test(type.name));
+  const otherTypes = variantTypes.filter((type) => type !== storageType && !stateTypes.includes(type));
 
   const priceForOption = (type, option) => {
     const selection = { ...selectedVariants, [type.name]: option.value };
@@ -48,8 +49,20 @@ export default function IPhoneSalesDetail({ product, variantTypes, selectedVaria
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-[.2em] text-neutral-500">Boutique · iPhone</p>
             <h1 className="text-3xl font-black tracking-tight text-neutral-950 md:text-4xl">{product.name}</h1>
-            <p className="mt-3 text-sm leading-6 text-neutral-600">Choisissez la capacité de stockage et les options disponibles pour ce modèle.</p>
+            <p className="mt-3 text-sm leading-6 text-neutral-600">Choisissez d’abord l’état du téléphone, puis sa capacité de stockage.</p>
           </div>
+
+          {stateTypes.map((type) => (
+            <fieldset key={type.id}>
+              <legend className="mb-3 text-sm font-bold text-neutral-900">{type.name}{type.required ? " *" : ""}</legend>
+              <div className="flex flex-wrap gap-2">
+                {type.options.map((option) => {
+                  const active = selectedVariants[type.name] === option.value;
+                  return <button key={option.id || option.value} type="button" onClick={() => onSelectVariant(type.name, option.value)} aria-pressed={active} className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${active ? "border-neutral-950 bg-neutral-950 text-white" : "border-black/10 bg-white text-neutral-800 hover:border-black/40"}`}><span className="block">{option.value}</span><span className={`mt-1 block text-xs font-medium ${active ? "text-white/75" : "text-neutral-500"}`}>{formatPrice(priceForOption(type, option))}</span></button>;
+                })}
+              </div>
+            </fieldset>
+          ))}
 
           {storageType ? (
             <fieldset>
