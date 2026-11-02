@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { reparationAdminApi } from "@/lib/api";
+import AdminIPhoneRepairCatalog from "@/components/admin/AdminIPhoneRepairCatalog";
 
 // Les trois espaces sont figés côté serveur (`ESPACES` dans
 // repairs.controller.js) : ce ne sont pas des catégories que l'admin peut
@@ -895,7 +896,8 @@ export default function AdminReparations() {
       </div>
 
       {/* ═══════════════════════ CATALOGUE ═══════════════════════ */}
-      {ongletPrincipal === "catalogue" && (
+      {ongletPrincipal === "catalogue" && espace === "APPLE" && <AdminIPhoneRepairCatalog />}
+      {ongletPrincipal === "catalogue" && espace !== "APPLE" && (
         <>
           <div className="glass-card rounded-3xl p-4 flex items-center justify-between flex-wrap gap-3">
             <div className="flex gap-1 flex-wrap">

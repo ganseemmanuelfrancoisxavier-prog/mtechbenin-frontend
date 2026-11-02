@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import { productsApi, reparationApi } from "@/lib/api";
 import { MODELES_IPHONE, imageIphone } from "@/lib/reparationModeles";
+import { compareIPhoneGeneration } from "@/lib/iphoneProducts";
 import styles from "./ReparationEspace.module.css";
 
 const NOMS_ESPACE = { apple: "iPhone", android: "Android", pc: "Mac / PC" };
@@ -175,7 +176,7 @@ export default function ReparationEspace({ espace }) {
             // Le catalogue d’images du panneau est facultatif pour afficher la liste.
           }
         }
-        if (!annule) setModeles(visibles);
+        if (!annule) setModeles(espace === "apple" ? [...visibles].sort(compareIPhoneGeneration) : visibles);
       } catch (err) {
         if (!annule) setErreur(err.message || "Impossible de charger les modèles pour le moment.");
       } finally {
