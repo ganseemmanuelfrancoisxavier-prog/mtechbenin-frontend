@@ -81,6 +81,56 @@
   .arrow { display: none; }
 }
 
+
+/* Galerie de modèles iPhone inspirée de la référence fournie. */
+.applePage {
+  width: 100%;
+  max-width: none;
+  min-height: 68vh;
+  padding: 24px max(22px, calc((100vw - 1080px) / 2)) 80px;
+  background: #202127;
+  color: #f7f7f8;
+}
+.applePage .back { color: #c5c6ca; }
+.applePage .search {
+  border-color: rgba(255, 255, 255, .12);
+  background: #292a31;
+  box-shadow: none;
+}
+.applePage .search svg,
+.applePage .search input { color: #f5f5f6; }
+.applePage .search input::placeholder { color: #a6a7ad; }
+.applePage .heading { margin: 34px 0 22px; }
+.applePage .heading p { color: #a6a7ad; }
+.applePage .heading h1 { color: #f7f7f8; }
+.applePage .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 48px; row-gap: 70px; }
+.applePage .card {
+  align-items: center;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.applePage .card:hover { transform: translateY(-3px); box-shadow: none; }
+.applePage .imageFrame { width: 100%; height: clamp(190px, 25vw, 300px); background: transparent; }
+.applePage .image { padding: 4px 12px; }
+.applePage .cardFooter { min-height: 42px; padding: 14px 4px 0; text-align: center; }
+.applePage .modelName { color: #d8d9de; font-size: clamp(16px, 2vw, 22px); font-weight: 450; }
+.applePage .family,
+.applePage .arrow { display: none; }
+.applePage .message { color: #c5c6ca; }
+
+@media (max-width: 700px) {
+  .applePage { padding: 14px 20px 56px; }
+  .applePage .heading { margin: 26px 0 30px; }
+  .applePage .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; row-gap: 72px; }
+  .applePage .imageFrame { height: clamp(170px, 42vw, 245px); }
+  .applePage .image { padding: 0 4px; }
+  .applePage .cardFooter { min-height: 44px; padding-top: 14px; }
+  .applePage .modelName { font-size: clamp(14px, 3.6vw, 19px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card, .arrow { transition: none; }
   .card:hover { transform: none; }

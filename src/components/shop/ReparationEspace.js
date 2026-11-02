@@ -21,7 +21,7 @@ function normaliserTexte(value) {
 function imageModele(modele, espace) {
   const nom = normaliserTexte(`${modele.name} ${modele.slug}`);
   if (espace === "apple") {
-    return imageIphone(nom);
+    return modele.image || imageIphone(nom);
   }
   if (espace === "android") return "/images/reparation/devices/android.png";
   return "/images/reparation/devices/computer.png";
@@ -92,7 +92,7 @@ export default function ReparationEspace({ espace }) {
   }, [modeles, query]);
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${espace === "apple" ? styles.applePage : ""}`}>
       <Link href={espace === "apple" ? "/reparation/apple" : "/reparation"} className={styles.back}>
         <ArrowLeft /> {espace === "apple" ? "Choisir un service" : "Réparation"}
       </Link>
@@ -109,7 +109,7 @@ export default function ReparationEspace({ espace }) {
 
       <div className={styles.heading}>
         <p>Réparation · {nomEspace}</p>
-        <h1>Tous les modèles</h1>
+        <h1>{espace === "apple" ? "Choisissez votre iPhone" : "Tous les modèles"}</h1>
       </div>
 
       {chargement ? (
