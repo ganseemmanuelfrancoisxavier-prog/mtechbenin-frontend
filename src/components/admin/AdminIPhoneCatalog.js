@@ -83,6 +83,51 @@ function ColorImageInput({ value, onChange, color }) {
   );
 }
 
+function PhoneImageInput({ value, onChange, name }) {
+  const inputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  const upload = async (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return setError("Choisissez un fichier image.");
+    if (file.size > 25 * 1024 * 1024) return setError("L’image doit faire moins de 25 Mo.");
+    setUploading(true);
+    setError("");
+    try {
+      const result = await uploadApi.upload(await fileToBase64(file), "mtechbenin/products/iphones");
+      onChange(result.url);
+    } catch (err) {
+      setError(err.message || "Envoi de l’image impossible.");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-black/[.06] bg-neutral-50 p-3">
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(event) => upload(event.target.files?.[0])} />
+      {value ? (
+        <img src={value} alt={`Aperçu ${name || "du téléphone"}`} className="h-20 w-20 rounded-xl border border-black/10 bg-white object-contain p-1" />
+      ) : (
+        <div className="grid h-20 w-20 place-items-center rounded-xl border border-dashed border-black/15 bg-white text-neutral-400"><Smartphone size={24} /></div>
+      )}
+      <div className="min-w-[180px] flex-1">
+        <p className="text-sm font-semibold">{value ? "Image prête pour la boutique" : "Aucune image ajoutée"}</p>
+        <p className="mt-1 text-xs text-neutral-500">Choisissez une photo nette du modèle (JPG, PNG ou WebP).</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button type="button" disabled={uploading} onClick={() => inputRef.current?.click()} className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-neutral-950 px-3 text-xs font-semibold text-white hover:bg-neutral-800 disabled:opacity-50">
+            {uploading ? <LoaderCircle size={14} className="animate-spin" /> : <ImagePlus size={14} />}{value ? "Changer l’image" : "Importer une image"}
+          </button>
+          {value && <button type="button" onClick={() => onChange("")} className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-black/10 bg-white px-3 text-xs font-semibold text-neutral-600 hover:bg-neutral-100"><X size={14} /> Retirer</button>}
+        </div>
+        {error && <p role="alert" className="mt-2 text-xs text-red-600">{error}</p>}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminIPhoneCatalog() {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(emptyForm);
@@ -127,7 +172,7 @@ export default function AdminIPhoneCatalog() {
           : [{ value: "", price: String(product.price || "") }],
         colors: color?.options?.length
           ? color.options.map((option) => ({ value: option.value, delta: String(option.priceDelta || 0), imageUrl: colorImages.find((item) => (item.value || item.color) === option.value)?.imageUrl || "" }))
-          : [{ value: "", delta: "0", imageUrl: "" }]
+          : [{ value: "", delta: "0", imageUrl: "" }],
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
@@ -190,7 +235,7 @@ export default function AdminIPhoneCatalog() {
       const slug = (form.slug.trim() || slugify(form.name)).toLowerCase();
       const colorImages = cleanColors
         .filter((row) => row.imageUrl)
-        .map((row) => ({ typeName: "Couleur", value: row.value.trim(), imageUrl: row.imageUrl }));
+    .map((row) => ({ typeName: "Couleur", value: row.value.trim(), imageUrl: row.imageUrl }));
       const payload = {
         name: form.name.trim(), slug, categorySlug: "smartphone-tablette", price: minPrice,
         stock: Number(form.stock), status: Number(form.stock) > 0 ? "En stock" : "Rupture",
@@ -239,9 +284,13 @@ export default function AdminIPhoneCatalog() {
           <label className="space-y-1.5 text-sm font-semibold">Nom du modèle
             <input className={fieldClass} placeholder="iPhone 17 Pro" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: form.id ? form.slug : slugify(e.target.value) })} />
           </label>
-          <label className="space-y-1.5 text-sm font-semibold">Adresse de l’image nette
-            <input className={fieldClass} type="url" placeholder="https://…" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} />
-          </label>
+          <div className="space-y-2 md:col-span-2">
+            <p className="text-sm font-semibold">Image principale du téléphone</p>
+            <PhoneImageInput name={form.name} value={form.image} onChange={(image) => setForm((current) => ({ ...current, image }))} />
+            <label className="block space-y-1.5 text-xs font-medium text-neutral-500">Ou collez une adresse d’image
+              <input className={fieldClass} type="url" placeholder="https://…" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} />
+            </label>
+          </div>
           <label className="space-y-1.5 text-sm font-semibold">Stock total
             <input className={fieldClass} type="number" min="0" step="1" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
           </label>
