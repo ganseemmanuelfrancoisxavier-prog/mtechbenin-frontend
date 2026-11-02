@@ -55,7 +55,8 @@
 .repairText strong { font-size:16px; }
 .repairText small { display:flex; align-items:center; gap:5px; color:#777; font-size:12px; }
 .repairText small svg { width:13px; height:13px; }
-.repairPrice { white-space:nowrap; font-size:15px; }
+.repairChevron { width:19px; height:19px; flex:none; color:#666; transition:transform .2s ease; }
+.repairChevronOpen { transform:rotate(180deg); }
 .options { display:grid; gap:8px; margin:14px 0 0 35px; }
 .options button { display:flex; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid #eee; border-radius:14px; background:#f7f7f7; color:#222; font:inherit; text-align:left; cursor:pointer; }
 .options .optionSelected { background:#111; color:#fff; border-color:#111; }
@@ -109,7 +110,6 @@
   .repairCard { padding:13px; border-radius:16px; }
   .options { margin-left:0; }
   .repairText strong { font-size:14px; }
-  .repairPrice { font-size:13px; }
   .conditions { font-size:13px; }
   .actionBar { position:fixed; z-index:30; left:10px; right:10px; bottom:calc(66px + env(safe-area-inset-bottom)); padding:12px; gap:8px; border-radius:19px; box-shadow:0 5px 26px #0002; }
   .total > strong { font-size:17px; }

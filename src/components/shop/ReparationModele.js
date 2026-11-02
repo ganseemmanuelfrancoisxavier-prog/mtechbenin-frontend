@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BadgeCheck,
+  ChevronDown,
   ChevronRight,
   Check,
   Clock,
@@ -38,14 +39,6 @@ function estimerHeures(delay) {
   return nombre; // heures par défaut (h, heure, heures)
 }
 
-// Le plus bas des prix proposés pour une réparation. Sert d'accroche
-// « dès X » quand plusieurs qualités existent : c'est le montant à partir
-// duquel le client peut réellement faire réparer.
-function prixMini(options) {
-  const prix = (options || []).map((o) => o.price).filter((p) => Number.isFinite(p));
-  return prix.length ? Math.min(...prix) : 0;
-}
-
 export default function ReparationModele({ espace, slug }) {
   const router = useRouter();
 
@@ -57,6 +50,7 @@ export default function ReparationModele({ espace, slug }) {
   // c'est cet id, et lui seul, qui part au serveur — voir `reparationApi` dans
   // lib/api.js, aucun prix n'y transite depuis le navigateur.
   const [selections, setSelections] = useState({});
+  const [reparationOuverte, setReparationOuverte] = useState(null);
 
   const [devisOuvert, setDevisOuvert] = useState(false);
   const [devisNom, setDevisNom] = useState("");
@@ -73,6 +67,7 @@ export default function ReparationModele({ espace, slug }) {
       setChargement(true);
       setErreur(null);
       setSelections({});
+      setReparationOuverte(null);
       try {
         const data = await reparationApi.modele(slug);
         if (!annule) setDonnees(data);
@@ -108,23 +103,19 @@ export default function ReparationModele({ espace, slug }) {
 
   const reparations = donnees?.reparations || [];
 
-  const toggleReparation = (job) => {
-    setSelections((s) => {
-      const next = { ...s };
-      if (next[job.id] !== undefined) {
-        delete next[job.id];
-      } else {
-        // Une seule option : elle est prise implicitement, la notion de
-        // qualité ne s'affiche même pas (l'administrateur ne l'a pas
-        // définie, le client n'a pas à la découvrir).
-        next[job.id] = job.options[0]?.id ?? null;
-      }
-      return next;
-    });
+  const toggleReparationMenu = (jobId) => {
+    setReparationOuverte((ouverte) => (ouverte === jobId ? null : jobId));
   };
 
   const choisirOption = (jobId, optionId) => {
-    setSelections((s) => ({ ...s, [jobId]: optionId }));
+    setSelections((s) => {
+      if (s[jobId] === optionId) {
+        const next = { ...s };
+        delete next[jobId];
+        return next;
+      }
+      return { ...s, [jobId]: optionId };
+    });
   };
 
   const optionIdsSelectionnees = useMemo(
@@ -282,16 +273,19 @@ export default function ReparationModele({ espace, slug }) {
           <div className={styles.repairList}>
             {reparations.map((job) => {
               const checked = selections[job.id] !== undefined;
-              const optionUnique = job.options.length === 1;
               const selectedOptionId = selections[job.id];
+              const menuOuvert = reparationOuverte === job.id;
               return (
                 <div key={job.id} className={styles.repairCard}>
-                  <button onClick={() => toggleReparation(job)} className={styles.repairSelect} aria-pressed={checked}>
-                    <span className={`${styles.checkbox} ${checked ? styles.checkboxChecked : ""}`}>{checked && <Check />}</span>
-                    <span className={styles.repairText}><strong>{job.name}</strong>{job.delay && <small><Clock /> {job.delay}</small>}</span>
-                    <strong className={styles.repairPrice}>{optionUnique ? formatPrice(job.options[0]?.price || 0) : `dès ${formatPrice(prixMini(job.options))}`}</strong>
+                  <button type="button" onClick={() => toggleReparationMenu(job.id)} className={styles.repairSelect} aria-expanded={menuOuvert} aria-controls={`repair-options-${job.id}`}>
+                    <span className={`${styles.checkbox} ${checked ? styles.checkboxChecked : ""}`} aria-hidden="true">{checked && <Check />}</span>
+                    <span className={styles.repairText}>
+                      <strong>{job.name}</strong>
+                      <small>{menuOuvert ? "Choisir un type de pièce" : "Voir les types et les prix"}</small>
+                    </span>
+                    <ChevronDown className={`${styles.repairChevron} ${menuOuvert ? styles.repairChevronOpen : ""}`} aria-hidden="true" />
                   </button>
-                  {!optionUnique && <div className={styles.options}>{job.options.map((option) => <button type="button" key={option.id} onClick={() => choisirOption(job.id, option.id)} className={selectedOptionId === option.id ? styles.optionSelected : ""}><span>{option.label}</span><strong>{formatPrice(option.price)}</strong></button>)}</div>}
+                  {menuOuvert && <div id={`repair-options-${job.id}`} className={styles.options}>{job.options.map((option) => <button type="button" key={option.id} aria-pressed={selectedOptionId === option.id} onClick={() => choisirOption(job.id, option.id)} className={selectedOptionId === option.id ? styles.optionSelected : ""}><span>{option.label}</span><strong>{formatPrice(option.price)}</strong></button>)}</div>}
                 </div>
               );
             })}
@@ -333,7 +327,7 @@ export default function ReparationModele({ espace, slug }) {
         <div className={styles.total}><span>Total sélectionné</span><strong>{formatPrice(total)}</strong>{delaiPlusLong && <small><Clock /> {delaiPlusLong}</small>}</div>
         <div className={styles.actions}>
           <button onClick={ouvrirDevis} disabled={!auMoinsUneSelection} className={styles.quote}><MessageCircle /> Demander un devis</button>
-          <button onClick={handleCommande} disabled={!auMoinsUneSelection} className={styles.order}>Continuer <ArrowRight /></button>
+          <button onClick={handleCommande} disabled={!auMoinsUneSelection} className={styles.order}>Commander <ArrowRight /></button>
         </div>
       </div>
 
