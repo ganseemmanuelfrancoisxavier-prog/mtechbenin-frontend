@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Check, CirclePlus, ImagePlus, LoaderCircle, Pencil, Plus, Smartphone, Trash2, X } from "lucide-react";
 import { productsApi, uploadApi, variantsApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
+import { compareIPhoneGeneration, isIPhoneProduct } from "@/lib/iphoneProducts";
 
 const emptyForm = {
   id: null,
@@ -20,7 +21,7 @@ const emptyForm = {
 const fieldClass = "w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-black/40";
 const COLOR_IMAGES_SPEC = "__mtech_variant_color_images";
 const IPHONE_PRICING_SPEC = "__mtech_iphone_pricing";
-const isIPhone = (product) => /iphone[\s-]*(?:x(?:r|s(?:[\s-]*max)?)?|\d{1,2})(?=$|[\s-])/i.test(`${product?.name || ""} ${product?.slug || ""}`);
+const isIPhone = isIPhoneProduct;
 const slugify = (value) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 function variantByName(types, name) {
@@ -153,7 +154,7 @@ export default function AdminIPhoneCatalog() {
     setError("");
     try {
       const { products: list = [] } = await productsApi.getAll({ limit: 500, includeInactive: true });
-      setProducts(list.filter(isIPhone).sort((a, b) => a.name.localeCompare(b.name, "fr")));
+      setProducts(list.filter(isIPhone).sort(compareIPhoneGeneration));
     } catch (err) {
       setError(err.status !== undefined ? err.message : "Connexion au serveur impossible.");
     } finally {
