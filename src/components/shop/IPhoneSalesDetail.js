@@ -38,10 +38,10 @@ export default function IPhoneSalesDetail({ product, variantTypes, selectedVaria
           {stateTypes.map((type) => (
             <fieldset key={type.id}>
               <legend className="mb-3 text-sm font-bold text-neutral-900">{type.name}{type.required ? " *" : ""}</legend>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {type.options.map((option) => {
                   const active = selectedVariants[type.name] === option.value;
-                  return <button key={option.id || option.value} type="button" onClick={() => onSelectVariant(type.name, option.value)} aria-pressed={active} className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${active ? "border-neutral-950 bg-neutral-950 text-white" : "border-black/10 bg-white text-neutral-800 hover:border-black/40"}`}>{option.value}</button>;
+                  return <button key={option.id || option.value} type="button" onClick={() => onSelectVariant(type.name, option.value)} aria-pressed={active} className={`rounded-2xl border p-4 text-left transition ${active ? "border-neutral-950 bg-neutral-950 text-white shadow-md" : "border-black/10 bg-white hover:border-black/40"}`}><span className="block text-base font-bold">{option.value}</span></button>;
                 })}
               </div>
             </fieldset>
