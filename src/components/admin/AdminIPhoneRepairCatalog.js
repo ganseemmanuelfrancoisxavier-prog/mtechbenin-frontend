@@ -30,7 +30,7 @@ function PhoneImageField({ value, onChange, name }) {
     setUploading(true); setError("");
     try {
       const result = await uploadApi.upload(await fileToBase64(file), "mtechbenin/repairs/iphones");
-      onChange(result.url);
+      await onChange(result.url);
     } catch (err) {
       setError(err.message || "Envoi de l’image impossible.");
     } finally {
@@ -97,6 +97,20 @@ export default function AdminIPhoneRepairCatalog() {
   const beginEditModel = (model) => {
     setModelForm({ id: model.id, familyId: model.familyId, name: model.name || "", image: model.image || "", active: model.active !== false });
     setError(""); setSuccess(""); setModelModal(true);
+  };
+  const saveUploadedModelImage = async (image) => {
+    setModelForm((form) => ({ ...form, image }));
+    // Pour un modèle déjà créé, enregistrer dès la fin de l’envoi évite que
+    // la photo reste seulement dans le formulaire si l’administrateur le ferme.
+    if (!modelForm.id) return;
+    setSaving(true); setError(""); setSuccess("");
+    try {
+      await reparationAdminApi.modifierModele(modelForm.id, { image });
+      setSuccess(`Photo enregistrée pour ${modelForm.name}.`);
+      await load();
+    } catch (err) {
+      setError(err.message || "La photo a été envoyée, mais son enregistrement a échoué.");
+    } finally { setSaving(false); }
   };
   const saveModel = async (event) => {
     event.preventDefault();
@@ -188,7 +202,7 @@ export default function AdminIPhoneRepairCatalog() {
           <div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-widest text-neutral-400">Catalogue réparation</p><h3 className="mt-1 text-xl font-black">{modelForm.id ? "Modifier le modèle iPhone" : "Ajouter un modèle iPhone"}</h3></div><button type="button" onClick={() => setModelModal(false)} className="rounded-xl p-2 hover:bg-neutral-100"><X size={19}/></button></div>
           <label className="block space-y-1.5 text-sm font-semibold">Nom du modèle<input className={inputClass} placeholder="iPhone 18 Pro Max" value={modelForm.name} onChange={(event) => setModelForm((form) => ({ ...form, name: event.target.value }))}/></label>
           {!modelForm.id && families.length > 1 && <label className="block space-y-1.5 text-sm font-semibold">Famille<select className={inputClass} value={modelForm.familyId} onChange={(event) => setModelForm((form) => ({ ...form, familyId: event.target.value }))}>{families.map((family) => <option key={family.id} value={family.id}>{family.name}</option>)}</select></label>}
-          <PhoneImageField name={modelForm.name} value={modelForm.image} onChange={(image) => setModelForm((form) => ({ ...form, image }))}/>
+          <PhoneImageField name={modelForm.name} value={modelForm.image} onChange={saveUploadedModelImage}/>
           <label className="block space-y-1.5 text-xs font-medium text-neutral-500">Ou collez une adresse d’image<input className={inputClass} type="url" placeholder="https://…" value={modelForm.image} onChange={(event) => setModelForm((form) => ({ ...form, image: event.target.value }))}/></label>
           {error && <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
           <button disabled={saving} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 text-sm font-bold text-white disabled:opacity-50">{saving ? <LoaderCircle size={17} className="animate-spin"/> : <Check size={17}/>} {saving ? "Enregistrement…" : "Enregistrer le modèle"}</button>

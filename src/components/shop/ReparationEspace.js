@@ -28,17 +28,6 @@ function imageModele(modele, espace) {
   return "/images/reparation/devices/computer.png";
 }
 
-function imageFondEcran(modele) {
-  const nom = normaliserTexte(`${modele.name} ${modele.slug}`);
-  if (nom.startsWith("iphonexsmax") || nom.startsWith("iphonexr")) {
-    return "/images/reparation/wallpapers/iphone-xsmax-xr.webp";
-  }
-  if (nom === "iphonex") return "/images/reparation/wallpapers/iphone-x.jpg";
-  if (nom.startsWith("iphone13")) return "/images/reparation/wallpapers/iphone-13.jpg";
-  if (nom.startsWith("iphone15")) return "/images/reparation/wallpapers/iphone-15.jpg";
-  if (nom.startsWith("iphone16")) return "/images/reparation/wallpapers/iphone-16.jpg";
-  return null;
-}
 
 const ICONE_COULEURS = [
   ["#45c66b", "#3988f5", "#f3a341", "#eb5a55"],
@@ -213,9 +202,9 @@ export default function ReparationEspace({ espace }) {
               className={styles.card}
             >
               <span className={styles.imageFrame}>
-                {espace === "apple" && (modele.image || imageFondEcran(modele)) ? (
+                {espace === "apple" && modele.image ? (
                   <Image
-                    src={modele.image || imageFondEcran(modele)}
+                    src={modele.image}
                     alt={`Écran de ${modele.name}`}
                     fill
                     sizes="(max-width: 640px) 45vw, 260px"
