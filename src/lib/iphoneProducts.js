@@ -14,5 +14,5 @@ export function compareIPhoneGeneration(a, b) {
     const tier = /max/.test(label) ? 3 : /\bpro\b/.test(label) ? 2 : /\bplus\b/.test(label) || token === "air" ? 1 : 0;
     return generation * 10 + tier;
   };
-  return order(a) - order(b) || String(a?.name || "").localeCompare(String(b?.name || ""), "fr");
+  return order(b) - order(a) || String(b?.name || "").localeCompare(String(a?.name || ""), "fr");
 }
