@@ -12,6 +12,7 @@ import useCategoryStore from "@/store/categoryStore";
 import { productsApi } from "@/lib/api";
 import { services as staticServices } from "@/lib/abonnements";
 import { categories as staticCategories } from "@/lib/categories";
+import { isIPhoneProduct } from "@/lib/iphoneProducts";
 
 export default function RecherchePage({ initialQuery = "" }) {
   const router = useRouter();
@@ -63,12 +64,13 @@ export default function RecherchePage({ initialQuery = "" }) {
   // Produits à afficher : résultats API en priorité, fallback local
   const productResults = useMemo(() => {
     if (!query.trim()) return [];
-    if (apiResults.length > 0) return apiResults;
+    if (apiResults.length > 0) return apiResults.filter((product) => !isIPhoneProduct(product));
     // Fallback local
     const q = query.toLowerCase();
     return products.filter(
       (p) =>
         p.active &&
+        !isIPhoneProduct(p) &&
         (p.name.toLowerCase().includes(q) ||
           (p.categorySlug || p.category || "").toLowerCase().includes(q) ||
           (p.description || "").toLowerCase().includes(q)),

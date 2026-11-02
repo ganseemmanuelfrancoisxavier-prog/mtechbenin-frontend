@@ -7,6 +7,7 @@ import useProductStore from "@/store/productStore";
 import useCategoryStore from "@/store/categoryStore";
 import { categories as staticCategories } from "@/lib/categories";
 import { isCatalogueCategory } from "@/lib/catalogueCategories";
+import { isIPhoneProduct } from "@/lib/iphoneProducts";
 
 const sortOptions = [
   { value: "default", label: "Par défaut" },
@@ -35,8 +36,8 @@ export default function CataloguePage({ initialCategory = "tous" }) {
 
   // Produits actifs depuis le store (déjà chargés depuis l'API)
   const allProducts = mounted
-    ? products.filter((p) => p.active)
-    : products.filter((p) => p.active);
+    ? products.filter((p) => p.active && !isIPhoneProduct(p))
+    : products.filter((p) => p.active && !isIPhoneProduct(p));
 
   const categoryOptions = [
     { slug: "tous", label: "Tous les produits" },

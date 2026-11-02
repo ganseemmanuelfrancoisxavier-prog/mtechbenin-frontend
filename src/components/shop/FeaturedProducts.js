@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import ProductCard from "./ProductCard";
 import useProductStore from "@/store/productStore";
+import { isIPhoneProduct } from "@/lib/iphoneProducts";
 
 export default function FeaturedProducts() {
   const [mounted, setMounted] = useState(false);
@@ -16,7 +17,7 @@ export default function FeaturedProducts() {
     fetchFeaturedProducts();
   }, []);
 
-  const featured = featuredProducts.filter((p) => p.active && p.featured);
+  const featured = featuredProducts.filter((p) => p.active && p.featured && !isIPhoneProduct(p));
 
   // Skeleton pendant le chargement
   if (!mounted) {

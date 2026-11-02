@@ -30,6 +30,8 @@ import ReviewPhotoPicker from "./ReviewPhotoPicker";
 import ReviewPhotos from "./ReviewPhotos";
 import { urlVideoJouable, afficheVideo } from "@/lib/media";
 import useVisibleVideo from "@/hooks/useVisibleVideo";
+import { isIPhoneProduct } from "@/lib/iphoneProducts";
+import IPhoneSalesDetail from "./IPhoneSalesDetail";
 
 // ── Normalise images depuis l'API (JSON string ou array) ─────────────────────
 function parseImages(raw) {
@@ -48,11 +50,11 @@ function parseImages(raw) {
 // ── Normalise specs depuis l'API (JSON string ou array) ──────────────────────
 function parseSpecs(raw) {
   if (!raw) return [];
-  const hideInternal = (specs) => specs.filter((spec) => !spec.label?.startsWith("__mtech_"));
-  if (Array.isArray(raw)) return hideInternal(raw);
+  const internal = (specs) => specs.filter((spec) => !spec.label?.startsWith("__mtech_"));
+  if (Array.isArray(raw)) return internal(raw);
   try {
     const parsed = JSON.parse(raw) || [];
-    return Array.isArray(parsed) ? hideInternal(parsed) : [];
+    return Array.isArray(parsed) ? internal(parsed) : [];
   } catch {
     return [];
   }
@@ -239,11 +241,14 @@ export default function ProductPage({ slug }) {
   // Use its videoUrl in priority over the store cache which can be up to 5 min stale.
   // Galerie unifiée : les photos, puis la vidéo à la fin s'il y en a une —
   // activeImage indexe ce tableau, balayable comme les photos.
-  const selectedColorImage = product.colorImages.find((item) => item.typeName ? selectedVariants[item.typeName] === item.value : selectedVariants.Couleur === (item.value || item.color))?.imageUrl;
   const media = [
     ...product.images.map((url, index) => ({
       type: "image",
-      url: index === 0 ? selectedColorImage || url : url,
+      url: index === 0
+        ? product.colorImages.find((item) => item.typeName
+          ? selectedVariants[item.typeName] === item.value
+          : selectedVariants.Couleur === (item.value || item.color))?.imageUrl || url
+        : url,
     })),
     ...(videoUrl ? [{ type: "video", url: videoUrl }] : []),
   ];
@@ -321,6 +326,25 @@ export default function ProductPage({ slug }) {
     buyNow(cartProduct, quantity);
     router.push("/checkout");
   };
+
+  if (isIPhoneProduct(product)) {
+    const storageType = variantTypes.find((type) => /stockage|capacit[ée]/i.test(type.name));
+    const hasRequiredStorage = storageType && selectedVariants[storageType.name];
+    const canBuy = !isRupture && !detailEnCours && !detailErreur && Boolean(storageType?.options?.length) && Boolean(hasRequiredStorage) && variantsComplete;
+    return (
+      <IPhoneSalesDetail
+        product={product}
+        variantTypes={variantTypes}
+        selectedVariants={selectedVariants}
+        onSelectVariant={(typeName, value) => setSelectedVariants((current) => ({ ...current, [typeName]: value }))}
+        quantity={quantity}
+        setQuantity={setQuantity}
+        price={prixAffiche}
+        canBuy={canBuy}
+        onBuy={handleBuyNow}
+      />
+    );
+  }
 
   // ── Balayage gauche/droite sur l'image principale pour changer de photo ────
   const SWIPE_THRESHOLD = 40; // px minimum pour compter comme un balayage volontaire
@@ -544,7 +568,11 @@ export default function ProductPage({ slug }) {
           {/* ── Variantes ── */}
           {variantTypes.length > 0 && (
             <div className="space-y-4">
-              {[...variantTypes].sort((a, b) => Number(/couleur|color/i.test(b.name)) - Number(/couleur|color/i.test(a.name))).map((vType) => (
+              {[...variantTypes].sort((a, b) => {
+                const aColor = /couleur|color/i.test(a.name);
+                const bColor = /couleur|color/i.test(b.name);
+                return Number(bColor) - Number(aColor);
+              }).map((vType) => (
                 <div key={vType.id}>
                   <p className="text-[12px] font-semibold text-apple-mid uppercase tracking-widest mb-2.5">
                     {vType.name}
@@ -557,8 +585,9 @@ export default function ProductPage({ slug }) {
                   <div className={/couleur|color/i.test(vType.name) ? "flex gap-3 overflow-x-auto pb-2" : "flex flex-wrap gap-2"}>
                     {vType.options.map((opt) => {
                       const isSelected = selectedVariants[vType.name] === opt.value;
-                      const isColor = /couleur|color/i.test(vType.name);
-                      const optionImage = product.colorImages.find((item) => item.typeName ? item.typeName === vType.name && item.value === opt.value : isColor && (item.value || item.color) === opt.value)?.imageUrl;
+                      const optionImage = product.colorImages.find((item) => item.typeName
+                        ? item.typeName === vType.name && item.value === opt.value
+                        : /couleur|color/i.test(vType.name) && (item.value || item.color) === opt.value)?.imageUrl;
                       const showImage = Boolean(optionImage);
                       // Le supplément n'est délibérément pas affiché à côté de
                       // l'option : le client lit le prix total au-dessus, qui
@@ -567,13 +596,15 @@ export default function ProductPage({ slug }) {
                       return (
                         <button
                           key={opt.id}
-                          onClick={() => {
-                            setSelectedVariants((prev) => ({
-                              ...prev,
-                              [vType.name]: isSelected ? undefined : opt.value,
-                            }));
-                            if (isColor) setActiveImage(0);
-                          }}
+                          onClick={() =>
+                            {
+                              setSelectedVariants((prev) => ({
+                                ...prev,
+                                [vType.name]: isSelected ? undefined : opt.value,
+                              }));
+                              if (vType.name.toLowerCase() === "couleur") setActiveImage(0);
+                            }
+                          }
                           className={showImage
                             ? "flex min-w-[76px] flex-col items-center gap-1.5 rounded-2xl p-1 text-[12px] font-medium transition-all duration-150"
                             : "px-4 py-2 rounded-2xl text-[13px] font-semibold transition-all duration-150"}
@@ -581,13 +612,15 @@ export default function ProductPage({ slug }) {
                             ? { background: "transparent", color: "#1D1D1F", border: "2px solid transparent" }
                             : isSelected
                               ? { background: "rgba(29,29,31,0.92)", color: "#fff", border: "2px solid rgba(29,29,31,0.92)" }
-                              : { background: "rgba(0,0,0,0.03)", color: "#1D1D1F", border: "2px solid rgba(0,0,0,0.10)" }}
+                              : { background: "rgba(0,0,0,0.03)", color: "#1D1D1F", border: "2px solid rgba(0,0,0,0.10)"}}
                         >
                           {showImage && (
-                            <span className={"relative block h-[68px] w-[68px] overflow-hidden rounded-xl border-2 bg-neutral-50 " + (isSelected ? "border-apple-black" : "border-black/[0.08]")}>
-                              {optionImage
-                                ? <Image src={optionImage} alt="" fill unoptimized className="object-cover" sizes="68px" />
-                                : <span className="absolute inset-0 flex items-center justify-center text-2xl" aria-hidden="true">{opt.value.slice(0, 1)}</span>}
+                            <span className={`relative block h-[68px] w-[68px] overflow-hidden rounded-xl border-2 bg-neutral-50 ${isSelected ? "border-apple-black" : "border-black/[0.08]"}`}>
+                              {optionImage ? (
+                                <Image src={optionImage} alt="" fill unoptimized className="object-cover" sizes="68px" />
+                              ) : (
+                                <span className="absolute inset-0 flex items-center justify-center text-2xl" aria-hidden="true">{opt.value.slice(0, 1)}</span>
+                              )}
                             </span>
                           )}
                           <span className={showImage ? "max-w-[80px] truncate text-center" : ""}>{opt.value}</span>
@@ -621,7 +654,7 @@ export default function ProductPage({ slug }) {
               </span>
               <button
                 onClick={() => setQuantity((q) => q + 1)}
-                className="w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center hover:bg-neutral-50 transition"
+                className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center hover:bg-neutral-50 transition"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
