@@ -4,7 +4,7 @@ import { useEffect, useId, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
-import { reparationApi } from "@/lib/api";
+import { productsApi, reparationApi } from "@/lib/api";
 import { MODELES_IPHONE, imageIphone } from "@/lib/reparationModeles";
 import styles from "./ReparationEspace.module.css";
 
@@ -37,6 +37,17 @@ function imageFondEcran(modele) {
   if (nom.startsWith("iphone15")) return "/images/reparation/wallpapers/iphone-15.jpg";
   if (nom.startsWith("iphone16")) return "/images/reparation/wallpapers/iphone-16.jpg";
   return null;
+}
+
+function imageProduitPourModele(modele, produits) {
+  const nom = normaliserTexte(modele.name);
+  const produit = produits.find((item) => normaliserTexte(item.name) === nom);
+  if (!produit) return "";
+  let images = produit.images;
+  if (typeof images === "string") {
+    try { images = JSON.parse(images); } catch { images = []; }
+  }
+  return produit.image || (Array.isArray(images) ? images[0] : "") || "";
 }
 
 const ICONE_COULEURS = [
@@ -153,6 +164,17 @@ export default function ReparationEspace({ espace }) {
             catalogueSecours: true,
           }));
         }
+        if (espace === "apple") {
+          try {
+            const { products = [] } = await productsApi.getAll({ limit: 500 });
+            visibles = visibles.map((modele) => ({
+              ...modele,
+              imagePanel: imageProduitPourModele(modele, products),
+            }));
+          } catch {
+            // Le catalogue d’images du panneau est facultatif pour afficher la liste.
+          }
+        }
         if (!annule) setModeles(visibles);
       } catch (err) {
         if (!annule) setErreur(err.message || "Impossible de charger les modèles pour le moment.");
@@ -212,9 +234,9 @@ export default function ReparationEspace({ espace }) {
               className={styles.card}
             >
               <span className={styles.imageFrame}>
-                {espace === "apple" && imageFondEcran(modele) ? (
+                {espace === "apple" && (modele.imagePanel || imageFondEcran(modele)) ? (
                   <Image
-                    src={imageFondEcran(modele)}
+                    src={modele.imagePanel || imageFondEcran(modele)}
                     alt={`Écran de ${modele.name}`}
                     fill
                     sizes="(max-width: 640px) 45vw, 260px"
