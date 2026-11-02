@@ -8,6 +8,8 @@ import {
   Check,
   HelpCircle,
   MessageCircle,
+  LockKeyhole,
+  Wrench,
 } from "lucide-react";
 import styles from "./ReparationAppleChoix.module.css";
 
@@ -103,22 +105,24 @@ export default function ReparationAppleChoix() {
       {etape === "choix" ? (
         <>
           <header className={styles.heading}>
-            <p>Réparation Apple</p>
-            <h1>Réparation ou déblocage&nbsp;?</h1>
+            <p>Service Apple</p>
+            <h1>Que souhaitez-vous faire&nbsp;?</h1>
             <span>Choisissez le service adapté à votre appareil.</span>
           </header>
 
           <section className={styles.grid} aria-label="Services Apple">
             <Link href="/reparation/apple/reparation" className={styles.card}>
+              <span className={styles.icon}><Wrench aria-hidden="true" /></span>
               <span className={styles.cardTitle}>Réparation</span>
-              <span className={styles.description}>Écran, batterie, système, vitre arrière et plus encore.</span>
+              <span className={styles.description}>Écran, batterie, système, vitre arrière…</span>
               <span className={styles.action}>Choisir un modèle <ArrowRight aria-hidden="true" /></span>
             </Link>
 
             <button type="button" onClick={() => setEtape("categories")} className={`${styles.card} ${styles.cardButton}`}>
+              <span className={styles.icon}><LockKeyhole aria-hidden="true" /></span>
               <span className={styles.cardTitle}>Déblocage</span>
-              <span className={styles.description}>Bypass, MDM, eSIM ou désimlockage : trouvez votre prestation.</span>
-              <span className={styles.action}>Découvrir les services <ArrowRight aria-hidden="true" /></span>
+              <span className={styles.description}>Reprogrammation, accompagnement MDM…</span>
+              <span className={styles.action}>Voir les prestations <ArrowRight aria-hidden="true" /></span>
             </button>
           </section>
           <p className={styles.footnote}>Vous ne savez pas quelle option choisir&nbsp;? Nous vous aiderons à identifier le service adapté.</p>
