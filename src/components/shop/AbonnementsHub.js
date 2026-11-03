@@ -69,7 +69,7 @@ function ServiceCard({ service, onToggleMute, cardRef }) {
     >
       <div className="relative h-40 overflow-hidden">
         <div
-          className={`absolute inset-0 bg-gradient-to-br ${serviceBg[service.slug] || service.color || defaultBg}`}
+          className={`absolute inset-0 ${isVideo ? "bg-black" : `bg-gradient-to-br ${serviceBg[service.slug] || service.color || defaultBg}`}`}
         />
         {service.mediaType === "image" && service.mediaUrl && (
           <Image
@@ -90,7 +90,10 @@ function ServiceCard({ service, onToggleMute, cardRef }) {
             playsInline
             muted={service.mediaMuted !== false}
             preload="none"
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-200"
+            style={{ opacity: 0 }}
+            onPlaying={(event) => { event.currentTarget.style.opacity = "1"; }}
+            onWaiting={(event) => { event.currentTarget.style.opacity = "0"; }}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
