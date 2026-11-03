@@ -87,7 +87,7 @@ export default function ReparationAppleChoix() {
   function demanderLeService() {
     if (!categorie || !option || !imeiValide) return;
     const message = [
-      "Bonjour MTECHBENIN, je souhaite un service de déblocage Apple.",
+      "Bonjour MTECHBENIN, je souhaite un service de déblocage iPhone.",
       `Prestation : ${categorie.titre}`,
       `Modèle : ${option.nom}`,
       `IMEI / numéro de série : ${imei.trim().toUpperCase()}`,
@@ -107,12 +107,12 @@ export default function ReparationAppleChoix() {
       {etape === "choix" ? (
         <>
           <header className={styles.heading}>
-            <p>Service Apple</p>
+            <p>Service iPhone</p>
             <h1>Que souhaitez-vous faire&nbsp;?</h1>
             <span>Choisissez le service adapté à votre appareil.</span>
           </header>
 
-          <section className={styles.grid} aria-label="Services Apple">
+          <section className={styles.grid} aria-label="Services iPhone">
             <Link href="/reparation/apple/reparation" className={styles.card}>
               <span className={styles.icon}><Wrench aria-hidden="true" /></span>
               <span className={styles.cardTitle}>Réparation</span>
@@ -133,7 +133,7 @@ export default function ReparationAppleChoix() {
         <section className={styles.flow}>
           <div className={styles.flowTop}>
             <button type="button" onClick={etape === "details" ? () => setEtape("categories") : retournerAuMenu} className={styles.backButton}>
-              <ArrowLeft aria-hidden="true" /> {etape === "details" ? "Changer de prestation" : "Retour au menu Apple"}
+              <ArrowLeft aria-hidden="true" /> {etape === "details" ? "Changer de prestation" : "Retour au menu iPhone"}
             </button>
             <div className={styles.steps} aria-label={`Étape ${etape === "categories" ? "1" : "2"} sur 2`}>
               <span className={styles.stepActive}>1 <span>Prestation</span></span><i />
@@ -144,7 +144,7 @@ export default function ReparationAppleChoix() {
           {etape === "categories" ? (
             <>
               <header className={styles.flowHeading}>
-                <p>Déblocage Apple</p>
+                <p>Déblocage iPhone</p>
                 <h1>Quel service recherchez-vous&nbsp;?</h1>
                 <span>Sélectionnez la prestation qui correspond à votre appareil.</span>
               </header>
@@ -160,7 +160,7 @@ export default function ReparationAppleChoix() {
           ) : (
             <>
               <header className={styles.flowHeading}>
-                <p>{categorie?.titre || "Déblocage Apple"}</p>
+                <p>{categorie?.titre || "Déblocage iPhone"}</p>
                 <h1>Précisez votre appareil</h1>
                 <span>Choisissez votre modèle, puis renseignez son IMEI ou son numéro de série.</span>
               </header>
