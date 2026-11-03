@@ -76,7 +76,10 @@ function ServiceCard({ service, onToggleMute, cardRef }) {
           muted={service.mediaMuted !== false}
           poster={afficheVideo(service.mediaUrl)}
           preload="none"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-200"
+            style={{ opacity: 0 }}
+            onPlaying={(event) => { event.currentTarget.style.opacity = "1"; }}
+            onWaiting={(event) => { event.currentTarget.style.opacity = "0"; }}
           style={{ transform: "scale(1.005)", transformOrigin: "center" }}
         />
       )}
