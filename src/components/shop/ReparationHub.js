@@ -13,11 +13,11 @@ import styles from "./ReparationHub.module.css";
 
 const APPAREILS = [
   {
-    nom: "iPhone",
+    nom: "Apple",
     detail: "Écran, batterie, Face ID, caméra, carte mère…",
     href: "/reparation/apple",
     image: "/images/reparation/devices/iphone.jpg",
-    alt: "iPhone et appareils Apple",
+    alt: "Appareils Apple, dont l’iPhone",
   },
   {
     nom: "Android",
