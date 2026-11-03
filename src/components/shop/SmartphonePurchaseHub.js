@@ -63,7 +63,9 @@ export default function SmartphonePurchaseHub() {
             const isApple = /iphone/i.test(String(device.title || "") + " " + String(device.href || ""));
             return isApple ? { ...device, title: "Apple", href: "/smartphones/iphone" } : device;
           });
-          setDevices(normalizedDevices.filter((device) => device.active !== false));
+          setDevices(normalizedDevices.filter((device) =>
+            device && typeof device === "object" && device.active !== false && String(device.title || "").trim(),
+          ));
         }
       } catch (error) {
         console.error("Impossible de lire les appareils de la boutique", error);
