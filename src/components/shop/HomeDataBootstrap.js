@@ -13,30 +13,15 @@ export default function HomeDataBootstrap({ children }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    const timeoutId = window.setTimeout(() => {
-      if (!cancelled) setReady(true);
-    }, 12000);
-
-    const initialData = [
-      useCategoryStore.getState().fetchCategories(),
-      useHeroStore.getState().fetchHero(),
-      useAbonnementStore.getState().fetchServices(),
-      useProductStore.getState().fetchFeaturedProducts(),
-      useReviewStore.getState().fetchFeaturedReviews(),
-      useAdStore.getState().fetchAds(),
-      useClientMediaStore.getState().fetchMedias(),
-    ];
-
-    Promise.allSettled(initialData).finally(() => {
-      window.clearTimeout(timeoutId);
-      if (!cancelled) setReady(true);
-    });
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeoutId);
-    };
+    // Load remote data in the background so a slow API cannot block the shop.
+    void useCategoryStore.getState().fetchCategories();
+    void useHeroStore.getState().fetchHero();
+    void useAbonnementStore.getState().fetchServices();
+    void useProductStore.getState().fetchFeaturedProducts();
+    void useReviewStore.getState().fetchFeaturedReviews();
+    void useAdStore.getState().fetchAds();
+    void useClientMediaStore.getState().fetchMedias();
+    setReady(true);
   }, []);
 
   if (!ready) {
