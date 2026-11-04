@@ -1725,6 +1725,9 @@ export default function AdminAbonnements() {
                   )}
                   {selected.plans.map((plan) => {
                     const d = getPlanDispo(plan, currentCategory);
+                    const poolLinks = plan.poolLinks || [];
+                    const linksDisponibles = poolLinks.filter((link) => link.status === "disponible");
+                    const liensAttribues = poolLinks.filter((link) => link.status !== "disponible");
                     return (
                       <div
                         key={plan.id}
@@ -2000,9 +2003,7 @@ export default function AdminAbonnements() {
                                   Liens en réserve
                                 </p>
                                 <span className="text-[11px] text-apple-mid">
-                                  {plan.poolLinks?.filter((l) => l.status === "disponible").length || 0} dispo
-                                  {" / "}
-                                  {plan.poolLinks?.length || 0}
+                                  {linksDisponibles.length} disponible(s)
                                 </span>
                               </div>
 
@@ -2032,17 +2033,15 @@ export default function AdminAbonnements() {
                                 </p>
                               )}
 
-                              {!plan.poolLinks || plan.poolLinks.length === 0 ? (
+                              {linksDisponibles.length === 0 ? (
                                 <div className="text-center py-4 rounded-xl border border-dashed border-black/[0.10]">
                                   <p className="text-apple-mid text-[11px]">
-                                    Aucun lien en réserve — les paiements resteront en attente de votre envoi
-                                    manuel
+                                    Aucun lien disponible en réserve. Les nouveaux paiements resteront en attente d'un lien.
                                   </p>
                                 </div>
                               ) : (
                                 <div className="space-y-2">
-                                  {plan.poolLinks.map((l) => {
-                                    const dispo = l.status === "disponible";
+                                  {linksDisponibles.map((l) => {
                                     return (
                                       <div
                                         key={l.id}
@@ -2053,25 +2052,12 @@ export default function AdminAbonnements() {
                                             {l.link}
                                           </p>
                                           <p className="text-[10px] text-apple-mid mt-0.5">
-                                            {dispo ? "Disponible" : "Attribué à un client"}
+                                            Disponible dans la réserve
                                           </p>
                                         </div>
                                         <div className="flex items-center gap-1">
                                           <button type="button" onClick={() => handleEditPoolLink(plan.id, l)} disabled={poolLinkEnCours[plan.id]} aria-label="Modifier ce lien" title="Modifier ce lien" className="p-2 rounded-xl text-apple-mid hover:text-apple-black hover:bg-black/[0.04] transition flex-shrink-0 disabled:opacity-50"><Pencil className="w-3.5 h-3.5" /></button>
-                                          {dispo && <button
-                                            type="button"
-                                            onClick={() =>
-                                              setDeletePoolLinkConfirm({
-                                                planId: plan.id,
-                                                id: l.id,
-                                              })
-                                            }
-                                            aria-label="Supprimer ce lien"
-                                            title="Supprimer ce lien"
-                                            className="p-2 rounded-xl text-apple-mid hover:text-red-500 hover:bg-red-500/[0.06] transition flex-shrink-0"
-                                          >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                          </button>}
+                                          <button type="button" onClick={() => setDeletePoolLinkConfirm({ planId: plan.id, id: l.id })} aria-label="Supprimer ce lien" title="Supprimer ce lien" className="p-2 rounded-xl text-apple-mid hover:text-red-500 hover:bg-red-500/[0.06] transition flex-shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
                                         </div>
                                       </div>
                                     );
@@ -2079,6 +2065,40 @@ export default function AdminAbonnements() {
                                 </div>
                               )}
                             </div>
+
+                              {liensAttribues.length > 0 && (
+                                <details className="mt-3 rounded-xl border border-black/[0.06] bg-white">
+                                  <summary className="cursor-pointer px-3 py-2.5 text-[11px] font-semibold text-apple-mid">
+                                    Historique des liens attribués ({liensAttribues.length})
+                                  </summary>
+                                  <div className="space-y-2 border-t border-black/[0.05] p-3">
+                                    {liensAttribues.map((l) => {
+                                      const clientsForLink = (plan.linkClients || []).filter((client) => client.link === l.link);
+                                      const clientsEnvoyes = clientsForLink.filter((client) => client.status === "envoyé");
+                                      const clientTrace = clientsEnvoyes[0] || clientsForLink[0];
+                                      const dateTrace = clientTrace?.sentAt || clientTrace?.paidAt || l.claimedAt || l.createdAt;
+                                      return (
+                                        <div key={l.id} className="rounded-lg bg-black/[0.03] p-3">
+                                          <p className="truncate font-mono text-[10px] text-apple-black">{l.link}</p>
+                                          <p className="mt-1 text-[10px] font-medium text-apple-mid">
+                                            {clientsEnvoyes.length > 0
+                                              ? `Envoyé à ${clientsEnvoyes.length} client(s)`
+                                              : clientsForLink.length > 0
+                                                ? "Attribué — en attente d’envoi"
+                                                : "Attribué à une commande"}
+                                            {dateTrace ? ` · ${formatJourBenin(dateTrace)}` : ""}
+                                          </p>
+                                          {clientsForLink.length > 0 && (
+                                            <p className="mt-1 text-[10px] text-apple-mid">
+                                              {clientsForLink.map((client) => `${client.name} (${client.status === "envoyé" ? "envoyé" : "en attente"})`).join(" · ")}
+                                            </p>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </details>
+                              )}
 
                             <div className="flex items-center justify-between mb-2">
                               <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
