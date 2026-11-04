@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { formatPrice, libelleDuree } from "@/lib/format";
 import { subscriptionsApi } from "@/lib/api";
+import AdminAbonnementsLinkBlast from "./AdminAbonnementsLinkBlast";
 import useAbonnementStore from "@/store/abonnementStore";
 import AdminComptesPartages from "./AdminComptesPartages";
 import MediaUploader from "@/components/admin/MediaUploader";
@@ -2083,12 +2084,19 @@ export default function AdminAbonnements() {
                               <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
                                 Clients ayant payé
                               </p>
-                              <button
-                                onClick={() => openAddLinkClient(plan.id)}
-                                className="flex items-center gap-1 text-[11px] font-semibold text-apple-black hover:text-apple-mid transition"
-                              >
-                                <Plus className="w-3 h-3" /> Ajouter client
-                              </button>
+                              <div className="flex items-center gap-3">
+                                <AdminAbonnementsLinkBlast
+                                  plan={plan}
+                                  serviceName={selected.name}
+                                  onSent={loadAll}
+                                />
+                                <button
+                                  onClick={() => openAddLinkClient(plan.id)}
+                                  className="flex items-center gap-1 text-[11px] font-semibold text-apple-black hover:text-apple-mid transition"
+                                >
+                                  <Plus className="w-3 h-3" /> Ajouter client
+                                </button>
+                              </div>
                             </div>
                             {!plan.linkClients ||
                             plan.linkClients.length === 0 ? (
