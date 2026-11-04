@@ -13,7 +13,7 @@ export default async function CGUPage() {
     const res = await fetch(`${apiUrl}/api/legal/cgu`, { cache: "no-store" });
     if (res.ok) {
       const data = await res.json();
-      if (data.page?.content) page = data.page;
+      if (data.page) page = data.page;
     }
   } catch {}
 
@@ -21,7 +21,7 @@ export default async function CGUPage() {
     <LegalLayout
       title={page?.title || "Conditions générales d’utilisation (CGU)"}
       lastUpdated={page?.updatedAt || null}
-      htmlContent={page?.content || DEFAULT_CONTENT}
+      htmlContent={page ? page.content : DEFAULT_CONTENT}
     />
   );
 }
