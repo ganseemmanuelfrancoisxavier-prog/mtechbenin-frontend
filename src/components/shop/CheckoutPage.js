@@ -5,14 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Script from "next/script";
 import {
-  ArrowLeft,
   ArrowRight,
   MapPin,
   Check,
   ShoppingBag,
   Tag,
   ChevronDown,
-  Lock,
   Gift,
   Truck,
   Info,
@@ -43,9 +41,8 @@ const countryCodes = [
 ];
 
 const steps = [
-  { id: 1, label: "Livraison" },
-  { id: 2, label: "Paiement" },
-  { id: 3, label: "Confirmation" },
+  { id: 1, label: "Paiement" },
+  { id: 2, label: "Confirmation" },
 ];
 
 const slots = [
@@ -131,7 +128,6 @@ export default function CheckoutPage() {
     giftDialCode: "+229",
   });
 
-  const [showPaymentMethods, setShowPaymentMethods] = useState(false);
   // La référence n'est plus tirée ici : elle vient du serveur, qui la génère
   // d'une source cryptographique à la création de la commande. Le tirage local
   // (`Math.random()` sur 5 chiffres) était devinable et entrait en collision.
@@ -238,7 +234,7 @@ export default function CheckoutPage() {
 
       widgetRef.current = null;
       clearCart();
-      setStep(3);
+      setStep(2);
     }
   };
 
@@ -355,7 +351,7 @@ export default function CheckoutPage() {
     setIsSubmittingOrder(false);
   };
 
-  if (items.length === 0 && step !== 3) {
+  if (items.length === 0 && step !== 2) {
     return (
       <div className="max-w-7xl mx-auto px-5 py-24 text-center">
         <div className="w-16 h-16 rounded-3xl bg-black/[0.04] flex items-center justify-center mx-auto mb-5">
@@ -706,8 +702,8 @@ export default function CheckoutPage() {
                 )}
 
                 <button
-                  onClick={() => setStep(2)}
-                  disabled={!step1Valid}
+                  onClick={handlePayment}
+                  disabled={!step1Valid || !fedapayReady || isSubmittingOrder}
                   className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-[14px] font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{
                     background: step1Valid
@@ -721,223 +717,13 @@ export default function CheckoutPage() {
                       : "none",
                   }}
                 >
-                  Continuer vers le paiement <ArrowRight className="w-4 h-4" />
+                  {isSubmittingOrder ? "Création de la commande..." : fedapayReady ? <>Payer {formatPrice(grandTotal)} <ArrowRight className="w-4 h-4" /></> : "Chargement du paiement..."}
                 </button>
               </>
             )}
 
-            {/* ═══════ ÉTAPE 2 ═══════ */}
+            {/* ═══════ CONFIRMATION ═══════ */}
             {step === 2 && (
-              <>
-                <div>
-                  <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1">
-                    Étape 2
-                  </p>
-                  <h2 className="font-display font-black text-2xl text-apple-black tracking-tight">
-                    Paiement
-                  </h2>
-                </div>
-
-                <div className="glass-card rounded-3xl p-5 space-y-4">
-                  <p className="text-[12px] font-semibold text-apple-mid uppercase tracking-widest">
-                    Récapitulatif
-                  </p>
-                  <div className="space-y-2.5">
-                    {[
-                      { label: "Client", value: form.firstName },
-                      { label: "WhatsApp", value: fullWhatsapp },
-                      ...(hasPhysicalProduct
-                        ? [{ label: "Ville", value: form.city }]
-                        : []),
-                      ...(hasPhysicalProduct && form.neighborhood
-                        ? [{ label: "Quartier", value: form.neighborhood }]
-                        : []),
-                      ...(hasPhysicalProduct
-                        ? [{ label: "Créneau", value: form.slot }]
-                        : []),
-                    ].map((row) => (
-                      <div
-                        key={row.label}
-                        className="flex justify-between text-[13px]"
-                      >
-                        <span className="text-apple-mid">{row.label}</span>
-                        <span className="font-medium text-apple-black">
-                          {row.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="border-t border-black/[0.06] pt-3 space-y-2">
-                    <div className="flex justify-between text-[13px]">
-                      <span className="text-apple-mid">Articles</span>
-                      <span className="font-medium text-apple-black">
-                        {formatPrice(subtotal)}
-                      </span>
-                    </div>
-                    {discount > 0 && (
-                      <div className="flex justify-between text-[13px] text-green-600 font-medium">
-                        <span>Réduction ({appliedCoupon?.code})</span>
-                        <span>-{formatPrice(discount)}</span>
-                      </div>
-                    )}
-                    {hasPhysicalProduct && (
-                    <div className="flex justify-between text-[13px]">
-                      <span className="text-apple-mid">
-                        Livraison — {form.city}
-                      </span>
-                      <span
-                        className={`font-medium ${deliveryFee > 0 ? "text-apple-black" : "text-green-600"}`}
-                      >
-                        {deliveryFee > 0
-                          ? formatPrice(deliveryFee)
-                          : "Gratuite"}
-                      </span>
-                    </div>
-                    )}
-                    {hasPhysicalProduct && deliveryDelay && (
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-apple-mid/60">Délai estimé</span>
-                        <span className="text-apple-mid">{deliveryDelay}</span>
-                      </div>
-                    )}
-                    {feeAmount > 0 && (
-                      <div className="flex items-center justify-between text-[13px]">
-                        <span className="text-apple-mid flex items-center gap-1.5">
-                          Frais de paiement
-                          <span className="text-[10px] bg-black/[0.05] px-1.5 py-0.5 rounded-full font-medium">
-                            {paymentFeePercent}%
-                          </span>
-                        </span>
-                        <span className="font-medium text-apple-mid">
-                          {formatPrice(feeAmount)}
-                        </span>
-                      </div>
-                    )}
-                    {feeAmount > 0 && (
-                      <div className="flex items-start gap-2 p-2.5 rounded-xl bg-blue-50/60 border border-blue-100/80">
-                        <Info
-                          className="w-3.5 h-3.5 text-blue-400 flex-shrink-0 mt-0.5"
-                          strokeWidth={1.8}
-                        />
-                        <p className="text-[11px] text-blue-600 leading-relaxed">
-                          Les frais de paiement sont ajoutés par notre
-                          intégrateur. Vous ne paierez pas plus que le montant
-                          total affiché.
-                        </p>
-                      </div>
-                    )}
-                    <div className="border-t border-black/[0.06] pt-2 flex justify-between">
-                      <span className="font-bold text-apple-black text-[14px]">
-                        Total à payer
-                        {feeAmount > 0 && (
-                          <span className="text-[11px] text-apple-mid font-normal ml-1">
-                            (frais inclus)
-                          </span>
-                        )}
-                      </span>
-                      <span className="font-display font-black text-lg text-apple-black">
-                        {formatPrice(grandTotal)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="glass-card rounded-3xl overflow-hidden">
-                  <button
-                    onClick={() => setShowPaymentMethods((v) => !v)}
-                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-black/[0.02] transition-colors duration-150"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Lock className="w-3.5 h-3.5 text-apple-mid" strokeWidth={1.6} />
-                      <span className="text-[12px] font-semibold text-apple-mid uppercase tracking-widest">
-                        Méthodes de paiement acceptées
-                      </span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 text-apple-mid transition-transform duration-200 ${showPaymentMethods ? "rotate-180" : ""}`}
-                    />
-                  </button>
-
-                  {showPaymentMethods && (
-                    <div className="px-5 pb-5 border-t border-black/[0.05]">
-                      <div className="pt-4 space-y-3">
-                        {[
-                          {
-                            flag: "🇧🇯",
-                            pays: "Bénin",
-                            methods: ["MTN MoMo", "Moov Money", "Celtiis", "BMO", "Coris Money"],
-                          },
-                          { flag: "🇹🇬", pays: "Togo", methods: ["Mixx By Yas", "Moov"] },
-                          { flag: "🇨🇮", pays: "Côte d'Ivoire", methods: ["MTN"] },
-                          { flag: "🇳🇪", pays: "Niger", methods: ["Airtel"] },
-                          { flag: "🇸🇳", pays: "Sénégal", methods: ["Free Sénégal"] },
-                          { flag: "🌍", pays: "International", methods: ["Visa", "MasterCard"] },
-                        ].map(({ flag, pays, methods }) => (
-                          <div key={pays}>
-                            <p className="text-[10px] font-semibold text-apple-mid/60 uppercase tracking-widest mb-2">
-                              {flag} {pays}
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {methods.map((m) => (
-                                <span
-                                  key={m}
-                                  className="text-[12px] bg-black/[0.04] text-apple-mid px-3 py-1.5 rounded-xl font-medium border border-black/[0.06]"
-                                >
-                                  {m}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <p className="text-[11px] text-apple-mid mt-4 pt-3 border-t border-black/[0.05]">
-                        Paiement 100% sécurisé via FedaPay — Bénin · Côte d&apos;Ivoire · Togo · Niger · Sénégal
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setStep(1)}
-                    className="flex items-center gap-2 px-5 py-3.5 rounded-2xl text-[13px] font-medium text-apple-mid hover:text-apple-black transition-all duration-200"
-                    style={{
-                      background: "rgba(0,0,0,0.04)",
-                      border: "1px solid rgba(0,0,0,0.07)",
-                    }}
-                  >
-                    <ArrowLeft className="w-4 h-4" /> Retour
-                  </button>
-                  <button
-                    onClick={handlePayment}
-                    disabled={!fedapayReady || isSubmittingOrder}
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[14px] font-semibold transition-all duration-200 active:scale-98 disabled:opacity-60"
-                    style={{
-                      background: "rgba(29,29,31,0.92)",
-                      backdropFilter: "blur(16px)",
-                      color: "#FFFFFF",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      boxShadow: "0 2px 14px rgba(0,0,0,0.22)",
-                    }}
-                  >
-                    {isSubmittingOrder ? (
-                      "Création de la commande..."
-                    ) : fedapayReady ? (
-                      <>
-                        <ArrowRight className="w-4 h-4" /> Payer{" "}
-                        {formatPrice(grandTotal)}
-                      </>
-                    ) : (
-                      "Chargement..."
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* ═══════ ÉTAPE 3 ═══════ */}
-            {step === 3 && (
               <div className="text-center py-10 space-y-6">
                 <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto">
                   <Check
@@ -984,7 +770,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* ── Récapitulatif sticky ─────────────────────────────────────── */}
-          {step !== 3 && (
+          {step !== 2 && (
             <div className="lg:col-span-2">
               <div className="glass-card rounded-3xl p-5 sticky top-24 space-y-4">
                 <p className="text-[12px] font-semibold text-apple-mid uppercase tracking-widest">
@@ -1075,15 +861,20 @@ export default function CheckoutPage() {
                     </span>
                   </div>
                   {feeAmount > 0 && (
-                    <div className="flex justify-between text-[13px] text-apple-mid">
-                      <span className="flex items-center gap-1">
-                        Frais paiement
-                        <span className="text-[10px] bg-black/[0.05] px-1.5 py-0.5 rounded-full">
-                          {paymentFeePercent}%
+                    <>
+                      <div className="flex justify-between text-[13px] text-apple-mid">
+                        <span className="flex items-center gap-1">
+                          Frais de paiement
+                          <span className="text-[10px] bg-black/[0.05] px-1.5 py-0.5 rounded-full">
+                            {paymentFeePercent}%
+                          </span>
                         </span>
-                      </span>
-                      <span>{formatPrice(feeAmount)}</span>
-                    </div>
+                        <span>{formatPrice(feeAmount)}</span>
+                      </div>
+                      <p className="text-[11px] text-blue-600 leading-relaxed px-1">
+                        Les frais de paiement sont ajoutés par notre intégrateur. Vous ne paierez pas plus que le montant total affiché.
+                      </p>
+                    </>
                   )}
                   <div className="flex justify-between font-display font-black text-[17px] text-apple-black pt-1 border-t border-black/[0.06]">
                     <span>Total</span>
