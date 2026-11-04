@@ -6,7 +6,7 @@ import { Check, X, Save, FileText, Clock } from "lucide-react";
 import { legalApi } from "@/lib/api";
 import RichEditor from "@/components/ui/RichEditor";
 
-const PAGE_ICONS = {
+const PAGE_ICONS = {\n  cgu: "📖",
   "politique-confidentialite": "🔒",
   cgv: "📋",
   "politique-cookies": "🍪",
