@@ -50,7 +50,7 @@ export const categories = [
     label: "Sextoys",
     name: "Sextoys",
     icon: "🌸",
-    sortOrder: 999,
+    sortOrder: 6,
     active: true,
   },
 ];
