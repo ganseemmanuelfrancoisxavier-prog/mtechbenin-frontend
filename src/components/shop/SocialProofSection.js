@@ -108,19 +108,19 @@ export default function SocialProofSection() {
         >
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10 scale-105 bg-cover bg-center opacity-45 blur-[2px] transition-opacity group-hover:opacity-55"
+            className="pointer-events-none absolute inset-0 z-0 scale-105 bg-cover bg-center opacity-45 blur-[2px] transition-opacity group-hover:opacity-55"
             style={{ backgroundImage: "url('/images/reparation/devices/conditions-tools.png')" }}
           />
-          <span aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-black/55" />
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-black/35 text-white backdrop-blur-sm">
+          <span aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-black/55" />
+          <span className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-black/35 text-white backdrop-blur-sm">
             <Wrench className="h-5 w-5" strokeWidth={1.8} />
           </span>
-          <span className="min-w-0 flex-1">
+          <span className="relative z-10 min-w-0 flex-1">
             <span className="block text-sm font-semibold leading-snug text-white sm:text-base">
               MTECHBENIN propose aussi des services de réparation et de maintenance des appareils.
             </span>
           </span>
-          <ArrowUpRight className="h-4 w-4 shrink-0 text-white/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          <ArrowUpRight className="relative z-10 h-4 w-4 shrink-0 text-white/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </Link>
       </div>
     </section>
