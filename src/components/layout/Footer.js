@@ -92,7 +92,9 @@ export default function Footer() {
             links: [
               { label: "Conditions d'utilisation", href: "/cgv" },
               { label: "Confidentialité", href: "/politique-confidentialite" },
-              { label: "Politique des cookies", href: "/politique-cookies" },\n              { label: "Conditions de retour", href: "/retours" },\n              { label: "Conditions de réparation", href: "/reparation/conditions" },
+              { label: "Politique des cookies", href: "/politique-cookies" },
+              { label: "Conditions de retour", href: "/retours" },
+              { label: "Conditions de réparation", href: "/reparation/conditions" },
               { label: "Livraison", href: "/livraison" },
             ],
           },
