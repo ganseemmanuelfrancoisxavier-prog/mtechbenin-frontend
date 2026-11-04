@@ -110,7 +110,7 @@ export default function SocialProofSection() {
             src="/images/reparation/devices/conditions-tools.png"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 z-0 h-full w-full scale-105 object-cover opacity-100 blur-[3px] transition-transform duration-500 group-hover:scale-110"
+            className="pointer-events-none absolute inset-0 z-0 h-full w-full scale-105 object-cover opacity-100 grayscale blur-[3px] transition-transform duration-500 group-hover:scale-110"
           />
           <span aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 bg-black/25" />
           <span className="relative z-20 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-black/35 text-white backdrop-blur-sm">
