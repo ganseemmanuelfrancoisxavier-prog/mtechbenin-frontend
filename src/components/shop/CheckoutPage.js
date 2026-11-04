@@ -443,7 +443,7 @@ export default function CheckoutPage() {
                       className={inputClass}
                     />
                   </Field>
-                  <Field label="Téléphone WhatsApp" required>
+                  <Field label="Numéro WhatsApp" required hint="— sans le 01 si votre numéro n’en dispose pas">
                     <div className="flex gap-2">
                       <DialCodeSelect
                         value={form.dialCode}
