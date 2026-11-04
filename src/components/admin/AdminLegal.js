@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, FilePlus2, Save, Trash2, X } from "lucide-react";
 import { legalApi } from "@/lib/api";
 import RichEditor from "@/components/ui/RichEditor";
@@ -21,7 +21,7 @@ export default function AdminLegal() {
 
   const dirty = isNew
     ? Boolean(draft.slug || draft.title || draft.content)
-    : JSON.stringify(draft) !== JSON.stringify(original);
+    : Boolean(original && JSON.stringify(draft) !== JSON.stringify(original));
   const slugValid = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(draft.slug);
   const canSave = draft.title.trim() && slugValid && hasText(draft.content) && dirty && !saving;
 
