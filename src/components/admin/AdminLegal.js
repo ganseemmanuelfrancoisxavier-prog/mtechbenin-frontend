@@ -47,7 +47,7 @@ export default function AdminLegal() {
         setSelected(data.pages[0]);
         setContent(data.pages[0].content || "");
       }
-    } catch { showToast("Erreur de chargement", "error"); }
+    } catch (error) { showToast(error?.message || "Erreur de chargement", "error"); }
     setLoading(false);
   }, []);
 
@@ -74,7 +74,7 @@ export default function AdminLegal() {
       );
       setSelected((prev) => ({ ...prev, ...data.page }));
       showToast("Page sauvegardée !");
-    } catch { showToast("Erreur lors de la sauvegarde", "error"); }
+    } catch (error) { showToast(error?.message || "Erreur lors de la sauvegarde", "error"); }
     setSaving(false);
   };
 
