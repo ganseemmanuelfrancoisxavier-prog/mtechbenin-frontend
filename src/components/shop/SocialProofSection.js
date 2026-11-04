@@ -104,9 +104,15 @@ export default function SocialProofSection() {
       <div className="mt-12 flex justify-center">
         <Link
           href="/reparation"
-          className="group flex w-full max-w-xl items-center gap-4 rounded-3xl border border-white/10 bg-neutral-950 p-5 text-white shadow-[0_16px_36px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5 hover:bg-neutral-900"
+          className="group relative isolate flex w-full max-w-xl items-center gap-4 overflow-hidden rounded-3xl border border-white/10 bg-neutral-950 p-5 text-white shadow-[0_16px_36px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5"
         >
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10 scale-105 bg-cover bg-center opacity-45 blur-[2px] transition-opacity group-hover:opacity-55"
+            style={{ backgroundImage: "url('/images/reparation/devices/conditions-tools.png')" }}
+          />
+          <span aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-black/55" />
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-black/35 text-white backdrop-blur-sm">
             <Wrench className="h-5 w-5" strokeWidth={1.8} />
           </span>
           <span className="min-w-0 flex-1">
