@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import useSettingsStore from "@/store/settingsStore";
+import { legalApi } from "@/lib/api";
 
 export default function Footer() {
   const [mounted, setMounted] = useState(false);
+  const [legalPages, setLegalPages] = useState([]);
 
   const {
     shopName,
@@ -20,6 +22,11 @@ export default function Footer() {
 
   useEffect(() => {
     setMounted(true);
+    let active = true;
+    legalApi.getPublished().then((data) => {
+      if (active) setLegalPages(data.pages || []);
+    }).catch(() => {});
+    return () => { active = false; };
   }, []);
 
   const socials = [
@@ -87,15 +94,10 @@ export default function Footer() {
 
         {/* Colonnes liens */}
         {[
-          {
+          ...(legalPages.length ? [{
             title: "Légal",
-            links: [
-              { label: "Conditions d'utilisation", href: "/cgv" },
-              { label: "Confidentialité", href: "/politique-confidentialite" },
-              { label: "Conditions de retour", href: "/retours" },
-              { label: "Livraison", href: "/livraison" },
-            ],
-          },
+            links: legalPages.map((page) => ({ label: page.title, href: `/legal/${page.slug}` })),
+          }] : []),
           {
             title: "Support",
             links: [

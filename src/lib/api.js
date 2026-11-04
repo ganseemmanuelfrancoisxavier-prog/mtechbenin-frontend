@@ -478,10 +478,13 @@ export const faqApi = {
 
 // ── Pages légales ─────────────────────────────────────────────────────────────
 export const legalApi = {
-  getPage: (slug) => apiFetch(`/api/legal/${slug}`),
+  getPage: (slug) => apiFetch(`/api/legal/${encodeURIComponent(slug)}`, { skipAuth: true, cache: "no-store" }),
+  getPublished: () => apiFetch("/api/legal", { skipAuth: true, cache: "no-store" }),
   getAll: () => apiFetch("/api/legal/admin"),
   upsert: (slug, data) =>
-    apiFetch(`/api/legal/admin/${slug}`, { method: "PUT", body: JSON.stringify(data) }),
+    apiFetch(`/api/legal/admin/${encodeURIComponent(slug)}`, { method: "PUT", body: JSON.stringify(data) }),
+  remove: (slug) =>
+    apiFetch(`/api/legal/admin/${encodeURIComponent(slug)}`, { method: "DELETE" }),
 };
 
 // ── Messages de contact ───────────────────────────────────────────────────────
