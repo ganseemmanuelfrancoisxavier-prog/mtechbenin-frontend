@@ -101,7 +101,14 @@ export default function SocialProofSection() {
           </Link>
         </div>
       )}
-      <div className="mt-12 flex justify-center">
+    </section>
+  );
+}
+
+export function RepairPromoSection() {
+  return (
+    <section className="mx-auto w-full max-w-6xl px-5 pb-8 sm:px-8">
+      <div className="flex justify-center">
         <Link
           href="/reparation"
           className="group relative isolate flex w-full max-w-xl items-center gap-4 overflow-hidden rounded-3xl border border-white/10 bg-neutral-950 p-5 text-white shadow-[0_16px_36px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5"
