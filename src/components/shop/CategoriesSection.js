@@ -234,7 +234,7 @@ export default function CategoriesSection() {
         </div>
       )}
 
-      {mounted && allItems.length > 6 && (
+      {mounted && allItems.length > 4 && (
         <div className={styles.more}>
           <button type="button" onClick={() => setShowAllCategories((value) => !value)} className={styles.moreLink}>
             {showAllCategories ? "Voir moins" : "Voir plus"}
