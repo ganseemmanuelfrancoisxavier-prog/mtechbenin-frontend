@@ -19,8 +19,8 @@ export default function HomePage() {
         <SubscriptionsSection />
         <StatisticsSection />
         <AdvertisingSection />
-        <ClientGallery />
         <SocialProofSection />
+        <ClientGallery />
       </HomeDataBootstrap>
     </ShopLayout>
   );
