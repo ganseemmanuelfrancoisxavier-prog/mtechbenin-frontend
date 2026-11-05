@@ -201,7 +201,7 @@ export default function CategoriesSection() {
       };
     });
 
-  const visibleItems = showAllCategories ? allItems : allItems.slice(0, 6);
+  const visibleItems = showAllCategories ? allItems : allItems.slice(0, 4);
 
   return (
     <section className={styles.section}>
