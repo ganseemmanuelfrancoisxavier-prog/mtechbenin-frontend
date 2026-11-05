@@ -175,7 +175,17 @@ export default function CategoriesSection() {
     ? getActiveCategories()
     : staticCategories.filter((c) => c.active);
 
-  const allItems = activeCategories
+  // L'API ne renvoie que les catégories actives en base. Garder aussi les
+  // catégories du catalogue initial absentes de la base pour qu'elles restent
+  // accessibles sous « Voir plus ».
+  const categoriesForDisplay = [
+    ...activeCategories,
+    ...staticCategories.filter(
+      (fallback) => !activeCategories.some((category) => category.slug === fallback.slug),
+    ),
+  ];
+
+  const allItems = categoriesForDisplay
     .filter((cat) => isCatalogueCategory(cat))
     .map((cat) => {
       const label = cat.label || cat.name;
