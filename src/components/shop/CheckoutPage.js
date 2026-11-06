@@ -724,38 +724,39 @@ export default function CheckoutPage() {
 
             {/* ═══════ CONFIRMATION ═══════ */}
             {step === 2 && (
-              <main className="fixed inset-0 z-[100] flex min-h-[100dvh] flex-col justify-between overflow-hidden bg-black text-white">
-                <video
-                  src="/confirmation-animation.MOV"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  aria-hidden="true"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/25 to-black/70" />
-                <section className="relative z-10 mx-auto w-full max-w-3xl px-6 pt-[max(2rem,env(safe-area-inset-top))] text-center sm:px-10 sm:pt-16">
-                  <h1 className="font-display text-3xl font-black tracking-tight sm:text-5xl">
+              <main className="fixed inset-0 z-[100] flex min-h-[100dvh] flex-col justify-between overflow-y-auto bg-white text-black">
+                <section className="relative z-10 mx-auto w-full max-w-3xl px-6 pt-[max(2rem,env(safe-area-inset-top))] text-center sm:px-10 sm:pt-12">
+                  <h1 className="font-display text-3xl font-black tracking-tight text-black sm:text-5xl">
                     Commande confirmée !
                   </h1>
-                  <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-white/90 sm:text-xl">
+                  <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-black/80 sm:text-xl">
                     Merci {form.firstName.trim()} — vous recevrez une confirmation sur WhatsApp ou votre mail.
                   </p>
-                  <div className="mx-auto mt-6 rounded-2xl border border-white/20 bg-black/35 px-5 py-4 backdrop-blur-sm sm:mt-8 sm:px-8">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70 sm:text-sm">
-                      Référence de commande
-                    </p>
-                    <p className="mt-2 break-all text-lg font-bold tracking-wide sm:text-2xl">
-                      {orderRef}
-                    </p>
-                  </div>
                 </section>
-                <div className="relative z-10 mx-auto w-full max-w-3xl px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pb-10">
+                <div className="flex flex-1 items-center justify-center px-5 py-5 sm:px-8">
+                  <video
+                    src="/confirmation-animation.MOV"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    className="max-h-[42dvh] w-full max-w-3xl rounded-3xl object-contain sm:max-h-[48dvh]"
+                    aria-label="Animation de confirmation"
+                  />
+                </div>
+                <section className="relative z-10 mx-auto w-full max-w-3xl px-6 pb-5 text-center sm:px-10">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-black/60 sm:text-sm">
+                    Référence de commande
+                  </p>
+                  <p className="mt-2 break-all text-lg font-bold tracking-wide text-black sm:text-2xl">
+                    {orderRef}
+                  </p>
+                </section>
+                <div className="relative z-10 mx-auto w-full max-w-3xl px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5 sm:px-10 sm:pb-8">
                   <Link
                     href="/"
-                    className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-base font-bold text-black shadow-lg transition hover:bg-white/90 sm:mx-auto sm:w-auto sm:min-w-72"
+                    className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border border-black/15 bg-white px-6 py-4 text-base font-bold text-black shadow-sm transition hover:bg-black/[0.04] sm:mx-auto sm:w-auto sm:min-w-72"
                   >
                     Retourner à la page d’accueil
                     <ArrowRight className="h-5 w-5" />
