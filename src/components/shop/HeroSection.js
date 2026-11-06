@@ -90,7 +90,7 @@ export default function HeroSection() {
   // Skeleton pendant le chargement initial
   if (!mounted) {
     return (
-      <section className="relative flex min-h-[calc(100dvh-56px)] w-full items-center overflow-hidden bg-gradient-to-br from-[#0A0A0A] via-[#1a1a2e] to-[#0f3460]">
+      <section className="relative flex min-h-[clamp(520px,calc(100svh-56px),800px)] w-full items-center overflow-hidden bg-gradient-to-br from-[#0A0A0A] via-[#1a1a2e] to-[#0f3460]">
         <div className="relative z-10 max-w-7xl mx-auto px-5 w-full py-20">
           <div className="animate-pulse space-y-4">
             <div className="h-5 bg-white/10 rounded-full w-32" />
@@ -112,7 +112,7 @@ export default function HeroSection() {
   const slide = slides[safeIndex];
 
   return (
-    <section className="relative flex min-h-[calc(100dvh-56px)] w-full items-center overflow-hidden">
+    <section className="relative flex min-h-[clamp(520px,calc(100svh-56px),800px)] w-full items-center overflow-hidden">
       {/* Fond */}
       <div
         className={`absolute inset-0 transition-all duration-700 ${
