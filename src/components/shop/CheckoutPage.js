@@ -741,7 +741,7 @@ export default function CheckoutPage() {
                     loop
                     playsInline
                     preload="auto"
-                    className="h-full w-full object-cover object-[center_54%] scale-x-[0.96]"
+                    className="h-full w-full object-cover object-[center_54%]"
                     aria-label="Animation de confirmation"
                   />
                 </div>
