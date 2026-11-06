@@ -724,48 +724,44 @@ export default function CheckoutPage() {
 
             {/* ═══════ CONFIRMATION ═══════ */}
             {step === 2 && (
-              <div className="text-center py-10 space-y-6">
-                <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto">
-                  <Check
-                    className="w-10 h-10 text-green-500"
-                    strokeWidth={2.5}
-                  />
-                </div>
-                <div>
-                  <h2 className="font-display font-black text-3xl text-apple-black mb-2 tracking-tight">
+              <main className="fixed inset-0 z-[100] flex min-h-[100dvh] flex-col justify-between overflow-hidden bg-black text-white">
+                <video
+                  src="/confirmation-animation.MOV"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  aria-hidden="true"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/25 to-black/70" />
+                <section className="relative z-10 mx-auto w-full max-w-3xl px-6 pt-[max(2rem,env(safe-area-inset-top))] text-center sm:px-10 sm:pt-16">
+                  <h1 className="font-display text-3xl font-black tracking-tight sm:text-5xl">
                     Commande confirmée !
-                  </h2>
-                  <p className="text-apple-mid text-[14px]">
-                    Merci {form.firstName} — vous recevrez une confirmation sur
-                    WhatsApp.
+                  </h1>
+                  <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-white/90 sm:text-xl">
+                    Merci {form.firstName.trim()} — vous recevrez une confirmation sur WhatsApp ou votre mail.
                   </p>
-                </div>
-                <div className="glass-card rounded-3xl p-6 text-left space-y-2 max-w-sm mx-auto">
-                  <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
-                    Référence de commande
-                  </p>
-                  <p className="font-display font-black text-xl text-apple-black tracking-tight">
-                    {orderRef}
-                  </p>
-                  <p className="text-[12px] text-apple-mid">
-                    Notification envoyée au {fullWhatsapp}
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Link
-                    href={`/suivi/${orderRef}`}
-                    className="inline-flex items-center justify-center gap-2 btn-dark text-[13px] px-7 py-3.5"
-                  >
-                    Suivre ma commande <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  <div className="mx-auto mt-6 rounded-2xl border border-white/20 bg-black/35 px-5 py-4 backdrop-blur-sm sm:mt-8 sm:px-8">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70 sm:text-sm">
+                      Référence de commande
+                    </p>
+                    <p className="mt-2 break-all text-lg font-bold tracking-wide sm:text-2xl">
+                      {orderRef}
+                    </p>
+                  </div>
+                </section>
+                <div className="relative z-10 mx-auto w-full max-w-3xl px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pb-10">
                   <Link
                     href="/"
-                    className="inline-flex items-center justify-center gap-2 btn-ghost text-[13px] px-7 py-3.5"
+                    className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-base font-bold text-black shadow-lg transition hover:bg-white/90 sm:mx-auto sm:w-auto sm:min-w-72"
                   >
-                    Retour à l&apos;accueil
+                    Retourner à la page d’accueil
+                    <ArrowRight className="h-5 w-5" />
                   </Link>
                 </div>
-              </div>
+              </main>
             )}
           </div>
 
