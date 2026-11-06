@@ -730,7 +730,7 @@ export default function CheckoutPage() {
                     Commande confirmée !
                   </h1>
                   <p className="mx-auto mt-1.5 max-w-[350px] text-[10px] leading-[1.35] text-black/60">
-                    Merci \${form.firstName.trim()} — vous recevrez une confirmation sur WhatsApp.
+                    Merci {form.firstName.trim()} — vous recevrez une confirmation sur WhatsApp.
                   </p>
                 </section>
                 <div className="absolute left-1/2 top-[40.5%] aspect-[9/4] w-full max-w-[720px] -translate-x-1/2 overflow-hidden">
@@ -741,7 +741,7 @@ export default function CheckoutPage() {
                     loop
                     playsInline
                     preload="auto"
-                    className="h-full w-full object-cover object-[center_54%]"
+                    className="h-full w-full object-cover object-[center_54%] scale-x-[0.96]"
                     aria-label="Animation de confirmation"
                   />
                 </div>
@@ -750,7 +750,7 @@ export default function CheckoutPage() {
                     Référence de commande
                   </p>
                   <p className="mt-0.5 break-all text-[14px] font-bold tracking-tight text-black">
-                    \${orderRef}
+                    {orderRef}
                   </p>
                 </section>
                 <div className="absolute left-1/2 top-[84.7%] -translate-x-1/2">
