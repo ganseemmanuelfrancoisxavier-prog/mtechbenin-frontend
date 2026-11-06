@@ -724,42 +724,41 @@ export default function CheckoutPage() {
 
             {/* ═══════ CONFIRMATION ═══════ */}
             {step === 2 && (
-              <main className="fixed inset-0 z-[100] flex min-h-[100dvh] flex-col justify-between overflow-y-auto bg-white text-black">
-                <section className="relative z-10 mx-auto w-full max-w-3xl px-6 pt-[max(2rem,env(safe-area-inset-top))] text-center sm:px-10 sm:pt-12">
-                  <h1 className="font-display text-3xl font-black tracking-tight text-black sm:text-5xl">
+              <main className="fixed inset-0 z-[100] overflow-hidden bg-white text-black">
+                <section className="absolute inset-x-0 top-[23.5%] px-6 text-center">
+                  <h1 className="font-display text-[18px] font-bold leading-tight tracking-tight text-black">
                     Commande confirmée !
                   </h1>
-                  <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-black/80 sm:text-xl">
-                    Merci {form.firstName.trim()} — vous recevrez une confirmation sur WhatsApp ou votre mail.
+                  <p className="mx-auto mt-1.5 max-w-[350px] text-[10px] leading-[1.35] text-black/60">
+                    Merci \${form.firstName.trim()} — vous recevrez une confirmation sur WhatsApp.
                   </p>
                 </section>
-                <div className="flex flex-1 items-center justify-center px-5 py-5 sm:px-8">
+                <div className="absolute left-1/2 top-[40.5%] aspect-[9/4] w-full max-w-[720px] -translate-x-1/2 overflow-hidden">
                   <video
-                    src="/confirmation-animation.MOV"
+                    src="/confirmation-screen-reference.MP4"
                     autoPlay
                     muted
                     loop
                     playsInline
                     preload="auto"
-                    className="max-h-[42dvh] w-full max-w-3xl rounded-3xl object-contain sm:max-h-[48dvh]"
+                    className="h-full w-full object-cover object-[center_54%]"
                     aria-label="Animation de confirmation"
                   />
                 </div>
-                <section className="relative z-10 mx-auto w-full max-w-3xl px-6 pb-5 text-center sm:px-10">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-black/60 sm:text-sm">
+                <section className="absolute left-1/2 top-[70.2%] min-h-[50px] w-[72vw] max-w-[420px] -translate-x-1/2 rounded-[4px] border border-[#eeeeee] px-4 py-2 text-left">
+                  <p className="text-[8px] font-semibold uppercase tracking-[0.13em] text-black/60">
                     Référence de commande
                   </p>
-                  <p className="mt-2 break-all text-lg font-bold tracking-wide text-black sm:text-2xl">
-                    {orderRef}
+                  <p className="mt-0.5 break-all text-[14px] font-bold tracking-tight text-black">
+                    \${orderRef}
                   </p>
                 </section>
-                <div className="relative z-10 mx-auto w-full max-w-3xl px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5 sm:px-10 sm:pb-8">
+                <div className="absolute left-1/2 top-[84.7%] -translate-x-1/2">
                   <Link
                     href="/"
-                    className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border border-black/15 bg-white px-6 py-4 text-base font-bold text-black shadow-sm transition hover:bg-black/[0.04] sm:mx-auto sm:w-auto sm:min-w-72"
+                    className="flex h-12 items-center justify-center whitespace-nowrap rounded-lg bg-black px-[18px] text-[13px] font-bold text-white transition hover:bg-black/85"
                   >
-                    Retourner à la page d’accueil
-                    <ArrowRight className="h-5 w-5" />
+                    Retour à l’accueil
                   </Link>
                 </div>
               </main>
