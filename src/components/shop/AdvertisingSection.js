@@ -55,6 +55,9 @@ export default function AdvertisingSection() {
   const enPause = survole || focalise;
   const video = useVisibleVideo({
     enabled: activeAd?.type === "video",
+    // Lance la vidéo un écran avant l'arrivée du visiteur, pour qu'elle joue
+    // déjà lorsqu'il fait défiler la page jusqu'à l'annonce.
+    rootMargin: "100% 0px",
     identity: activeAd?.id ?? index,
   });
 
