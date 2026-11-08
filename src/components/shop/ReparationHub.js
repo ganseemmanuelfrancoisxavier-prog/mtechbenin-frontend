@@ -7,7 +7,6 @@ import {
   Headset,
   Settings,
   ShieldCheck,
-  Zap,
 } from "lucide-react";
 import styles from "./ReparationHub.module.css";
 
@@ -52,31 +51,6 @@ const AVANTAGES = [
 export default function ReparationHub() {
   return (
     <div className={styles.page}>
-      <section className={styles.hero} aria-labelledby="repair-title">
-        <Image
-          src="/images/reparation/apple.jpg"
-          alt="Technicien réparant un appareil dans son atelier"
-          fill
-          priority
-          sizes="(max-width: 767px) 100vw, 1200px"
-          className={styles.heroImage}
-        />
-        <div className={styles.heroShade} />
-        <div className={styles.heroContent}>
-          <p className={styles.eyebrow}>Service de réparation</p>
-          <h1 id="repair-title">Vos appareils<br />entre de bonnes mains</h1>
-          <p className={styles.heroCopy}>
-            Diagnostic rapide, pièces de qualité<br className={styles.desktopBreak} />
-            {" "}et réparation garantie.
-          </p>
-          <div className={styles.heroPromises}>
-            <span><ShieldCheck /><span>Garantie<br />sur nos services</span></span>
-            <span><Zap /><span>Réparation<br />rapide</span></span>
-            <span><Settings /><span>Techniciens<br />qualifiés</span></span>
-          </div>
-        </div>
-      </section>
-
       <section className={styles.devices} aria-labelledby="devices-title">
         <p className={styles.sectionEyebrow}>Nos services</p>
         <h2 id="devices-title">Choisissez votre appareil</h2>
