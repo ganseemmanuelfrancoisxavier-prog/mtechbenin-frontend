@@ -144,11 +144,8 @@ export default function AdvertisingSection() {
           // on passe à la suivante au lieu d'attendre le plafond.
           onError={ads.length > 1 ? avancer : undefined}
           playsInline
-          preload="none"
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-200"
-            style={{ opacity: 0 }}
-            onPlaying={(event) => { event.currentTarget.style.opacity = "1"; }}
-            onWaiting={(event) => { event.currentTarget.style.opacity = "0"; }}
+          preload="auto"
+          className="absolute inset-0 w-full h-full object-cover"
         />
       ) : (
         <Image
