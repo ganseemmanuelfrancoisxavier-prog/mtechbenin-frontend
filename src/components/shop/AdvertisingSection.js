@@ -55,7 +55,6 @@ export default function AdvertisingSection() {
   const enPause = survole || focalise;
   const video = useVisibleVideo({
     enabled: activeAd?.type === "video",
-    shouldPlay: !enPause,
     identity: activeAd?.id ?? index,
   });
 
@@ -128,13 +127,14 @@ export default function AdvertisingSection() {
     >
       {courante.type === "video" ? (
         <video
+          key={courante.id ?? index}
           ref={video.ref}
           src={video.selected ? urlVideoJouable(courante.url) : undefined}
           // Image d'attente pendant le chargement : sans elle, le visiteur
           // voit un rectangle noir le temps que la vidéo se décode.
           poster={afficheVideo(courante.url)}
           muted
-          autoPlay={video.selected && !video.reducedMotion && !enPause}
+          autoPlay={video.selected && !video.reducedMotion}
           // On ne boucle que s'il n'y a rien d'autre à montrer. Dès qu'une
           // deuxième annonce existe, boucler empêcherait `onEnded` de se
           // produire et le carrousel ne tournerait plus jamais.
