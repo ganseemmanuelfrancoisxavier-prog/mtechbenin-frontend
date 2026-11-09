@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import MediaUploader from "@/components/admin/MediaUploader";
 import { AlertCircle, Check, Send, X } from "lucide-react";
 import { subscriptionsApi } from "@/lib/api";
 
@@ -21,18 +22,21 @@ export default function AdminAbonnementsLinkBlast({ plan, serviceName, onSent })
   const recipients = getPendingRecipients(plan);
   const [open, setOpen] = useState(false);
   const [link, setLink] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [count, setCount] = useState("1");
   const [saving, setSaving] = useState(false);
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const targetCount = Number.parseInt(count, 10) || 0;
-  const targets = recipients.slice(0, Math.max(0, targetCount));
+  const eligibleRecipients = imageUrl ? recipients.filter((client) => client.whatsapp) : recipients;
+  const targets = eligibleRecipients.slice(0, Math.max(0, targetCount));
   const sentCount = result?.filter((item) => item.sent).length || 0;
   const failed = result?.filter((item) => !item.sent) || [];
 
   const ouvrir = () => {
     setLink("");
+    setImageUrl("");
     setCount("1");
     setProgress("");
     setError("");
@@ -47,12 +51,12 @@ export default function AdminAbonnementsLinkBlast({ plan, serviceName, onSent })
       setError("Saisis le lien à envoyer.");
       return;
     }
-    if (!Number.isInteger(nombre) || nombre < 1 || nombre > recipients.length) {
+    if (!Number.isInteger(nombre) || nombre < 1 || nombre > eligibleRecipients.length) {
       setError("Choisis un nombre de clients en attente valide.");
       return;
     }
 
-    const aEnvoyer = recipients.slice(0, nombre);
+    const aEnvoyer = eligibleRecipients.slice(0, nombre);
     const resultats = [];
     setSaving(true);
     setError("");
@@ -60,7 +64,7 @@ export default function AdminAbonnementsLinkBlast({ plan, serviceName, onSent })
       const client = aEnvoyer[index];
       setProgress(`Envoi ${index + 1}/${aEnvoyer.length} : ${client.name}`);
       try {
-        await subscriptionsApi.sendLink(client.id, url);
+        await subscriptionsApi.sendLink(client.id, url, imageUrl || null);
         resultats.push({ id: client.id, name: client.name, sent: true });
       } catch (err) {
         resultats.push({
@@ -140,12 +144,31 @@ export default function AdminAbonnementsLinkBlast({ plan, serviceName, onSent })
 
               <div>
                 <label className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1.5 block">
-                  Nombre de personnes (sur {recipients.length} en attente)
+                  Photo à joindre (facultatif)
+                </label>
+                <MediaUploader
+                  value={imageUrl}
+                  onChange={(url) => setImageUrl(url)}
+                  folder="mtechbenin/link-access"
+                  accept="image/*"
+                  label="Photo du message"
+                  hideUrlTab
+                />
+                {imageUrl && (
+                  <p className="mt-2 text-[11px] text-apple-mid">
+                    La photo et le lien partiront dans le même message WhatsApp. Seuls les clients avec un numéro WhatsApp seront inclus.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1.5 block">
+                  Nombre de personnes (sur {eligibleRecipients.length} en attente)
                 </label>
                 <input
                   type="number"
                   min="1"
-                  max={recipients.length}
+                  max={eligibleRecipients.length}
                   step="1"
                   value={count}
                   onChange={(event) => setCount(event.target.value)}
@@ -220,7 +243,7 @@ export default function AdminAbonnementsLinkBlast({ plan, serviceName, onSent })
                 <button
                   type="button"
                   onClick={envoyer}
-                  disabled={saving || !link.trim() || targetCount < 1 || targetCount > recipients.length}
+                  disabled={saving || !link.trim() || targetCount < 1 || targetCount > eligibleRecipients.length}
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-semibold text-sm disabled:opacity-40"
                 >
                   {saving ? (
