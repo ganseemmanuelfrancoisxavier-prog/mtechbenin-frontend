@@ -353,15 +353,18 @@ export const subscriptionsApi = {
       method: "POST",
       body: JSON.stringify(data),
     }),
-  sendLink: (id, link, imageUrl = null) =>
+  sendLink: (id, link) =>
     apiFetch(`/api/subscriptions/admin/link-clients/${id}/send`, {
       method: "POST",
-      body: JSON.stringify({ link, imageUrl }),
+      body: JSON.stringify({ link }),
     }),
   getPoolLinks: (planId) =>
     apiFetch(`/api/subscriptions/admin/plans/${planId}/pool-links`),
-  updatePoolLink: (id, link) =>
-    apiFetch(`/api/subscriptions/admin/pool-links/${id}`, { method: "PATCH", body: JSON.stringify({ link }) }),
+  updatePoolLink: (id, data) =>
+    apiFetch(`/api/subscriptions/admin/pool-links/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
   addPoolLink: (planId, link) =>
     apiFetch(`/api/subscriptions/admin/plans/${planId}/pool-links`, {
       method: "POST",
