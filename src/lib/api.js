@@ -353,10 +353,10 @@ export const subscriptionsApi = {
       method: "POST",
       body: JSON.stringify(data),
     }),
-  sendLink: (id, link) =>
+  sendLink: (id, link, imageUrl = null) =>
     apiFetch(`/api/subscriptions/admin/link-clients/${id}/send`, {
       method: "POST",
-      body: JSON.stringify({ link }),
+      body: JSON.stringify({ link, imageUrl }),
     }),
   getPoolLinks: (planId) =>
     apiFetch(`/api/subscriptions/admin/plans/${planId}/pool-links`),
