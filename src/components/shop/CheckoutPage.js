@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Script from "next/script";
@@ -100,6 +100,34 @@ export default function CheckoutPage() {
   const { addOrder } = useOrderStore();
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const confirmationVideoRef = useRef(null);
+
+  useEffect(() => {
+    if (step !== 2) return;
+
+    const video = confirmationVideoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+
+    const playVideo = () => {
+      const playRequest = video.play();
+      if (playRequest && typeof playRequest.catch === "function") {
+        playRequest.catch(() => {});
+      }
+    };
+
+    playVideo();
+    video.addEventListener("loadeddata", playVideo);
+    video.addEventListener("canplay", playVideo);
+
+    return () => {
+      video.removeEventListener("loadeddata", playVideo);
+      video.removeEventListener("canplay", playVideo);
+    };
+  }, [step]);
   const [coords, setCoords] = useState({ lat: 6.3654, lng: 2.4183 });
   const [fedapayReady, setFedapayReady] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
@@ -735,7 +763,10 @@ export default function CheckoutPage() {
                 </section>
                 <div className="absolute left-1/2 top-[40.5%] aspect-[9/4] w-full max-w-[720px] -translate-x-1/2 overflow-hidden">
                   <video
+                    ref={confirmationVideoRef}
+
                     src="/confirmation-screen-reference.MP4"
+
                     autoPlay
                     muted
                     loop
