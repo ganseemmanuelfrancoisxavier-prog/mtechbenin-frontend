@@ -269,6 +269,11 @@ export default function AdminAbonnements() {
   // compte famille : elle passe donc par la même confirmation qu'elles.
   // Contient { planId, id } le temps de la confirmation.
   const [deletePoolLinkConfirm, setDeletePoolLinkConfirm] = useState(null);
+  const [editingPoolLink, setEditingPoolLink] = useState(null);
+  const [poolLinkValue, setPoolLinkValue] = useState("");
+  const [poolLinkImageDraft, setPoolLinkImageDraft] = useState("");
+  const [poolLinkEditError, setPoolLinkEditError] = useState("");
+  const [poolLinkEditSaving, setPoolLinkEditSaving] = useState(false);
 
   // Rattachement d'un profil à son acheteur : identifiant du profil en cours
   // d'enregistrement, et messages de refus du serveur indexés par profil.
@@ -868,17 +873,30 @@ export default function AdminAbonnements() {
     setPoolLinkEnCours((p) => ({ ...p, [planId]: false }));
   };
 
-  const handleEditPoolLink = async (planId, item) => {
-    const value = window.prompt("Modifier le lien", item.link);
-    if (value === null || value.trim() === item.link) return;
-    setPoolLinkEnCours((p) => ({ ...p, [planId]: true }));
-    setPoolLinkErreurs((p) => ({ ...p, [planId]: null }));
+  const handleEditPoolLink = (planId, item) => {
+    setEditingPoolLink({ planId, item });
+    setPoolLinkValue(item.link || "");
+    setPoolLinkImageDraft(item.imageUrl || "");
+    setPoolLinkEditError("");
+  };
+
+  const handleSavePoolLink = async () => {
+    if (!editingPoolLink || !poolLinkValue.trim()) return;
+    setPoolLinkEditSaving(true);
+    setPoolLinkEditError("");
+    setPoolLinkErreurs((p) => ({ ...p, [editingPoolLink.planId]: null }));
     try {
-      await subscriptionsApi.updatePoolLink(item.id, value.trim());
+      await subscriptionsApi.updatePoolLink(editingPoolLink.item.id, {
+        link: poolLinkValue.trim(),
+        imageUrl: poolLinkImageDraft || null,
+      });
       await loadAll();
+      setEditingPoolLink(null);
     } catch (err) {
-      setPoolLinkErreurs((p) => ({ ...p, [planId]: err.message || "Modification impossible" }));
-    } finally { setPoolLinkEnCours((p) => ({ ...p, [planId]: false })); }
+      setPoolLinkEditError(err.message || "Modification impossible");
+    } finally {
+      setPoolLinkEditSaving(false);
+    }
   };
 
   const handleDeletePoolLink = async (planId, linkId) => {
@@ -2052,7 +2070,7 @@ export default function AdminAbonnements() {
                                             {l.link}
                                           </p>
                                           <p className="text-[10px] text-apple-mid mt-0.5">
-                                            Disponible dans la réserve
+                                            {l.imageUrl ? "Photo jointe · Disponible dans la réserve" : "Disponible dans la réserve"}
                                           </p>
                                         </div>
                                         <div className="flex items-center gap-1">
@@ -2990,6 +3008,80 @@ export default function AdminAbonnements() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {editingPoolLink && (
+        <div className="fixed inset-0 z-[75] flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Fermer"
+            disabled={poolLinkEditSaving}
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setEditingPoolLink(null)}
+          />
+          <div className="relative bg-white rounded-3xl shadow-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-display font-bold text-lg text-apple-black">
+                Modifier le lien et sa photo
+              </h3>
+              <button
+                type="button"
+                disabled={poolLinkEditSaving}
+                onClick={() => setEditingPoolLink(null)}
+                className="p-2 rounded-xl hover:bg-black/[0.05]"
+                aria-label="Fermer"
+              >
+                <X className="w-5 h-5 text-apple-mid" />
+              </button>
+            </div>
+            <label className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1.5 block">
+              Lien d'accès
+            </label>
+            <input
+              type="url"
+              value={poolLinkValue}
+              onChange={(event) => setPoolLinkValue(event.target.value)}
+              disabled={poolLinkEditSaving}
+              className="w-full bg-black/[0.03] rounded-xl px-4 py-3 text-[13px] border border-black/[0.07] focus:outline-none focus:border-black/20 font-mono"
+            />
+            <div className="mt-5">
+              <MediaUploader
+                value={poolLinkImageDraft}
+                onChange={(url) => setPoolLinkImageDraft(url)}
+                folder="mtechbenin/link-access"
+                accept="image/*"
+                label="Photo envoyée avec ce lien"
+                hideUrlTab
+              />
+              <p className="mt-2 text-[11px] leading-relaxed text-apple-mid">
+                La photo et le lien partiront ensemble dans un seul message WhatsApp.
+              </p>
+            </div>
+            {poolLinkEditError && (
+              <p role="alert" className="mt-4 text-[12px] text-red-600">
+                {poolLinkEditError}
+              </p>
+            )}
+            <div className="flex gap-3 mt-6">
+              <button
+                type="button"
+                disabled={poolLinkEditSaving}
+                onClick={() => setEditingPoolLink(null)}
+                className="flex-1 py-3 rounded-2xl bg-black/[0.04] text-apple-black font-semibold text-sm"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                disabled={poolLinkEditSaving || !poolLinkValue.trim()}
+                onClick={handleSavePoolLink}
+                className="flex-1 py-3 rounded-2xl bg-apple-black text-white font-semibold text-sm disabled:opacity-40"
+              >
+                {poolLinkEditSaving ? "Enregistrement…" : "Enregistrer"}
+              </button>
+            </div>
           </div>
         </div>
       )}
