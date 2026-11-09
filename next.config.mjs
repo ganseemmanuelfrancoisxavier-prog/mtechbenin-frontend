@@ -59,7 +59,10 @@ const pwaConfig = withPWA({
 const nextConfig = {
   async rewrites() {
     const backend = (process.env.API_PROXY_TARGET || "https://mtechbenin-backend-xp3i.onrender.com").replace(/\/$/, "");
-    return [{ source: "/api/:path*", destination: `${backend}/api/:path*` }];
+    return [
+      { source: "/apple-music/:token", destination: `${backend}/apple-music/:token` },
+      { source: "/api/:path*", destination: `${backend}/api/:path*` },
+    ];
   },
   eslint: {
     ignoreDuringBuilds: true,
