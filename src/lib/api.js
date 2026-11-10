@@ -365,10 +365,10 @@ export const subscriptionsApi = {
     }),
   deleteLinkAccessAccount: (id) =>
     apiFetch(`/api/subscriptions/admin/link-accounts/${id}`, { method: "DELETE" }),
-  addLinkAccessAccountLink: (id, link) =>
+  addLinkAccessAccountLink: (id, slotNumber, link) =>
     apiFetch(`/api/subscriptions/admin/link-accounts/${id}/links`, {
       method: "POST",
-      body: JSON.stringify({ link }),
+      body: JSON.stringify({ slotNumber, link }),
     }),
   getPoolLinks: (planId) =>
     apiFetch(`/api/subscriptions/admin/plans/${planId}/pool-links`),
