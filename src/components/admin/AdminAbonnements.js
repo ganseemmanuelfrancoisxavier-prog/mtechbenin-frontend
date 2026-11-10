@@ -902,7 +902,11 @@ export default function AdminAbonnements() {
     setPoolLinkEnCours((p) => ({ ...p, [planId]: true }));
     setPoolLinkErreurs((p) => ({ ...p, [planId]: null }));
     try {
-      await subscriptionsApi.deletePoolLink(linkId);
+      if (deletePoolLinkConfirm?.history) {
+        await subscriptionsApi.deletePoolLinkHistory(linkId);
+      } else {
+        await subscriptionsApi.deletePoolLink(linkId);
+      }
       await loadAll();
     } catch (err) {
       setPoolLinkErreurs((p) => ({ ...p, [planId]: err.message || "Suppression impossible" }));
@@ -2095,9 +2099,10 @@ export default function AdminAbonnements() {
                                       const clientTrace = clientsEnvoyes[0] || clientsForLink[0];
                                       const dateTrace = clientTrace?.sentAt || clientTrace?.paidAt || l.claimedAt || l.createdAt;
                                       return (
-                                        <div key={l.id} className="rounded-lg bg-black/[0.03] p-3">
-                                          <p className="truncate font-mono text-[10px] text-apple-black">{l.link}</p>
-                                          <p className="mt-1 text-[10px] font-medium text-apple-mid">
+                                        <div key={l.id} className="flex items-start gap-2 rounded-lg bg-black/[0.03] p-3">
+                                          <div className="min-w-0 flex-1">
+                                            <p className="truncate font-mono text-[10px] text-apple-black">{l.link}</p>
+                                            <p className="mt-1 text-[10px] font-medium text-apple-mid">
                                             {clientsEnvoyes.length > 0
                                               ? `Envoyé à ${clientsEnvoyes.length} client(s)`
                                               : clientsForLink.length > 0
@@ -2105,11 +2110,21 @@ export default function AdminAbonnements() {
                                                 : "Attribué à une commande"}
                                             {dateTrace ? ` · ${formatJourBenin(dateTrace)}` : ""}
                                           </p>
-                                          {clientsForLink.length > 0 && (
-                                            <p className="mt-1 text-[10px] text-apple-mid">
-                                              {clientsForLink.map((client) => `${client.name} (${client.status === "envoyé" ? "envoyé" : "en attente"})`).join(" · ")}
-                                            </p>
-                                          )}
+                                            {clientsForLink.length > 0 && (
+                                              <p className="mt-1 text-[10px] text-apple-mid">
+                                                {clientsForLink.map((client) => `${client.name} (${client.status === "envoyé" ? "envoyé" : "en attente"})`).join(" · ")}
+                                              </p>
+                                            )}
+                                          </div>
+                                          <button
+                                            type="button"
+                                            onClick={() => setDeletePoolLinkConfirm({ planId: plan.id, id: l.id, history: true })}
+                                            aria-label="Supprimer cette entrée de l'historique"
+                                            title="Supprimer cette entrée de l'historique"
+                                            className="p-2 rounded-xl text-apple-mid hover:text-red-500 hover:bg-red-500/[0.06] transition flex-shrink-0"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
                                         </div>
                                       );
                                     })}
@@ -3089,11 +3104,14 @@ export default function AdminAbonnements() {
               <Trash2 className="w-7 h-7 text-red-500" />
             </div>
             <h3 className="font-display font-bold text-lg text-apple-black mb-2">
-              Retirer ce lien de la réserve ?
+              {deletePoolLinkConfirm.history
+                ? "Supprimer cette entrée de l’historique ?"
+                : "Retirer ce lien de la réserve ?"}
             </h3>
             <p className="text-apple-mid text-sm mb-6">
-              Cette action est irréversible. Ce lien ne sera plus attribué
-              automatiquement aux prochains paiements.
+              {deletePoolLinkConfirm.history
+                ? "Cette action supprimera l’entrée de l’historique du panel. Elle n’annule pas l’abonnement du client."
+                : "Cette action est irréversible. Ce lien ne sera plus attribué automatiquement aux prochains paiements."}
             </p>
             <div className="flex gap-3">
               <button
