@@ -35,7 +35,6 @@ import { formatPrice, libelleDuree } from "@/lib/format";
 import { subscriptionsApi } from "@/lib/api";
 import AdminAbonnementsLinkBlast from "./AdminAbonnementsLinkBlast";
 import useAbonnementStore from "@/store/abonnementStore";
-import AdminComptesPartages from "./AdminComptesPartages";
 import MediaUploader from "@/components/admin/MediaUploader";
 
 const serviceIcons = {
@@ -2250,13 +2249,6 @@ export default function AdminAbonnements() {
                     );
                   })}
 
-                  {/* Comptes partagés : compte → profils → occupants. Un compte
-                      streaming appartient au service, pas à une formule précise :
-                      cette section n'est donc pas répétée dans la boucle des
-                      formules ci-dessus. */}
-                  {currentCategory === "family" && (
-                    <AdminComptesPartages service={selected} />
-                  )}
                 </div>
               )}
             </div>
