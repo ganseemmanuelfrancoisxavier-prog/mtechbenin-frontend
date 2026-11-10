@@ -361,6 +361,13 @@ export default function AdminAbonnements() {
     return matchSearch && matchStatus;
   });
 
+  const isAppleMusicService = (service) =>
+    service?.slug === "apple-music" || /apple music/i.test(service?.name || "");
+  const linksForPlan = (plan, service) =>
+    isAppleMusicService(service)
+      ? (plan.linkAccounts || []).flatMap((account) => account.links || [])
+      : (plan.poolLinks || []);
+
   const stats = {
     active: services.filter((s) => s.active).length,
     maintenance: services.filter((s) => s.serviceStatus === "maintenance")
@@ -388,7 +395,7 @@ export default function AdminAbonnements() {
           acc +
           s.plans.reduce(
             (a, p) =>
-              a + (p.poolLinks?.filter((l) => l.status === "disponible").length || 0),
+              a + linksForPlan(p, s).filter((link) => link.status === "disponible").length,
             0,
           ),
         0,
@@ -413,13 +420,11 @@ export default function AdminAbonnements() {
       // réels du pool (poolLinks) de chaque formule du service ; totalPlaces
       // ne sert plus de ce côté.
       const total = service.plans.reduce(
-        (a, p) => a + (p.poolLinks?.length || 0),
+        (a, p) => a + linksForPlan(p, service).length,
         0,
       );
       const dispo = service.plans.reduce(
-        (a, p) =>
-          a +
-          (p.poolLinks?.filter((l) => l.status === "disponible").length || 0),
+        (a, p) => a + linksForPlan(p, service).filter((link) => link.status === "disponible").length,
         0,
       );
       return { total, dispo, isFull: total > 0 && dispo === 0 };
@@ -435,16 +440,16 @@ export default function AdminAbonnements() {
         plan.accounts?.filter((a) => a.status === "envoyé").length || 0;
       return { total, dispo, sent, isFull: total > 0 && dispo === 0 };
     } else {
-      const total = plan.poolLinks?.length || 0;
-      const dispo =
-        plan.poolLinks?.filter((l) => l.status === "disponible").length || 0;
-      const sent =
-        plan.poolLinks?.filter((l) => l.status === "envoyé").length || 0;
+      const planLinks = linksForPlan(plan, selected);
+      const total = planLinks.length;
+      const dispo = planLinks.filter((link) => link.status === "disponible").length;
+      const sent = planLinks.filter((link) => link.status === "envoyé").length;
       return { total, dispo, sent, isFull: total > 0 && dispo === 0 };
     }
   };
 
   const currentCategory = selected?.category || "family";
+  const isAppleMusic = isAppleMusicService(selected);
 
   // ── Commandes d'abonnement (toutes formules confondues) ───────────────────
   const filteredOrders = orders.filter((o) =>
@@ -876,14 +881,14 @@ export default function AdminAbonnements() {
     }
   };
 
-  const handleAddLinkAccessAccountLink = async (planId, accountId) => {
-    const key = accountId;
+  const handleAddLinkAccessAccountLink = async (planId, accountId, slotNumber) => {
+    const key = `${accountId}:${slotNumber}`;
     const link = (linkAccountLinkDrafts[key] || "").trim();
     if (!link) return;
     setPoolLinkEnCours((p) => ({ ...p, [planId]: true }));
     setPoolLinkErreurs((p) => ({ ...p, [planId]: null }));
     try {
-      await subscriptionsApi.addLinkAccessAccountLink(accountId, link);
+      await subscriptionsApi.addLinkAccessAccountLink(accountId, slotNumber, link);
       await loadAll();
       setLinkAccountLinkDrafts((p) => ({ ...p, [key]: "" }));
     } catch (err) {
@@ -1794,7 +1799,7 @@ export default function AdminAbonnements() {
                   )}
                   {selected.plans.map((plan) => {
                     const d = getPlanDispo(plan, currentCategory);
-                    const poolLinks = (plan.poolLinks || []).filter((link) => !link.accountId);
+                    const poolLinks = linksForPlan(plan, selected);
                     const linksDisponibles = poolLinks.filter((link) => link.status === "disponible");
                     const liensAttribues = poolLinks.filter((link) => link.status !== "disponible");
                     return (
@@ -2066,6 +2071,7 @@ export default function AdminAbonnements() {
                         {/* LINK ACCESS */}
                         {currentCategory === "link_access" && (
                           <div>
+                            {!isAppleMusic && (
                             <div className="mb-4">
                               <div className="flex items-center justify-between mb-2">
                                 <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
@@ -2180,6 +2186,8 @@ export default function AdminAbonnements() {
                                 </details>
                               )}
 
+                            )}
+
                             <div className="mt-5 border-t border-black/[0.06] pt-4">
                               <div className="flex items-center justify-between mb-2">
                                 <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
@@ -2199,10 +2207,15 @@ export default function AdminAbonnements() {
                                   <Plus className="h-3 w-3" /> Ajouter
                                 </button>
                               </div>
+                              {poolLinkErreurs[plan.id] && (
+                                <p className="mb-2 flex items-center gap-1.5 text-[11px] text-red-500">
+                                  <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                                  {poolLinkErreurs[plan.id]}
+                                </p>
+                              )}
                               <div className="space-y-3">
                                 {(plan.linkAccounts || []).map((account) => {
                                   const slots = new Map((account.links || []).map((link) => [link.slotNumber, link]));
-                                  const nextSlot = [1, 2, 3, 4, 5].find((slot) => !slots.has(slot));
                                   return (
                                     <div key={account.id} className="rounded-xl border border-black/[0.06] bg-white p-3">
                                       <div className="mb-2 flex items-center justify-between gap-2">
@@ -2214,6 +2227,7 @@ export default function AdminAbonnements() {
                                       <div className="space-y-1.5">
                                         {[1, 2, 3, 4, 5].map((slot) => {
                                           const link = slots.get(slot);
+                                          const draftKey = `${account.id}:${slot}`;
                                           return link ? (
                                             <div key={slot} className={`flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-2 ${link.status === "disponible" ? "bg-black/[0.03]" : "bg-black/[0.07] opacity-60"}`}>
                                               <span className="w-4 flex-shrink-0 text-[10px] text-apple-mid">{slot}</span>
@@ -2221,15 +2235,11 @@ export default function AdminAbonnements() {
                                               <span className={`flex-shrink-0 text-[10px] font-medium ${link.status === "disponible" ? "text-emerald-600" : "text-apple-mid"}`}>{link.status === "disponible" ? "Disponible" : "Envoyé"}</span>
                                               {link.status === "disponible" && <button type="button" onClick={() => setDeletePoolLinkConfirm({ planId: plan.id, id: link.id })} aria-label="Supprimer ce lien disponible" className="flex-shrink-0 p-1 text-apple-mid hover:text-red-500"><Trash2 className="h-3 w-3" /></button>}
                                             </div>
-                                          ) : slot === nextSlot ? (
+                                          ) : (
                                             <div key={slot} className="flex min-w-0 items-center gap-2 rounded-lg border border-dashed border-black/[0.09] px-2 py-1.5">
                                               <span className="w-4 flex-shrink-0 text-[10px] text-apple-mid">{slot}</span>
-                                              <input value={linkAccountLinkDrafts[account.id] || ""} onChange={(e) => setLinkAccountLinkDrafts((p) => ({ ...p, [account.id]: e.target.value }))} placeholder="https://… invitation Apple" className="min-w-0 flex-1 bg-transparent py-1 text-[10px] focus:outline-none" />
-                                              <button type="button" onClick={() => handleAddLinkAccessAccountLink(plan.id, account.id)} disabled={!(linkAccountLinkDrafts[account.id] || "").trim() || !!poolLinkEnCours[plan.id]} className="flex-shrink-0 rounded-lg bg-black/[0.05] px-2 py-1 text-[10px] font-medium text-apple-black disabled:opacity-40">Ajouter</button>
-                                            </div>
-                                          ) : (
-                                            <div key={slot} className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-[10px] text-apple-mid opacity-50">
-                                              <span className="w-4 flex-shrink-0">{slot}</span><span>Emplacement libre</span>
+                                              <input value={linkAccountLinkDrafts[draftKey] || ""} onChange={(e) => setLinkAccountLinkDrafts((p) => ({ ...p, [draftKey]: e.target.value }))} placeholder={`Lien d'invitation — emplacement ${slot}`} className="min-w-0 flex-1 bg-transparent py-1 text-[10px] focus:outline-none" />
+                                              <button type="button" onClick={() => handleAddLinkAccessAccountLink(plan.id, account.id, slot)} disabled={!(linkAccountLinkDrafts[draftKey] || "").trim() || !!poolLinkEnCours[plan.id]} className="flex-shrink-0 rounded-lg bg-black/[0.05] px-2 py-1 text-[10px] font-medium text-apple-black disabled:opacity-40">Ajouter</button>
                                             </div>
                                           );
                                         })}
