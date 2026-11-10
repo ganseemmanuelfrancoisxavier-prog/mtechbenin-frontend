@@ -271,7 +271,6 @@ export default function AdminAbonnements() {
   const [deletePoolLinkConfirm, setDeletePoolLinkConfirm] = useState(null);
   const [editingPoolLink, setEditingPoolLink] = useState(null);
   const [poolLinkValue, setPoolLinkValue] = useState("");
-  const [poolLinkImageDraft, setPoolLinkImageDraft] = useState("");
   const [poolLinkEditError, setPoolLinkEditError] = useState("");
   const [poolLinkEditSaving, setPoolLinkEditSaving] = useState(false);
 
