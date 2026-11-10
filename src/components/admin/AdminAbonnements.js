@@ -2072,6 +2072,7 @@ export default function AdminAbonnements() {
                         {currentCategory === "link_access" && (
                           <div>
                             {!isAppleMusic && (
+                            <>
                             <div className="mb-4">
                               <div className="flex items-center justify-between mb-2">
                                 <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
@@ -2186,6 +2187,7 @@ export default function AdminAbonnements() {
                                 </details>
                               )}
 
+                            </> 
                             )}
 
                             <div className="mt-5 border-t border-black/[0.06] pt-4">
