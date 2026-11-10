@@ -257,6 +257,8 @@ export default function AdminAbonnements() {
   const [statusMessages, setStatusMessages] = useState({});
   const [statusSaved, setStatusSaved] = useState(false);
 
+  const [linkAccountEmailDrafts, setLinkAccountEmailDrafts] = useState({});
+  const [linkAccountLinkDrafts, setLinkAccountLinkDrafts] = useState({});
   const [poolLinkDrafts, setPoolLinkDrafts] = useState({});
   const [poolLinkErreurs, setPoolLinkErreurs] = useState({});
   // Indexé par formule (planId), comme poolLinkDrafts/poolLinkErreurs : un
@@ -857,6 +859,52 @@ export default function AdminAbonnements() {
     setAccountClientSaving(null);
   };
 
+
+  const handleCreateLinkAccessAccount = async (planId) => {
+    const email = (linkAccountEmailDrafts[planId] || "").trim();
+    if (!email) return;
+    setPoolLinkEnCours((p) => ({ ...p, [planId]: true }));
+    setPoolLinkErreurs((p) => ({ ...p, [planId]: null }));
+    try {
+      await subscriptionsApi.createLinkAccessAccount(planId, email);
+      await loadAll();
+      setLinkAccountEmailDrafts((p) => ({ ...p, [planId]: "" }));
+    } catch (err) {
+      setPoolLinkErreurs((p) => ({ ...p, [planId]: err.message || "Création impossible" }));
+    } finally {
+      setPoolLinkEnCours((p) => ({ ...p, [planId]: false }));
+    }
+  };
+
+  const handleAddLinkAccessAccountLink = async (planId, accountId) => {
+    const key = accountId;
+    const link = (linkAccountLinkDrafts[key] || "").trim();
+    if (!link) return;
+    setPoolLinkEnCours((p) => ({ ...p, [planId]: true }));
+    setPoolLinkErreurs((p) => ({ ...p, [planId]: null }));
+    try {
+      await subscriptionsApi.addLinkAccessAccountLink(accountId, link);
+      await loadAll();
+      setLinkAccountLinkDrafts((p) => ({ ...p, [key]: "" }));
+    } catch (err) {
+      setPoolLinkErreurs((p) => ({ ...p, [planId]: err.message || "Ajout impossible" }));
+    } finally {
+      setPoolLinkEnCours((p) => ({ ...p, [planId]: false }));
+    }
+  };
+
+  const handleDeleteLinkAccessAccount = async (planId, accountId) => {
+    setPoolLinkEnCours((p) => ({ ...p, [planId]: true }));
+    setPoolLinkErreurs((p) => ({ ...p, [planId]: null }));
+    try {
+      await subscriptionsApi.deleteLinkAccessAccount(accountId);
+      await loadAll();
+    } catch (err) {
+      setPoolLinkErreurs((p) => ({ ...p, [planId]: err.message || "Suppression impossible" }));
+    } finally {
+      setPoolLinkEnCours((p) => ({ ...p, [planId]: false }));
+    }
+  };
 
   const handleAddPoolLink = async (planId) => {
     const brouillon = (poolLinkDrafts[planId] || "").trim();
@@ -1746,7 +1794,7 @@ export default function AdminAbonnements() {
                   )}
                   {selected.plans.map((plan) => {
                     const d = getPlanDispo(plan, currentCategory);
-                    const poolLinks = plan.poolLinks || [];
+                    const poolLinks = (plan.poolLinks || []).filter((link) => !link.accountId);
                     const linksDisponibles = poolLinks.filter((link) => link.status === "disponible");
                     const liensAttribues = poolLinks.filter((link) => link.status !== "disponible");
                     return (
@@ -2131,6 +2179,66 @@ export default function AdminAbonnements() {
                                   </div>
                                 </details>
                               )}
+
+                            <div className="mt-5 border-t border-black/[0.06] pt-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
+                                  Comptes Apple Music
+                                </p>
+                                <span className="text-[10px] text-apple-mid">5 liens maximum par compte</span>
+                              </div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <input
+                                  type="email"
+                                  value={linkAccountEmailDrafts[plan.id] || ""}
+                                  onChange={(e) => setLinkAccountEmailDrafts((p) => ({ ...p, [plan.id]: e.target.value }))}
+                                  placeholder="Adresse e-mail du compte"
+                                  className="min-w-0 flex-1 rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 text-[12px] focus:outline-none focus:border-black/20"
+                                />
+                                <button type="button" onClick={() => handleCreateLinkAccessAccount(plan.id)} disabled={!(linkAccountEmailDrafts[plan.id] || "").trim() || !!poolLinkEnCours[plan.id]} className="flex items-center gap-1 rounded-xl bg-apple-black px-3 py-2.5 text-[11px] font-semibold text-white disabled:opacity-40">
+                                  <Plus className="h-3 w-3" /> Ajouter
+                                </button>
+                              </div>
+                              <div className="space-y-3">
+                                {(plan.linkAccounts || []).map((account) => {
+                                  const slots = new Map((account.links || []).map((link) => [link.slotNumber, link]));
+                                  const nextSlot = [1, 2, 3, 4, 5].find((slot) => !slots.has(slot));
+                                  return (
+                                    <div key={account.id} className="rounded-xl border border-black/[0.06] bg-white p-3">
+                                      <div className="mb-2 flex items-center justify-between gap-2">
+                                        <p className="min-w-0 truncate text-[12px] font-semibold text-apple-black">{account.email}</p>
+                                        <button type="button" onClick={() => handleDeleteLinkAccessAccount(plan.id, account.id)} disabled={!!poolLinkEnCours[plan.id]} aria-label={`Supprimer le compte ${account.email}`} title="Supprimer le compte (possible si aucun lien n'est actif)" className="rounded-lg p-1.5 text-apple-mid hover:text-red-500 disabled:opacity-40">
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                      </div>
+                                      <div className="space-y-1.5">
+                                        {[1, 2, 3, 4, 5].map((slot) => {
+                                          const link = slots.get(slot);
+                                          return link ? (
+                                            <div key={slot} className={`flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-2 ${link.status === "disponible" ? "bg-black/[0.03]" : "bg-black/[0.07] opacity-60"}`}>
+                                              <span className="w-4 flex-shrink-0 text-[10px] text-apple-mid">{slot}</span>
+                                              <p className="min-w-0 flex-1 truncate font-mono text-[10px] text-apple-black">{link.link}</p>
+                                              <span className={`flex-shrink-0 text-[10px] font-medium ${link.status === "disponible" ? "text-emerald-600" : "text-apple-mid"}`}>{link.status === "disponible" ? "Disponible" : "Envoyé"}</span>
+                                              {link.status === "disponible" && <button type="button" onClick={() => setDeletePoolLinkConfirm({ planId: plan.id, id: link.id })} aria-label="Supprimer ce lien disponible" className="flex-shrink-0 p-1 text-apple-mid hover:text-red-500"><Trash2 className="h-3 w-3" /></button>}
+                                            </div>
+                                          ) : slot === nextSlot ? (
+                                            <div key={slot} className="flex min-w-0 items-center gap-2 rounded-lg border border-dashed border-black/[0.09] px-2 py-1.5">
+                                              <span className="w-4 flex-shrink-0 text-[10px] text-apple-mid">{slot}</span>
+                                              <input value={linkAccountLinkDrafts[account.id] || ""} onChange={(e) => setLinkAccountLinkDrafts((p) => ({ ...p, [account.id]: e.target.value }))} placeholder="https://… invitation Apple" className="min-w-0 flex-1 bg-transparent py-1 text-[10px] focus:outline-none" />
+                                              <button type="button" onClick={() => handleAddLinkAccessAccountLink(plan.id, account.id)} disabled={!(linkAccountLinkDrafts[account.id] || "").trim() || !!poolLinkEnCours[plan.id]} className="flex-shrink-0 rounded-lg bg-black/[0.05] px-2 py-1 text-[10px] font-medium text-apple-black disabled:opacity-40">Ajouter</button>
+                                            </div>
+                                          ) : (
+                                            <div key={slot} className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-[10px] text-apple-mid opacity-50">
+                                              <span className="w-4 flex-shrink-0">{slot}</span><span>Emplacement libre</span>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
 
                             <div className="flex items-center justify-between mb-2">
                               <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
