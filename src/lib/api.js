@@ -358,6 +358,18 @@ export const subscriptionsApi = {
       method: "POST",
       body: JSON.stringify({ link }),
     }),
+  createLinkAccessAccount: (planId, email) =>
+    apiFetch(`/api/subscriptions/admin/plans/${planId}/link-accounts`, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+  deleteLinkAccessAccount: (id) =>
+    apiFetch(`/api/subscriptions/admin/link-accounts/${id}`, { method: "DELETE" }),
+  addLinkAccessAccountLink: (id, link) =>
+    apiFetch(`/api/subscriptions/admin/link-accounts/${id}/links`, {
+      method: "POST",
+      body: JSON.stringify({ link }),
+    }),
   getPoolLinks: (planId) =>
     apiFetch(`/api/subscriptions/admin/plans/${planId}/pool-links`),
   updatePoolLink: (id, data) =>
