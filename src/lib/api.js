@@ -372,6 +372,8 @@ export const subscriptionsApi = {
     }),
   deletePoolLink: (id) =>
     apiFetch(`/api/subscriptions/admin/pool-links/${id}`, { method: "DELETE" }),
+  deletePoolLinkHistory: (id) =>
+    apiFetch(`/api/subscriptions/admin/pool-links/${id}/history`, { method: "DELETE" }),
   setExpiry: (orderId, expiresAt) =>
     apiFetch(`/api/subscriptions/admin/orders/${orderId}/expiry`, {
       method: "PATCH",
