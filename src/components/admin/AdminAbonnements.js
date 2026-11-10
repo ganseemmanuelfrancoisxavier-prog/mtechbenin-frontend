@@ -70,6 +70,7 @@ const emptyPlanForm = {
   price: "",
   capaciteProfil: "1",
   description: [""],
+  linkImageUrl: "",
 };
 
 // Bornes reprises du serveur (`subscriptions.controller.js`) : les faire
@@ -666,6 +667,7 @@ export default function AdminAbonnements() {
       // Une formule sans description ouvre sur une ligne vide plutôt que sur
       // rien : l'admin voit tout de suite où écrire.
       description: plan.description?.length ? [...plan.description] : [""],
+      linkImageUrl: plan.linkImageUrl || "",
     });
     setPlanErreur(null);
     setShowPlanModal(true);
@@ -696,6 +698,7 @@ export default function AdminAbonnements() {
       // Les lignes laissées vides ne partent pas : cliquer sur « + » sans
       // rien écrire ne doit pas créer une puce vide chez le client.
       description: planForm.description.map((l) => l.trim()).filter(Boolean),
+      linkImageUrl: planForm.linkImageUrl || null,
     };
     try {
       if (editingPlan) await subscriptionsApi.updatePlan(editingPlan.id, data);
@@ -875,7 +878,6 @@ export default function AdminAbonnements() {
   const handleEditPoolLink = (planId, item) => {
     setEditingPoolLink({ planId, item });
     setPoolLinkValue(item.link || "");
-    setPoolLinkImageDraft(item.imageUrl || "");
     setPoolLinkEditError("");
   };
 
@@ -887,7 +889,6 @@ export default function AdminAbonnements() {
     try {
       await subscriptionsApi.updatePoolLink(editingPoolLink.item.id, {
         link: poolLinkValue.trim(),
-        imageUrl: poolLinkImageDraft || null,
       });
       await loadAll();
       setEditingPoolLink(null);
@@ -2540,6 +2541,22 @@ export default function AdminAbonnements() {
                 )}
               </div>
 
+              {selected?.category === "link_access" && (
+                <div className="rounded-2xl bg-black/[0.025] p-4">
+                  <MediaUploader
+                    value={planForm.linkImageUrl}
+                    onChange={(url) => setPlanForm((p) => ({ ...p, linkImageUrl: url }))}
+                    folder="mtechbenin/link-access"
+                    accept="image/*"
+                    label="Photo commune de l'offre"
+                    hideUrlTab
+                  />
+                  <p className="mt-2 text-[11px] leading-relaxed text-apple-mid">
+                    Cette photo sera envoyée avec tous les liens de cette offre, dans le même message WhatsApp.
+                  </p>
+                </div>
+              )}
+
               {planErreur && (
                 <p className="flex items-center gap-1.5 text-[12px] text-red-500">
                   <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
@@ -3031,7 +3048,7 @@ export default function AdminAbonnements() {
           <div className="relative bg-white rounded-3xl shadow-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-display font-bold text-lg text-apple-black">
-                Modifier le lien et sa photo
+                Modifier le lien d'accès
               </h3>
               <button
                 type="button"
@@ -3053,19 +3070,9 @@ export default function AdminAbonnements() {
               disabled={poolLinkEditSaving}
               className="w-full bg-black/[0.03] rounded-xl px-4 py-3 text-[13px] border border-black/[0.07] focus:outline-none focus:border-black/20 font-mono"
             />
-            <div className="mt-5">
-              <MediaUploader
-                value={poolLinkImageDraft}
-                onChange={(url) => setPoolLinkImageDraft(url)}
-                folder="mtechbenin/link-access"
-                accept="image/*"
-                label="Photo envoyée avec ce lien"
-                hideUrlTab
-              />
-              <p className="mt-2 text-[11px] leading-relaxed text-apple-mid">
-                La photo et le lien partiront ensemble dans un seul message WhatsApp.
-              </p>
-            </div>
+            <p className="mt-3 text-[11px] leading-relaxed text-apple-mid">
+              La photo commune se règle avec le crayon de l’offre et sera envoyée avec tous ses liens.
+            </p>
             {poolLinkEditError && (
               <p role="alert" className="mt-4 text-[12px] text-red-600">
                 {poolLinkEditError}
