@@ -35,9 +35,12 @@ export default function CataloguePage({ initialCategory = "tous" }) {
     : staticCategories.filter((c) => c.active);
 
   // Produits actifs depuis le store (déjà chargés depuis l'API)
-  const allProducts = mounted
-    ? products.filter((p) => p.active && !isIPhoneProduct(p))
-    : products.filter((p) => p.active && !isIPhoneProduct(p));
+  const allProducts = products.filter(
+    (p) =>
+      p.active &&
+      !isIPhoneProduct(p) &&
+      isCatalogueCategory({ slug: p.categorySlug || p.category }),
+  );
 
   const categoryOptions = [
     { slug: "tous", label: "Tous les produits" },
