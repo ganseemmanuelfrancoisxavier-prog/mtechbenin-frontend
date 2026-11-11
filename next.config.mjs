@@ -61,6 +61,7 @@ const nextConfig = {
     const backend = (process.env.API_PROXY_TARGET || "https://mtechbenin-backend-xp3i.onrender.com").replace(/\/$/, "");
     return [
       { source: "/apple-music/:token", destination: `${backend}/apple-music/:token` },
+      { source: "/apple-access/:token", destination: `${backend}/apple-access/:token` },
       { source: "/api/:path*", destination: `${backend}/api/:path*` },
     ];
   },
