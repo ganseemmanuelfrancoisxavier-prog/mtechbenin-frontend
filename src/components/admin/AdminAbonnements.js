@@ -453,6 +453,12 @@ export default function AdminAbonnements() {
   };
 
   const currentCategory = selected?.category || "family";
+  const linkAccessModeLocked = Boolean(
+    editingPlan &&
+      ((editingPlan.linkAccounts || []).length > 0 ||
+        (editingPlan.poolLinks || []).length > 0 ||
+        (editingPlan.linkClients || []).length > 0),
+  );
   // ── Commandes d'abonnement (toutes formules confondues) ───────────────────
   const filteredOrders = orders.filter((o) =>
     o.clientName?.toLowerCase().includes(orderSearch.toLowerCase()) ||
@@ -2587,10 +2593,11 @@ export default function AdminAbonnements() {
                       <button
                         key={mode.value}
                         type="button"
+                        disabled={linkAccessModeLocked && planForm.linkAccessMode !== mode.value}
                         onClick={() =>
                           setPlanForm((p) => ({ ...p, linkAccessMode: mode.value }))
                         }
-                        className={"rounded-xl border-2 p-3 text-left transition-all " + (
+                        className={"rounded-xl border-2 p-3 text-left transition-all disabled:cursor-not-allowed disabled:opacity-50 " + (
                           planForm.linkAccessMode === mode.value
                             ? "border-apple-black bg-black/[0.04]"
                             : "border-transparent bg-black/[0.025] hover:bg-black/[0.05]"
@@ -2606,6 +2613,11 @@ export default function AdminAbonnements() {
                       </button>
                     ))}
                   </div>
+                  {linkAccessModeLocked && (
+                    <p className="mt-2 text-[11px] leading-relaxed text-apple-mid">
+                      Le type est verrouillé après l’ajout de stock ou une vente. Créez une nouvelle formule pour changer de type.
+                    </p>
+                  )}
                 </div>
               )}
 
