@@ -71,6 +71,7 @@ const emptyPlanForm = {
   capaciteProfil: "1",
   description: [""],
   linkImageUrl: "",
+  linkAccessMode: "single",
 };
 
 // Bornes reprises du serveur (`subscriptions.controller.js`) : les faire
@@ -363,8 +364,11 @@ export default function AdminAbonnements() {
 
   const isAppleMusicService = (service) =>
     service?.slug === "apple-music" || /apple music/i.test(service?.name || "");
+  const isAccountLinkPlan = (plan, service) =>
+    plan?.linkAccessMode === "account_slots" ||
+    (!plan?.linkAccessMode && isAppleMusicService(service));
   const linksForPlan = (plan, service) =>
-    isAppleMusicService(service)
+    isAccountLinkPlan(plan, service)
       ? (plan.linkAccounts || []).flatMap((account) => account.links || [])
       : (plan.poolLinks || []);
 
@@ -449,8 +453,6 @@ export default function AdminAbonnements() {
   };
 
   const currentCategory = selected?.category || "family";
-  const isAppleMusic = isAppleMusicService(selected);
-
   // ── Commandes d'abonnement (toutes formules confondues) ───────────────────
   const filteredOrders = orders.filter((o) =>
     o.clientName?.toLowerCase().includes(orderSearch.toLowerCase()) ||
@@ -659,7 +661,10 @@ export default function AdminAbonnements() {
 
   const openAddPlan = () => {
     setEditingPlan(null);
-    setPlanForm(emptyPlanForm);
+    setPlanForm({
+      ...emptyPlanForm,
+      linkAccessMode: isAppleMusicService(selected) ? "account_slots" : "single",
+    });
     setShowPlanModal(true);
   };
   const openEditPlan = (plan) => {
@@ -674,6 +679,8 @@ export default function AdminAbonnements() {
       // rien : l'admin voit tout de suite où écrire.
       description: plan.description?.length ? [...plan.description] : [""],
       linkImageUrl: plan.linkImageUrl || "",
+      linkAccessMode:
+        plan.linkAccessMode || (isAppleMusicService(selected) ? "account_slots" : "single"),
     });
     setPlanErreur(null);
     setShowPlanModal(true);
@@ -705,6 +712,8 @@ export default function AdminAbonnements() {
       // rien écrire ne doit pas créer une puce vide chez le client.
       description: planForm.description.map((l) => l.trim()).filter(Boolean),
       linkImageUrl: planForm.linkImageUrl || null,
+      linkAccessMode:
+        selected?.category === "link_access" ? planForm.linkAccessMode : "single",
     };
     try {
       if (editingPlan) await subscriptionsApi.updatePlan(editingPlan.id, data);
@@ -2071,7 +2080,7 @@ export default function AdminAbonnements() {
                         {/* LINK ACCESS */}
                         {currentCategory === "link_access" && (
                           <div>
-                            {!isAppleMusic && (
+                            {!isAccountLinkPlan(plan, selected) && (
                             <>
                             <div className="mb-4">
                               <div className="flex items-center justify-between mb-2">
@@ -2190,11 +2199,11 @@ export default function AdminAbonnements() {
                             </> 
                             )}
 
-                            {isAppleMusic && (
+                            {isAccountLinkPlan(plan, selected) && (
                             <div className="mt-5 border-t border-black/[0.06] pt-4">
                               <div className="flex items-center justify-between mb-2">
                                 <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
-                                  Comptes Apple Music
+                                  Comptes avec 5 liens
                                 </p>
                                 <span className="text-[10px] text-apple-mid">5 liens maximum par compte</span>
                               </div>
@@ -2553,6 +2562,52 @@ export default function AdminAbonnements() {
                   />
                 </div>
               </div>
+
+              {selected?.category === "link_access" && (
+                <div>
+                  <label className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1.5 block">
+                    Type de liens
+                  </label>
+                  <p className="text-[11px] text-apple-mid/70 mb-2">
+                    Choisissez comment les accès seront préparés pour cette formule.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      {
+                        value: "account_slots",
+                        label: "Compte + 5 liens",
+                        detail: "Un compte, jusqu’à cinq invitations",
+                      },
+                      {
+                        value: "single",
+                        label: "Lien unique",
+                        detail: "Un lien par accès vendu",
+                      },
+                    ].map((mode) => (
+                      <button
+                        key={mode.value}
+                        type="button"
+                        onClick={() =>
+                          setPlanForm((p) => ({ ...p, linkAccessMode: mode.value }))
+                        }
+                        className={"rounded-xl border-2 p-3 text-left transition-all " + (
+                          planForm.linkAccessMode === mode.value
+                            ? "border-apple-black bg-black/[0.04]"
+                            : "border-transparent bg-black/[0.025] hover:bg-black/[0.05]"
+                        )}
+                        aria-pressed={planForm.linkAccessMode === mode.value}
+                      >
+                        <span className="block text-[12px] font-semibold text-apple-black">
+                          {mode.label}
+                        </span>
+                        <span className="mt-1 block text-[10px] leading-relaxed text-apple-mid">
+                          {mode.detail}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Formule sans échéance.
                   Placé SOUS le champ des mois, pas à côté : c'est lui qui
