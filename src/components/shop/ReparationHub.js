@@ -69,7 +69,6 @@ export default function ReparationHub() {
               <div className={styles.deviceText}>
                 <h3>{appareil.nom}</h3>
                 <p>{appareil.detail}</p>
-                <span className={styles.arrowCircle} aria-hidden="true"><ArrowRight /></span>
               </div>
             </Link>
           ))}
