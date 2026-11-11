@@ -17,6 +17,7 @@ export function isCatalogueCategory(category) {
   const searchable = `${normaliser(category?.slug)}-${normaliser(category?.label || category?.name)}`;
   return !(
     /(^|-)suivi($|-)/.test(searchable) ||
-    /order-tracking/.test(searchable)
+    /order-tracking/.test(searchable) ||
+    /(^|-)for-woman(s)?($|-)/.test(searchable)
   );
 }
