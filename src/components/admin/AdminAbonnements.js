@@ -2190,6 +2190,7 @@ export default function AdminAbonnements() {
                             </> 
                             )}
 
+                            {isAppleMusic && (
                             <div className="mt-5 border-t border-black/[0.06] pt-4">
                               <div className="flex items-center justify-between mb-2">
                                 <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
@@ -2251,6 +2252,7 @@ export default function AdminAbonnements() {
                                 })}
                               </div>
                             </div>
+                            )}
 
                             <div className="flex items-center justify-between mb-2">
                               <p className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest">
