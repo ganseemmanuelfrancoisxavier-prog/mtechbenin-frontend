@@ -8,6 +8,7 @@ import {
   ArrowRight,
   MapPin,
   Check,
+  Clipboard,
   ShoppingBag,
   Tag,
   ChevronDown,
@@ -752,21 +753,26 @@ export default function CheckoutPage() {
 
             {/* ═══════ CONFIRMATION ═══════ */}
             {step === 2 && (
-              <main className="fixed inset-0 z-[100] overflow-hidden bg-white text-black">
-                <section className="absolute inset-x-0 top-[23.5%] px-6 text-center">
-                  <h1 className="font-display text-[18px] font-bold leading-tight tracking-tight text-black">
+              <main className="fixed inset-0 z-40 overflow-hidden bg-white text-black">
+                <div className="absolute inset-x-0 top-[12%] flex justify-center" aria-hidden="true">
+                  <span className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-black/[0.025] shadow-[0_0_0_14px_rgba(0,0,0,0.02)]">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-[15px] bg-black shadow-[0_8px_22px_rgba(0,0,0,0.2)]">
+                      <Check className="h-7 w-7 text-white" strokeWidth={3} />
+                    </span>
+                  </span>
+                </div>
+                <section className="absolute inset-x-0 top-[21%] px-5 text-center">
+                  <h1 className="font-display text-[28px] font-bold leading-tight tracking-tight text-black">
                     Commande confirmée !
                   </h1>
-                  <p className="mx-auto mt-1.5 max-w-[350px] text-[10px] leading-[1.35] text-black/60">
+                  <p className="mx-auto mt-2 max-w-[350px] text-[15px] leading-[1.4] text-black/60">
                     Merci {form.firstName.trim()} — vous recevrez une confirmation sur WhatsApp.
                   </p>
                 </section>
-                <div className="absolute left-1/2 top-[40.5%] aspect-[9/4] w-full max-w-[720px] -translate-x-1/2 overflow-hidden">
+                <div className="absolute left-1/2 top-[35%] aspect-[9/4] w-full max-w-[720px] -translate-x-1/2 overflow-hidden">
                   <video
                     ref={confirmationVideoRef}
-
                     src="/confirmation-screen-reference.MP4"
-
                     autoPlay
                     muted
                     loop
@@ -776,22 +782,17 @@ export default function CheckoutPage() {
                     aria-label="Animation de confirmation"
                   />
                 </div>
-                <section className="absolute left-1/2 top-[70.2%] min-h-[50px] w-[72vw] max-w-[420px] -translate-x-1/2 rounded-[4px] border border-[#eeeeee] px-4 py-2 text-left">
-                  <p className="text-[8px] font-semibold uppercase tracking-[0.13em] text-black/60">
-                    Référence de commande
-                  </p>
-                  <p className="mt-0.5 break-all text-[14px] font-bold tracking-tight text-black">
-                    {orderRef}
-                  </p>
+                <section className="absolute left-1/2 top-[70%] flex min-h-[60px] w-[80vw] max-w-[420px] -translate-x-1/2 items-center gap-4 rounded-[22px] border border-[#eeeeee] bg-white px-4 py-3 text-left shadow-[0_8px_22px_rgba(0,0,0,0.05)]">
+                  <Clipboard className="h-10 w-10 shrink-0 text-[#4a4a4a]" strokeWidth={1.8} aria-hidden="true" />
+                  <div className="min-w-0">
+                    <p className="text-[8px] font-semibold uppercase tracking-[0.13em] text-black/60">
+                      Référence de commande
+                    </p>
+                    <p className="mt-0.5 break-all text-[16px] font-bold tracking-tight text-black">
+                      {orderRef}
+                    </p>
+                  </div>
                 </section>
-                <div className="absolute left-1/2 top-[84.7%] -translate-x-1/2">
-                  <Link
-                    href="/"
-                    className="flex h-12 items-center justify-center whitespace-nowrap rounded-lg bg-black px-[18px] text-[13px] font-bold text-white transition hover:bg-black/85"
-                  >
-                    Retour à l’accueil
-                  </Link>
-                </div>
               </main>
             )}
           </div>
