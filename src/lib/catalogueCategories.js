@@ -15,15 +15,9 @@ export function isRepairCategory(category) {
 
 export function isCatalogueCategory(category) {
   const searchable = `${normaliser(category?.slug)}-${normaliser(category?.label || category?.name)}`;
-  const label = normaliser(category?.label || category?.name);
-  const isTabletCategory = ["tablette", "tablettes", "tablet", "tablets"].includes(
-    normaliser(category?.slug),
-  ) || ["tablette", "tablettes", "tablet", "tablets"].includes(label);
-
   return !(
     /(^|-)suivi($|-)/.test(searchable) ||
     /order-tracking/.test(searchable) ||
-    /(^|-)for-woman(s)?($|-)/.test(searchable) ||
-    isTabletCategory
+    /(^|-)for-woman(s)?($|-)/.test(searchable)
   );
 }
