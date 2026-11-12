@@ -766,7 +766,7 @@ export default function CheckoutPage() {
                     Commande confirmée !
                   </h1>
                   <p className="mx-auto mt-2 max-w-[350px] text-[15px] leading-[1.4] text-black/60">
-                    Merci ${form.firstName.trim()} — vous recevrez une confirmation sur WhatsApp.
+                    Merci {form.firstName.trim()} — vous recevrez une confirmation sur WhatsApp.
                   </p>
                 </section>
                 <div className="absolute left-1/2 top-[35%] aspect-[9/4] w-full max-w-[720px] -translate-x-1/2 overflow-hidden">
@@ -789,7 +789,7 @@ export default function CheckoutPage() {
                       Référence de commande
                     </p>
                     <p className="mt-0.5 break-all text-[16px] font-bold tracking-tight text-black">
-                      ${orderRef}
+                      {orderRef}
                     </p>
                   </div>
                 </section>
