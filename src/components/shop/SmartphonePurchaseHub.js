@@ -13,7 +13,6 @@ import {
   Truck,
 } from "lucide-react";
 import styles from "./SmartphonePurchaseHub.module.css";
-import smartphonePosterImage from "./smartphonePosterImage";
 import { settingsApi } from "@/lib/api";
 
 const DEVICES = [
@@ -86,13 +85,13 @@ export default function SmartphonePurchaseHub() {
             Qualité garantie et livraison rapide.
           </p>
           <Link href="/catalogue/smartphone-tablette" className={styles.heroCta}>
-            Voir les offres <ArrowRight size={18} aria-hidden="true" />
+            Voir les offres
           </Link>
         </div>
         <div className={styles.heroProduct} aria-hidden="true">
           <div
             className={styles.heroPoster}
-            style={{ backgroundImage: `url("${smartphonePosterImage}")` }}
+            style={{ backgroundImage: 'url("/images/smartphone-hero.webp")' }}
           />
         </div>
         <div className={styles.heroBenefits}>
@@ -127,9 +126,6 @@ export default function SmartphonePurchaseHub() {
                 <span className={styles.deviceDescription}>
                   {device.description}
                 </span>
-              </span>
-              <span className={styles.arrow} aria-hidden="true">
-                <ArrowRight size={21} strokeWidth={2} />
               </span>
             </Link>
           ))}

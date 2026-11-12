@@ -151,9 +151,6 @@ function CategoryRevealCard({ item }) {
         <span className={styles.cardInfo}>
           <span className={styles.cardTitle}>{label}</span>
           <span className={styles.cardDescription}>{description}</span>
-          <span className={styles.arrow} aria-hidden="true">
-            <ArrowRight />
-          </span>
         </span>
       </Link>
     </div>

@@ -81,9 +81,9 @@
 }
 
 .heroPoster {
-  background-position: center right;
+  background-position: center;
   background-repeat: no-repeat;
-  background-size: contain;
+  background-size: cover;
   inset: 0;
   position: absolute;
 }
