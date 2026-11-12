@@ -3,7 +3,7 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Search } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import { reparationApi } from "@/lib/api";
 import { MODELES_IPHONE, imageIphone } from "@/lib/reparationModeles";
 import { compareIPhoneGeneration } from "@/lib/iphoneProducts";
@@ -227,7 +227,6 @@ export default function ReparationEspace({ espace }) {
               <span className={styles.cardFooter}>
                 <span className={styles.modelName}>{modele.name}</span>
                 <span className={styles.family}>{modele.family?.name || nomEspace}</span>
-                <span className={styles.arrow} aria-hidden="true"><ArrowRight /></span>
               </span>
             </Link>
           ))}
