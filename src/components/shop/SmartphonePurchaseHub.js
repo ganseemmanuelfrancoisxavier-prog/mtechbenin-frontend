@@ -13,7 +13,6 @@ import {
   Truck,
 } from "lucide-react";
 import styles from "./SmartphonePurchaseHub.module.css";
-
 import { settingsApi } from "@/lib/api";
 
 const DEVICES = [
@@ -128,7 +127,6 @@ export default function SmartphonePurchaseHub() {
                   {device.description}
                 </span>
               </span>
-
             </Link>
           ))}
         </div>
