@@ -152,7 +152,7 @@ export default function ReparationAppleChoix() {
                 {DEBLOCAGES.map(({ id, titre, detail }) => (
                   <button type="button" key={id} className={styles.categoryCard} onClick={() => choisirCategorie(id)}>
                     <span className={styles.categoryText}><strong>{titre}</strong><small>{detail}</small></span>
-                    <span className={styles.categoryArrow}><ArrowRight aria-hidden="true" /></span>
+
                   </button>
                 ))}
               </div>
