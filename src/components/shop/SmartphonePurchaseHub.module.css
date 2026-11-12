@@ -21,14 +21,14 @@
   inset: 0;
   pointer-events: none;
   position: absolute;
-  z-index: -1;
+  z-index: 1;
 }
 
 .heroText {
   max-width: 62%;
   padding: 21px 0 76px 20px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .heroEyebrow {
@@ -71,12 +71,11 @@
 }
 
 .heroProduct {
-  bottom: 36px;
-  height: 190px;
+  bottom: 48px;
+  left: 35%;
   position: absolute;
-  right: -6px;
-  top: 7px;
-  width: 54%;
+  right: 0;
+  top: 0;
   z-index: 0;
 }
 
@@ -99,7 +98,7 @@
   padding: 5px 7px;
   position: absolute;
   right: 0;
-  z-index: 1;
+  z-index: 2;
 }
 
 .heroBenefits span {
@@ -383,10 +382,9 @@
 
   .heroProduct {
     bottom: 70px;
-    height: 360px;
+    left: 35%;
     right: 0;
-    top: 10px;
-    width: 58%;
+    top: 0;
   }
 
   .benefits {
