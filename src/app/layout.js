@@ -4,7 +4,6 @@ import "leaflet/dist/leaflet.css";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import SeasonalFavicon from "@/components/layout/SeasonalFavicon";
-import SplashScreen from "@/components/SplashScreen";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -95,7 +94,6 @@ export default function RootLayout({ children }) {
       <body
         className={`${inter.variable} ${plusJakarta.variable} font-sans bg-white text-gray-900 antialiased`}
       >
-        <SplashScreen />
         <ScrollToTop />
         <SeasonalFavicon />
         <MaintenanceGuard>{children}</MaintenanceGuard>
