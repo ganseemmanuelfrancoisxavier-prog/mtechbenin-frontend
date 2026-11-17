@@ -2,38 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Choisit une seule vidéo de boutique parmi celles qui coupent la fenêtre.
-// Le ratio visible le plus élevé gagne ; en cas d'égalité, l'inscription la
-// plus ancienne garde la priorité pour éviter les bascules entre voisines.
-const candidates = new Map();
-let sequence = 0;
-
-function selectWinner() {
-  // Attendre les premiers rapports des candidats montés : sinon plusieurs
-  // callbacks initiaux successifs peuvent faire démarrer puis interrompre des
-  // vidéos avant que le navigateur ait évalué toute la page.
-  if ([...candidates.values()].some((candidate) => candidate.enabled && !candidate.initialized)) return;
-  let winner = null;
-  for (const candidate of candidates.values()) {
-    if (!candidate.visible || !candidate.enabled) continue;
-    if (
-      !winner ||
-      candidate.ratio > winner.ratio ||
-      (candidate.ratio === winner.ratio && candidate.order < winner.order)
-    ) winner = candidate;
-  }
-  for (const candidate of candidates.values()) {
-    const selected = candidate === winner;
-    if (!selected && candidate.video) {
-      candidate.video.pause();
-      if (candidate.video.hasAttribute("src")) {
-        candidate.video.removeAttribute("src");
-        candidate.video.load();
-      }
-    }
-    candidate.setSelected(selected);
-  }
-}
+// Chaque lecteur décide de sa lecture selon sa visibilité. L'arbitrage global
+// d'une seule vidéo mettait en pause les autres lecteurs même lorsqu'ils étaient
+// visibles à l'écran.
 
 export default function useVisibleVideo({
   enabled = true,
@@ -56,30 +27,22 @@ export default function useVisibleVideo({
   useEffect(() => {
     const node = ref.current;
     if (!node) return undefined;
-    const key = {};
-    const candidate = {
-      enabled,
-      initialized: false,
-      visible: false,
-      ratio: 0,
-      order: sequence++,
-      setSelected,
-      video: node,
-    };
-    candidates.set(key, candidate);
+    if (!enabled) {
+      setSelected(false);
+      return undefined;
+    }
+    if (!("IntersectionObserver" in window)) {
+      setSelected(true);
+      return undefined;
+    }
+
     const observer = new IntersectionObserver(([entry]) => {
-      candidate.initialized = true;
-      candidate.visible = entry.isIntersecting;
-      candidate.ratio = entry.intersectionRatio || 0;
-      selectWinner();
-    }, { rootMargin, threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] });
+      setSelected(Boolean(entry.isIntersecting && entry.intersectionRatio > 0));
+    }, { rootMargin, threshold: [0, 0.01, 0.1] });
     observer.observe(node);
-    selectWinner();
     return () => {
       observer.disconnect();
-      candidates.delete(key);
       setSelected(false);
-      selectWinner();
     };
   }, [enabled, rootMargin, identity]);
 
