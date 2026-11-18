@@ -16,7 +16,7 @@ const DUREE_AFFICHAGE_MS = 6000;
 const PLAFOND_VIDEO_MS = 90000;
 
 export default function AdvertisingSection() {
-  const { ads, fetchAds } = useAdStore();
+  const { ads } = useAdStore();
   const [index, setIndex] = useState(0);
   const [survole, setSurvole] = useState(false);
   const [focalise, setFocalise] = useState(false);
@@ -30,9 +30,6 @@ export default function AdvertisingSection() {
   // réellement à l'écran.
   const activeAd = ads[index % (ads.length || 1)];
 
-  useEffect(() => {
-    fetchAds();
-  }, []);
 
   useEffect(() => {
     const target = videoWrapRef.current;
