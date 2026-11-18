@@ -17,15 +17,12 @@ export default function HeroSection() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const { getActiveCategories, fetchCategories } = useCategoryStore();
-  const { getActiveServices, fetchServices } = useAbonnementStore();
-  const { getActiveMedias, fetchHero } = useHeroStore();
+  const { getActiveCategories } = useCategoryStore();
+  const { getActiveServices } = useAbonnementStore();
+  const { getActiveMedias } = useHeroStore();
 
   useEffect(() => {
     setMounted(true);
-    fetchHero(); // ← slides depuis l'API
-    fetchCategories(); // ← catégories depuis l'API
-    fetchServices(); // ← services abonnements depuis l'API
   }, []);
 
   const activeCategories = mounted
@@ -87,25 +84,8 @@ export default function HeroSection() {
     return () => clearInterval(timer);
   }, [goNext, slides.length]);
 
-  // Skeleton pendant le chargement initial
-  if (!mounted) {
-    return (
-      <section className="relative flex min-h-[clamp(520px,calc(100svh-56px),800px)] w-full items-center overflow-hidden bg-gradient-to-br from-[#0A0A0A] via-[#1a1a2e] to-[#0f3460]">
-        <div className="relative z-10 max-w-7xl mx-auto px-5 w-full py-20">
-          <div className="animate-pulse space-y-4">
-            <div className="h-5 bg-white/10 rounded-full w-32" />
-            <div className="h-16 bg-white/10 rounded-2xl w-64" />
-            <div className="h-8  bg-white/10 rounded-xl  w-48" />
-            <div className="h-4  bg-white/10 rounded-full w-80 mt-4" />
-            <div className="h-4  bg-white/10 rounded-full w-64" />
-            <div className="flex gap-3 mt-6">
-              <div className="h-12 bg-white/10 rounded-2xl w-36" />
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // Le premier rendu utilise les slides de secours immédiatement. Les médias
+  // enregistrés et ceux de l'API les remplacent dès qu'ils sont disponibles.
 
   if (slides.length === 0) return null;
 
