@@ -11,6 +11,7 @@ export default function useVisibleVideo({
   rootMargin = "0px",
   shouldPlay = true,
   identity = null,
+  preserveSourceWhenHidden = false,
 } = {}) {
   const ref = useRef(null);
   const [selected, setSelected] = useState(false);
@@ -71,7 +72,11 @@ export default function useVisibleVideo({
       tenterLecture();
     } else {
       video.pause();
-      if (!selected && video.hasAttribute("src")) {
+      if (
+        !selected &&
+        !preserveSourceWhenHidden &&
+        video.hasAttribute("src")
+      ) {
         video.removeAttribute("src");
         video.load();
       }
@@ -82,7 +87,7 @@ export default function useVisibleVideo({
       video.removeEventListener("canplay", tenterLecture);
       document.removeEventListener("visibilitychange", tenterLecture);
     };
-  }, [selected, reducedMotion, shouldPlay]);
+  }, [selected, reducedMotion, shouldPlay, preserveSourceWhenHidden]);
 
   return { ref, selected, reducedMotion };
 }
