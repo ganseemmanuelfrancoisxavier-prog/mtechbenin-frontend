@@ -5,6 +5,8 @@ const pwaConfig = withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
+  clientsClaim: true,
+  cleanupOutdatedCaches: true,
   disable: process.env.NODE_ENV === "development", // désactivé en dev
   runtimeCaching: [
     // ── Pages et assets statiques ─────────────────────────────────────────
