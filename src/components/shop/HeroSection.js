@@ -7,8 +7,6 @@ import { ArrowRight } from "lucide-react";
 import useCategoryStore from "@/store/categoryStore";
 import useAbonnementStore from "@/store/abonnementStore";
 import useHeroStore from "@/store/heroStore";
-import { categories as staticCategories } from "@/lib/categories";
-import { services as staticServices } from "@/lib/abonnements";
 import { urlVideoJouable, afficheVideo } from "@/lib/media";
 import useVisibleVideo from "@/hooks/useVisibleVideo";
 
@@ -25,15 +23,9 @@ export default function HeroSection() {
     setMounted(true);
   }, []);
 
-  const activeCategories = mounted
-    ? getActiveCategories()
-    : staticCategories.filter((c) => c.active);
-
-  const activeServices = mounted
-    ? getActiveServices()
-    : staticServices.filter((s) => s.available);
-
-  const activeCategorySlugs = activeCategories.map((c) => c.slug);
+  const activeCategories = getActiveCategories();
+  const activeServices = getActiveServices();
+  const activeCategorySlugs = activeCategories.map((category) => category.slug);
 
   const slides = mounted
     ? getActiveMedias().filter((slide) => {
@@ -42,28 +34,28 @@ export default function HeroSection() {
           return activeServices.length > 0;
         return activeCategorySlugs.includes(slide.categoryKey);
       })
-    : staticCategories
-        .filter((c) => c.active)
-        .slice(0, 3)
-        .map((c, i) => ({
-          id: i,
-          type: "gradient",
-          active: true,
-          title: c.label,
-          subtitle: "",
-          description: "",
-          cta: "Découvrir",
-          href: `/catalogue/${c.slug}`,
-          badge: "",
-          bg: "from-[#0A0A0A] via-[#1a1a2e] to-[#0f3460]",
-          tag: "Collection",
-          categoryKey: c.slug,
-        }));
+    : [];
 
-  const safeIndex = slides.length === 0 ? 0 : current % slides.length;
-  const activeSlide = slides[safeIndex];
+  // Ne plus présenter les anciens exemples locaux (AirPods/JBL/Abonnements)
+  // pendant que les vrais médias de la boutique se chargent.
+  const fallbackSlide = {
+    id: "mtechbenin-loading",
+    type: "gradient",
+    active: true,
+    title: "Votre univers tech",
+    subtitle: "",
+    description: "Smartphones, accessoires et abonnements au Bénin.",
+    cta: "Découvrir",
+    href: "/catalogue",
+    badge: "",
+    bg: "from-[#0A0A0A] via-[#1a1a2e] to-[#0f3460]",
+    tag: "MTECHBENIN",
+  };
+  const displayedSlides = slides.length > 0 ? slides : [fallbackSlide];
+  const safeIndex = current % displayedSlides.length;
+  const activeSlide = displayedSlides[safeIndex];
   const heroVideo = useVisibleVideo({
-    enabled: mounted && activeSlide?.type === "video",
+    enabled: mounted && slides.length > 0 && activeSlide?.type === "video",
     identity: activeSlide?.id ?? safeIndex,
   });
 
@@ -84,12 +76,7 @@ export default function HeroSection() {
     return () => clearInterval(timer);
   }, [goNext, slides.length]);
 
-  // Le premier rendu utilise les slides de secours immédiatement. Les médias
-  // enregistrés et ceux de l'API les remplacent dès qu'ils sont disponibles.
-
-  if (slides.length === 0) return null;
-
-  const slide = slides[safeIndex];
+  const slide = displayedSlides[safeIndex];
 
   return (
     <section className="relative flex min-h-[clamp(520px,calc(100svh-56px),800px)] w-full items-center overflow-hidden">
