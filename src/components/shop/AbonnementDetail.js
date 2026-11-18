@@ -109,7 +109,13 @@ export default function AbonnementDetail({ slug }) {
   const mediaMuted = storeService?.mediaMuted !== false;
   const isVideo = mediaType === "video" && mediaUrl;
   const isImage = mediaType === "image" && mediaUrl;
-  const video = useVisibleVideo({ enabled: Boolean(isVideo), identity: mediaUrl });
+  const video = useVisibleVideo({
+    enabled: Boolean(isVideo),
+    identity: mediaUrl,
+    // Cette vidéo occupe l'écran dès l'ouverture : on la précharge au lieu
+    // d'attendre l'IntersectionObserver avant même de lui donner son URL.
+    preserveSourceWhenHidden: true,
+  });
   const bg = serviceBg[slug] || defaultBg;
 
   useEffect(() => {
@@ -302,13 +308,13 @@ export default function AbonnementDetail({ slug }) {
             {isVideo && (
               <video
                 ref={video.ref}
-                src={video.selected ? urlVideoJouable(mediaUrl) : undefined}
+                src={urlVideoJouable(mediaUrl)}
                 poster={afficheVideo(mediaUrl)}
                 autoPlay={video.selected && !video.reducedMotion}
                 loop
                 playsInline
                 muted={mediaMuted}
-                preload="none"
+                preload="auto"
                 className="absolute inset-0 w-full h-full object-cover"
               />
             )}
