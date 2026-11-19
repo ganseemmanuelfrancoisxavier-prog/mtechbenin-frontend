@@ -5,10 +5,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Award,
-  Clock3,
   FileText,
-  Headset,
-  Settings,
   ShieldCheck,
   Truck,
 } from "lucide-react";
@@ -42,12 +39,6 @@ const DEVICES = [
   },
 ];
 
-const BENEFITS = [
-  { Icon: ShieldCheck, title: "Diagnostic gratuit", detail: "Avant toute réparation" },
-  { Icon: Clock3, title: "Service rapide", detail: "48h en moyenne" },
-  { Icon: Settings, title: "Pièces de qualité", detail: "Originales ou premium" },
-  { Icon: Headset, title: "Support client", detail: "Suivi de votre réparation" },
-];
 
 export default function SmartphonePurchaseHub() {
   const [devices, setDevices] = useState(DEVICES);
@@ -132,19 +123,6 @@ export default function SmartphonePurchaseHub() {
         </div>
       </section>
 
-      <section className={styles.benefits} aria-label="Nos engagements">
-        {BENEFITS.map(({ Icon, title, detail }) => (
-          <div className={styles.benefit} key={title}>
-            <span className={styles.benefitIcon} aria-hidden="true">
-              <Icon />
-            </span>
-            <span className={styles.benefitText}>
-              <strong>{title}</strong>
-              <small>{detail}</small>
-            </span>
-          </div>
-        ))}
-      </section>
 
       <section className={styles.terms} aria-labelledby="terms-heading">
         <div className={styles.termsCopy}>
