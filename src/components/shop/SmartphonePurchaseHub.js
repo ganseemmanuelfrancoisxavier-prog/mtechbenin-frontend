@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Award,
+  FileText,
   ShieldCheck,
   Truck,
 } from "lucide-react";
@@ -68,7 +69,7 @@ export default function SmartphonePurchaseHub() {
     <div className={styles.page}>
       <section className={styles.hero} aria-label="Offres smartphones">
         <div className={styles.heroText}>
-          <h1>Smartphones<br />au meilleur prix</h1>
+          <h1>Smartphones<br />au meilleur<br />prix</h1>
           <Link href="/catalogue/smartphone-tablette" className={styles.heroCta}>
             Voir les offres
           </Link>
@@ -118,6 +119,19 @@ export default function SmartphonePurchaseHub() {
       </section>
 
 
+
+      <section className={styles.terms} aria-labelledby="terms-heading">
+        <div className={styles.termsCopy}>
+          <p className={styles.termsEyebrow}>Avant votre achat</p>
+          <h2 id="terms-heading">Conditions générales de vente</h2>
+          <p>Consultez les modalités de commande, paiement et livraison.</p>
+          <Link href="/cgv" className={styles.termsLink}>
+            <FileText size={20} aria-hidden="true" />
+            Lire les conditions générales de vente
+            <ArrowRight size={19} aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
