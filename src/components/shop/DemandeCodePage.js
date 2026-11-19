@@ -45,8 +45,9 @@ export default function DemandeCodePage() {
       </h1>
       <p className="text-apple-mid text-[14px] leading-relaxed mb-8">
         Votre service vous demande un code de vérification ? Indiquez votre
-        numéro WhatsApp, puis connectez-vous. Dès que le code arrive, nous vous
-        l&apos;envoyons.
+        numéro WhatsApp. Nous vous écrirons pour demander le numéro utilisé lors
+        de votre souscription. Ensuite, reconnectez-vous à Netflix et demandez
+        un nouveau code.
       </p>
 
       <form onSubmit={demander} className="space-y-4">
@@ -87,8 +88,9 @@ export default function DemandeCodePage() {
       <div className="mt-10 flex items-start gap-3 text-apple-mid text-[12px] leading-relaxed">
         <MessageCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
         <p>
-          Le code est toujours envoyé au numéro enregistré lors de votre achat,
-          jamais à celui saisi ici. Cette demande reste valable 15 minutes.
+          Le numéro saisi sert à vous répondre sur WhatsApp. Nous vous
+          demanderons dans la discussion le numéro utilisé lors de votre
+          souscription avant d&apos;ouvrir la demande de code.
         </p>
       </div>
     </div>
