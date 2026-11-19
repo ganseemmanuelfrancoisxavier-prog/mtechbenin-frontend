@@ -89,6 +89,16 @@ export default function AdminComptesPartages({ service }) {
   const [commandesLoading, setCommandesLoading] = useState(false);
   const [placementSaving, setPlacementSaving] = useState(false);
   const [placementErrors, setPlacementErrors] = useState({});
+  // Traitement d'une commande déjà payée mais restée sans accès faute de stock.
+  const [rattrapageOuvert, setRattrapageOuvert] = useState(false);
+  const [rattrapageCommandes, setRattrapageCommandes] = useState([]);
+  const [rattrapageLoading, setRattrapageLoading] = useState(false);
+  const [rattrapageSaving, setRattrapageSaving] = useState(false);
+  const [rattrapageError, setRattrapageError] = useState("");
+  const [rattrapageMessage, setRattrapageMessage] = useState("");
+  const [rattrapageForm, setRattrapageForm] = useState({
+    orderId: "", email: "", password: "", profile: "", profilePassword: "",
+  });
   // Client hors site : saisie par profil, comme les autres formulaires.
   const [horsSiteForms, setHorsSiteForms] = useState({});
   const [horsSiteSaving, setHorsSiteSaving] = useState(false);
@@ -349,6 +359,74 @@ export default function AdminComptesPartages({ service }) {
       setPlacementErrors((p) => ({ ...p, [profilId]: err.message }));
     }
     setPlacementSaving(false);
+  };
+
+  const chargerCommandesRattrapage = async () => {
+    setRattrapageLoading(true);
+    setRattrapageError("");
+    try {
+      const { commandes } = await comptesApi.commandesLibres(service.id);
+      const dejaAssociees = new Set(
+        comptes.flatMap((compte) =>
+          (compte.profils || []).map((profil) => profil.currentOrderId).filter(Boolean),
+        ),
+      );
+      setRattrapageCommandes((commandes || []).filter((commande) => !dejaAssociees.has(commande.id)));
+    } catch (err) {
+      setRattrapageCommandes([]);
+      setRattrapageError(err.message);
+    }
+    setRattrapageLoading(false);
+  };
+
+  const ouvrirRattrapage = async () => {
+    if (rattrapageOuvert) {
+      setRattrapageOuvert(false);
+      return;
+    }
+    setRattrapageOuvert(true);
+    setRattrapageError("");
+    setRattrapageMessage("");
+    await chargerCommandesRattrapage();
+  };
+
+  const handleRattrapage = async (e) => {
+    e.preventDefault();
+    const commande = rattrapageCommandes.find((c) => c.id === rattrapageForm.orderId);
+    if (!commande || !rattrapageForm.email.trim() || !rattrapageForm.password || !rattrapageForm.profile.trim()) {
+      setRattrapageError("Choisissez une commande et renseignez l’adresse, le mot de passe et le profil.");
+      return;
+    }
+
+    setRattrapageSaving(true);
+    setRattrapageError("");
+    setRattrapageMessage("");
+    try {
+      const { compte } = await comptesApi.create(service.id, {
+        email: rattrapageForm.email.trim(),
+        password: rattrapageForm.password,
+        maxFluxSimultanes: 4,
+      });
+      const { profil } = await comptesApi.addProfil(compte.id, {
+        profile: rattrapageForm.profile.trim(),
+        profilePassword: rattrapageForm.profilePassword.trim() || null,
+        planId: commande.plan.id,
+      });
+      const { occupation } = await comptesApi.placer(profil.id, { orderId: commande.id });
+      setRattrapageForm({ orderId: "", email: "", password: "", profile: "", profilePassword: "" });
+      await rechargerComptes();
+
+      try {
+        const envoi = await comptesApi.envoyerIdentifiants(occupation.id);
+        setRattrapageMessage(`Accès attribué à ${commande.clientName}. ${envoi.message || "Identifiants envoyés."}`);
+      } catch (err) {
+        setRattrapageMessage(`Accès attribué à ${commande.clientName}, mais l’envoi a échoué : ${err.message}. Vous pourrez réessayer depuis le profil créé.`);
+      }
+      await chargerCommandesRattrapage();
+    } catch (err) {
+      setRattrapageError(err.message);
+    }
+    setRattrapageSaving(false);
   };
 
   // Client qui a recu ses identifiants HORS du site. Sans enregistrement, le
@@ -1049,6 +1127,74 @@ export default function AdminComptesPartages({ service }) {
               ))}
             </div>
           )}
+
+          <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[12px] font-semibold text-apple-black">Client payé en attente d’accès ?</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-apple-mid">
+                  Ajoutez les nouveaux identifiants : ils seront associés à sa commande puis envoyés.
+                </p>
+              </div>
+              <button type="button" onClick={ouvrirRattrapage}
+                className="flex flex-shrink-0 items-center gap-1 rounded-xl bg-apple-black px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-neutral-800">
+                <Plus className="h-3.5 w-3.5" /> {rattrapageOuvert ? "Fermer" : "Traiter"}
+              </button>
+            </div>
+            {rattrapageOuvert && (
+              <form onSubmit={handleRattrapage} className="mt-4 space-y-3 border-t border-amber-200 pt-4">
+                {rattrapageLoading ? (
+                  <p className="text-[11px] text-apple-mid">Recherche des commandes payées sans accès…</p>
+                ) : rattrapageCommandes.length === 0 ? (
+                  <p className="text-[11px] text-apple-mid">Aucune commande payée sans accès n’est en attente pour ce service.</p>
+                ) : (
+                  <>
+                    <label className="block space-y-1">
+                      <span className="text-[11px] font-medium text-apple-black">Client et formule payée</span>
+                      <select value={rattrapageForm.orderId}
+                        onChange={(e) => setRattrapageForm((p) => ({ ...p, orderId: e.target.value }))}
+                        className="w-full rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 text-[12px] focus:outline-none focus:border-black/25" required>
+                        <option value="">Choisir un client…</option>
+                        {rattrapageCommandes.map((commande) => (
+                          <option key={commande.id} value={commande.id}>
+                            {commande.isGift && commande.giftName ? `${commande.giftName} (cadeau)` : commande.clientName}
+                            {` · ${commande.plan?.label || "Formule"} · ${commande.clientWhatsapp}`}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <input type="email" value={rattrapageForm.email}
+                        onChange={(e) => setRattrapageForm((p) => ({ ...p, email: e.target.value }))}
+                        placeholder="Adresse du compte (ex. Netflix)" autoComplete="off"
+                        className="rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 text-[12px] focus:outline-none focus:border-black/25" required />
+                      <input type="text" value={rattrapageForm.password}
+                        onChange={(e) => setRattrapageForm((p) => ({ ...p, password: e.target.value }))}
+                        placeholder="Mot de passe du compte" autoComplete="new-password"
+                        className="rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 text-[12px] focus:outline-none focus:border-black/25" required />
+                      <input value={rattrapageForm.profile}
+                        onChange={(e) => setRattrapageForm((p) => ({ ...p, profile: e.target.value }))}
+                        placeholder="Nom du profil" autoComplete="off"
+                        className="rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 text-[12px] focus:outline-none focus:border-black/25" required />
+                      <input value={rattrapageForm.profilePassword}
+                        onChange={(e) => setRattrapageForm((p) => ({ ...p, profilePassword: e.target.value }))}
+                        placeholder="Code du profil (facultatif)" autoComplete="off"
+                        className="rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 text-[12px] focus:outline-none focus:border-black/25" />
+                    </div>
+                    <p className="text-[10px] leading-relaxed text-apple-mid">
+                      Un nouveau compte et un profil de la formule seront créés, puis les identifiants seront envoyés par WhatsApp et par e-mail.
+                    </p>
+                    <button type="submit" disabled={rattrapageSaving}
+                      className="w-full rounded-xl bg-apple-black px-4 py-2.5 text-[12px] font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50">
+                      {rattrapageSaving ? "Enregistrement et envoi…" : "Enregistrer et envoyer au client"}
+                    </button>
+                  </>
+                )}
+                {rattrapageError && <p role="alert" className="text-[11px] font-medium text-red-600">{rattrapageError}</p>}
+                {rattrapageMessage && <p role="status" className="text-[11px] font-medium text-green-700">{rattrapageMessage}</p>}
+              </form>
+            )}
+          </section>
 
           {/* Journal des demandes de code — chargé à la demande,
               sur clic, pas au montage : c'est une information
