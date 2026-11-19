@@ -287,7 +287,7 @@
     linear-gradient(110deg, #080808 0%, #151515 58%, #050505 100%);
   border-radius: 28px;
   color: #fff;
-  margin: 58px auto 0;
+  margin: 82px auto 0;
   max-width: 1240px;
   min-height: 190px;
   overflow: hidden;
@@ -452,6 +452,6 @@
   }
 
   .terms {
-    margin-top: 80px;
+    margin-top: 104px;
   }
 }
