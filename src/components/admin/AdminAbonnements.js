@@ -2083,6 +2083,64 @@ export default function AdminAbonnements() {
                           </div>
                         )}
 
+                        {currentCategory === "family" && (() => {
+                          const commandesPayees = orders.filter(
+                            (order) => order.planId === plan.id && order.status === "CONFIRMED",
+                          );
+                          if (commandesPayees.length === 0) return null;
+                          const commandesAvecAcces = new Set(
+                            (plan.accounts || [])
+                              .map((account) => account.client?.id || account.currentOrderId)
+                              .filter(Boolean),
+                          );
+                          return (
+                            <details className="mt-4 rounded-xl border border-black/[0.07] bg-white">
+                              <summary className="cursor-pointer list-none px-3 py-3 flex items-center justify-between gap-2">
+                                <span className="text-[11px] font-semibold text-apple-black">
+                                  Clients ayant payé ({commandesPayees.length})
+                                </span>
+                                <ChevronDown className="w-3.5 h-3.5 text-apple-mid" />
+                              </summary>
+                              <div className="px-3 pb-3 space-y-2">
+                                {commandesPayees.map((order) => (
+                                  <div key={order.id} className="rounded-lg bg-black/[0.025] p-3">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0">
+                                        <p className="text-[12px] font-semibold text-apple-black">
+                                          {order.isGift && order.giftName
+                                            ? `${order.giftName} (cadeau de ${order.clientName})`
+                                            : order.clientName || "Client"}
+                                        </p>
+                                        <p className="mt-0.5 text-[10px] font-mono text-apple-mid break-all">
+                                          {order.clientWhatsapp || "WhatsApp non renseigné"}
+                                        </p>
+                                        {order.clientEmail && (
+                                          <p className="mt-0.5 text-[10px] text-apple-mid break-all">
+                                            {order.clientEmail}
+                                          </p>
+                                        )}
+                                      </div>
+                                      <span className={`flex-shrink-0 rounded-full px-2 py-1 text-[10px] font-medium ${
+                                        commandesAvecAcces.has(order.id)
+                                          ? "bg-green-50 text-green-700"
+                                          : "bg-amber-50 text-amber-700"
+                                      }`}>
+                                        {commandesAvecAcces.has(order.id) ? "Accès attribué" : "En attente d’accès"}
+                                      </span>
+                                    </div>
+                                    <p className="mt-2 text-[10px] text-apple-mid">
+                                      Payé · {formatPrice(order.amount)}
+                                      {order.createdAt
+                                        ? ` · ${new Date(order.createdAt).toLocaleDateString("fr-FR")}`
+                                        : ""}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          );
+                        })()}
+
                         {/* LINK ACCESS */}
                         {currentCategory === "link_access" && (
                           <div>
