@@ -12,6 +12,7 @@ import {
   LayoutGrid,
   PackageSearch,
   Headphones,
+  UserRound,
   Wrench,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +25,7 @@ import { categories as staticCategories } from "@/lib/categories";
 import useScrollThreshold from "@/hooks/useScrollThreshold";
 
 const menuActions = [
+  { label: "Mon compte", description: "Créer un compte ou retrouver mes commandes.", href: "/compte", icon: UserRound },
   { label: "Tous nos produits", href: "/catalogue", icon: LayoutGrid },
   { label: "Suivre ma commande", href: "/suivi", icon: PackageSearch },
   {
