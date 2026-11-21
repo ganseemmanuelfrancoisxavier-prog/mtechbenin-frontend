@@ -217,7 +217,7 @@ export default function ClientAccountPage() {
                 {visibleHistory.map((row) => <div key={row.id}>
                   <button type="button" onClick={() => setExpandedHistory(expandedHistory === row.id ? "" : row.id)} className="grid w-full grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-2 px-3 py-3 text-left transition hover:bg-neutral-50 sm:grid-cols-[70px_minmax(0,2fr)_1fr_1fr_1fr]">
                     <span className="text-[10px] font-bold text-neutral-700 sm:text-xs">#{String(row.reference).slice(-6)}</span>
-                    <span className="min-w-0"><strong className="block truncate text-[11px] font-semibold text-neutral-900 sm:text-sm">{row.title}</strong>{historyTab === "referrals" && <span className="mt-0.5 inline-block rounded-full bg-violet-50 px-2 py-0.5 text-[9px] font-semibold text-violet-700">Via votre code</span>}</span></span>
+                    <span className="min-w-0"><strong className="block truncate text-[11px] font-semibold text-neutral-900 sm:text-sm">{row.title}</strong>{historyTab === "referrals" && <span className="mt-0.5 inline-block rounded-full bg-violet-50 px-2 py-0.5 text-[9px] font-semibold text-violet-700">Via votre code</span>}</span>
                     <span className="hidden text-xs font-semibold text-neutral-900 sm:block">{row.amount ? formatPrice(row.amount) : "—"}</span><span className="hidden text-xs font-bold text-green-700 sm:block">{row.gain ? "+" + formatPrice(row.gain) : "—"}</span>
                     <span className="flex items-center justify-end gap-1 text-right text-[10px] text-neutral-600 sm:justify-between sm:text-xs">{formatDate(row.date)}<ChevronRight className="h-4 w-4 shrink-0 text-neutral-500" /></span>
                   </button>
