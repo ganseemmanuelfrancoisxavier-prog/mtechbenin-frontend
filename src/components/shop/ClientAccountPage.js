@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, Clock3, LogOut, ShieldCheck, UserRound, Gift, Copy, Award, ChevronDown, ChevronRight, House, Coins, Smartphone, ShoppingBag } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, LogOut, ShieldCheck, UserRound, Award, ChevronDown, ChevronRight, House, Coins, Smartphone, ShoppingBag } from "lucide-react";
 import { clientAccountApi } from "@/lib/clientAccountApi";
 
 const formatPrice = (value) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
@@ -194,15 +194,11 @@ export default function ClientAccountPage() {
               </div>
             </div>
 
-            <section id="client-rewards-panel" className="overflow-hidden rounded-[28px] bg-gradient-to-br from-neutral-950 via-zinc-900 to-black p-5 text-white shadow-lg sm:p-7">
-              <div className="flex items-start justify-between gap-4">
-                <div className="max-w-[75%]"><h3 className="flex items-center gap-2 text-xl font-extrabold tracking-tight sm:text-2xl"><Gift className="h-7 w-7" /> Mes récompenses</h3><p className="mt-4 text-sm leading-relaxed text-neutral-200 sm:text-base">10 % de cashback sur vos achats confirmés. Gagnez aussi <strong className="text-white">20 %</strong> sur les achats effectués avec votre code.</p></div>
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-4xl sm:h-20 sm:w-20"><span aria-hidden="true">🎁</span></div>
-              </div>
-              <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 text-neutral-950 sm:p-4">
-                <span className="flex min-w-0 flex-1 items-center gap-2"><Award className="h-5 w-5 shrink-0 text-neutral-700" /><span className="text-xs sm:text-sm">Votre code :</span><strong className="truncate font-mono text-sm font-extrabold sm:text-base">{rewards?.referralCode || "…"}</strong></span>
-                <button type="button" onClick={copierCode} disabled={!rewards?.referralCode} className="inline-flex items-center gap-2 rounded-xl border border-violet-200 px-3 py-2 text-xs font-bold text-violet-700 hover:bg-violet-50 disabled:opacity-50"><Copy className="h-4 w-4" /> Copier</button>
-              </div>
+            <section id="client-rewards-panel" aria-label="Mes récompenses" className="relative isolate overflow-hidden rounded-[28px] shadow-lg">
+              <img src="/images/client-rewards-card.svg" alt="" aria-hidden="true" className="block h-auto w-full" />
+              <span className="absolute left-[5%] top-[21.5%] flex h-[16%] w-[43%] items-center overflow-hidden bg-[#101010] pl-[1%] text-[clamp(1.2rem,7.4vw,3.3rem)] font-extrabold leading-none tracking-tight text-white sm:text-[clamp(1.5rem,5vw,3.4rem)]">{formatPrice(rewards?.balance || 0)}</span>
+              <span className="absolute left-[34%] top-[73.4%] flex h-[15%] w-[33%] items-center overflow-hidden bg-white pl-[1%] font-mono text-[clamp(.55rem,3.2vw,1.35rem)] font-extrabold leading-none tracking-tight text-black sm:text-[clamp(.7rem,2.1vw,1.35rem)]">{rewards?.referralCode || "…"}</span>
+              <button type="button" onClick={copierCode} disabled={!rewards?.referralCode} aria-label="Copier votre code de parrainage" className="absolute left-[71.5%] top-[71.5%] h-[20%] w-[24%] cursor-pointer rounded-2xl bg-transparent focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600 disabled:cursor-default" />
             </section>
 
             <section id="reward-history" className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
@@ -221,7 +217,7 @@ export default function ClientAccountPage() {
                 {visibleHistory.map((row) => <div key={row.id}>
                   <button type="button" onClick={() => setExpandedHistory(expandedHistory === row.id ? "" : row.id)} className="grid w-full grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-2 px-3 py-3 text-left transition hover:bg-neutral-50 sm:grid-cols-[70px_minmax(0,2fr)_1fr_1fr_1fr]">
                     <span className="text-[10px] font-bold text-neutral-700 sm:text-xs">#{String(row.reference).slice(-6)}</span>
-                    <span className="flex min-w-0 items-center gap-2"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-neutral-950 text-xs font-bold text-white">{historyTab === "referrals" ? <Gift className="h-4 w-4" /> : <span>{String(row.title).trim().charAt(0).toUpperCase()}</span>}</span><span className="min-w-0"><strong className="block truncate text-[11px] font-semibold text-neutral-900 sm:text-sm">{row.title}</strong>{historyTab === "referrals" && <span className="mt-0.5 inline-block rounded-full bg-violet-50 px-2 py-0.5 text-[9px] font-semibold text-violet-700">Via votre code</span>}</span></span>
+                    <span className="min-w-0"><strong className="block truncate text-[11px] font-semibold text-neutral-900 sm:text-sm">{row.title}</strong>{historyTab === "referrals" && <span className="mt-0.5 inline-block rounded-full bg-violet-50 px-2 py-0.5 text-[9px] font-semibold text-violet-700">Via votre code</span>}</span></span>
                     <span className="hidden text-xs font-semibold text-neutral-900 sm:block">{row.amount ? formatPrice(row.amount) : "—"}</span><span className="hidden text-xs font-bold text-green-700 sm:block">{row.gain ? "+" + formatPrice(row.gain) : "—"}</span>
                     <span className="flex items-center justify-end gap-1 text-right text-[10px] text-neutral-600 sm:justify-between sm:text-xs">{formatDate(row.date)}<ChevronRight className="h-4 w-4 shrink-0 text-neutral-500" /></span>
                   </button>
