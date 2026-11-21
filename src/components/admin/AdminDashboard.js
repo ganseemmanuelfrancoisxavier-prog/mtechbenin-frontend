@@ -14,9 +14,11 @@ import {
   Truck,
   PackageCheck,
   XCircle,
+  Search,
+  Wallet,
 } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { statsApi } from "@/lib/api";
+import { statsApi, rewardsAdminApi } from "@/lib/api";
 import useSondagePeriodique from "@/hooks/useSondagePeriodique";
 
 const STATUS = {
@@ -66,6 +68,28 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(false);
+  const [rewardData, setRewardData] = useState(null);
+  const [rewardSearch, setRewardSearch] = useState("");
+  const [rewardSelected, setRewardSelected] = useState("");
+  const [rewardTrace, setRewardTrace] = useState(null);
+  const [rewardLoading, setRewardLoading] = useState(false);
+
+  useEffect(() => {
+    rewardsAdminApi.dashboard().then(setRewardData).catch((err) => console.error("Suivi récompenses indisponible", err.message));
+  }, []);
+
+  const chargerSuiviRecompenses = async () => {
+    setRewardLoading(true);
+    try { setRewardData(await rewardsAdminApi.dashboard(rewardSearch.trim())); }
+    catch (err) { console.error("Erreur suivi récompenses", err.message); }
+    finally { setRewardLoading(false); }
+  };
+  const ouvrirTraceRecompenses = async (client) => {
+    if (rewardSelected === client.whatsapp) { setRewardSelected(""); setRewardTrace(null); return; }
+    setRewardSelected(client.whatsapp); setRewardTrace(null);
+    try { setRewardTrace(await rewardsAdminApi.trace(client.whatsapp)); }
+    catch (err) { console.error("Erreur traçabilité client", err.message); }
+  };
 
   // Un seul appel, quelques centaines d'octets. Auparavant : 500 produits et
   // 250 commandes entiers — 141 Ko — pour n'en tirer que des totaux et douze
@@ -286,6 +310,58 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Suivi détaillé des récompenses client */}
+      <section className="glass-card rounded-3xl p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="flex items-center gap-2 font-display text-[17px] font-bold text-apple-black"><Wallet className="h-5 w-5" /> Récompenses des clients inscrits</h2>
+            <p className="mt-1 text-[12px] text-apple-mid">Gains, retraits déjà payés et montants encore dus, avec le détail des opérations.</p>
+          </div>
+          <button type="button" onClick={chargerSuiviRecompenses} disabled={rewardLoading} className="flex items-center gap-2 rounded-xl border border-black/[0.08] px-3 py-2 text-[12px] text-apple-mid disabled:opacity-50"><RefreshCw className={`h-3.5 w-3.5 ${rewardLoading ? "animate-spin" : ""}`} /> Actualiser</button>
+        </div>
+        {rewardData && (
+          <>
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+              {[
+                ["Comptes", rewardData.summary.clients],
+                ["Gagné", formatPrice(rewardData.summary.earned)],
+                ["Déjà versé", formatPrice(rewardData.summary.paid)],
+                ["Disponible", formatPrice(rewardData.summary.available)],
+                ["Retraits en attente", formatPrice(rewardData.summary.pending)],
+                ["Reste à verser", formatPrice(rewardData.summary.due)],
+              ].map(([label, value]) => <div key={label} className="rounded-2xl bg-black/[0.03] p-3"><p className="text-[10px] text-apple-mid">{label}</p><p className="mt-1 text-[13px] font-bold text-apple-black">{value}</p></div>)}
+            </div>
+            <div className="relative mt-4 max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-apple-mid" />
+              <input value={rewardSearch} onChange={(e) => setRewardSearch(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") chargerSuiviRecompenses(); }} placeholder="Rechercher un nom, numéro ou code" className="w-full rounded-xl border border-black/[0.07] bg-white py-2.5 pl-9 pr-3 text-[12px]" />
+            </div>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[860px] text-left text-[11px]">
+                <thead><tr className="border-b border-black/[0.07] text-apple-mid"><th className="px-2 py-2">Client / code</th><th className="px-2 py-2">Gagné</th><th className="px-2 py-2">Déjà versé</th><th className="px-2 py-2">Disponible</th><th className="px-2 py-2">En attente</th><th className="px-2 py-2">Reste à verser</th></tr></thead>
+                <tbody>{rewardData.clients.map((client) => <tr key={client.whatsapp} className="border-b border-black/[0.04] align-top">
+                  <td colSpan={6} className="p-0">
+                    <button type="button" onClick={() => ouvrirTraceRecompenses(client)} className="grid w-full grid-cols-[2fr_repeat(5,1fr)] items-center text-left hover:bg-black/[0.02]">
+                      <span className="px-2 py-3"><strong className="block text-[12px] text-apple-black">{client.name}</strong><span className="mt-0.5 block text-apple-mid">{client.whatsapp} · {client.referralCode || "code en attente"}</span><span className="block text-[10px] text-apple-mid">Compte depuis {new Date(client.accountCreatedAt).toLocaleDateString("fr-FR")}</span></span>
+                      <span className="px-2 py-3 font-medium">{formatPrice(client.earned)}</span><span className="px-2 py-3 font-medium text-emerald-700">{formatPrice(client.paid)}</span><span className="px-2 py-3 font-medium">{formatPrice(client.available)}</span><span className="px-2 py-3 font-medium text-amber-700">{formatPrice(client.pending)}</span><span className="px-2 py-3 font-bold">{formatPrice(client.due)}</span>
+                    </button>
+                    {rewardSelected === client.whatsapp && <div className="border-t border-black/[0.05] bg-black/[0.02] p-4">
+                      {!rewardTrace ? <p className="text-xs text-apple-mid">Chargement de la traçabilité…</p> : <>
+                        <h3 className="mb-3 text-xs font-bold text-apple-black">Historique des récompenses et retraits</h3>
+                        {!rewardTrace.entries.length && !rewardTrace.withdrawals.length ? <p className="text-xs text-apple-mid">Aucune opération enregistrée.</p> : <div className="space-y-2">
+                          {rewardTrace.entries.map((entry) => <div key={entry.id} className="flex flex-wrap justify-between gap-2 rounded-xl bg-white p-3 text-[11px]"><span><strong>{entry.type === "CASHBACK" ? "Cashback achat" : entry.type === "REFERRAL" ? "Commission parrainage" : entry.type === "WITHDRAWAL" ? "Réservation retrait" : "Remboursement retrait refusé"}</strong><span className="ml-2 text-apple-mid">{entry.details || ""}{entry.orderRef ? ` · Réf. ${entry.orderRef}` : ""}</span></span><span className={entry.amount < 0 ? "font-semibold text-red-600" : "font-semibold text-emerald-700"}>{entry.amount > 0 ? "+" : ""}{formatPrice(entry.amount)} · {new Date(entry.createdAt).toLocaleString("fr-FR")}</span></div>)}
+                          {rewardTrace.withdrawals.map((w) => <div key={w.id} className="flex flex-wrap justify-between gap-2 rounded-xl border border-dashed border-black/[0.12] p-3 text-[11px]"><span><strong>Demande de retrait · {w.payoutNumber}</strong><span className="ml-2 text-apple-mid">{w.adminNote || ""}</span></span><span className="font-semibold">{formatPrice(w.amount)} · {w.status === "PAID" ? "Versé" : w.status === "REQUESTED" ? "À traiter" : "Refusé"}</span></div>)}
+                        </div>}
+                      </>}
+                    </div>}
+                  </td>
+                </tr>)}</tbody>
+              </table>
+              {!rewardData.clients.length && <p className="py-6 text-center text-xs text-apple-mid">Aucun compte client trouvé.</p>}
+            </div>
+          </>
+        )}
+      </section>
 
       {/* Stock faible */}
       <div className="glass-card rounded-3xl p-5">
