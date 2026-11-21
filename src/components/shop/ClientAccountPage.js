@@ -150,9 +150,7 @@ export default function ClientAccountPage() {
               </div>
             </div>
 
-            <div className="mt-7">
-              <div className="mb-3 flex items-center gap-2">
-            {rewards && (
+{rewards && (
               <section className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 sm:p-5">
                 <div className="flex items-center gap-2 text-emerald-900"><Wallet className="h-5 w-5" /><h3 className="font-semibold">Mes récompenses</h3></div>
                 <p className="mt-3 text-2xl font-bold text-neutral-950">{formatPrice(rewards.balance)}</p>
@@ -168,7 +166,10 @@ export default function ClientAccountPage() {
               </section>
             )}
 
-                <Package className="h-4 w-4 text-neutral-500" />
+
+            <div className="mt-7">
+              <div className="mb-3 flex items-center gap-2">
+                            <Package className="h-4 w-4 text-neutral-500" />
                 <h3 className="font-semibold text-neutral-950">Mes commandes</h3>
               </div>
               {orders.length + subscriptions.length === 0 ? (
