@@ -167,7 +167,7 @@ export default function ClientAccountPage() {
   return (
     <main className="min-h-[70vh] bg-neutral-50 px-4 py-10 sm:py-16">
       <div className="mx-auto max-w-2xl">
-        <header className="relative isolate mb-0 overflow-hidden rounded-[32px] px-6 pb-24 pt-8 text-white shadow-lg sm:px-10 sm:pt-10" style={{ backgroundImage: "radial-gradient(ellipse 32% 22% at 78% 100%, rgba(139,92,246,.18), transparent 100%), linear-gradient(135deg, #17171e 0%, #20202a 100%)" }}>
+        <header className="relative isolate mb-0 overflow-hidden rounded-[32px] px-6 pb-24 pt-8 text-white shadow-lg sm:px-10 sm:pt-10" style={{ backgroundImage: "linear-gradient(135deg, #17171e 0%, #20202a 100%)" }}>
                     <div className="relative flex items-center gap-4">
             <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[24px] border border-white/30 bg-black/20 text-white sm:h-20 sm:w-20">
               <UserRound className="h-9 w-9 sm:h-11 sm:w-11" strokeWidth={1.7} />
