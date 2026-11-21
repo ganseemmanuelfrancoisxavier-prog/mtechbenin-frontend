@@ -167,7 +167,7 @@ export default function ClientAccountPage() {
   return (
     <main className="min-h-[70vh] bg-neutral-50 px-4 py-10 sm:py-16">
       <div className="mx-auto max-w-2xl">
-        <header className="relative isolate mb-0 overflow-hidden rounded-[32px] px-6 pb-24 pt-8 text-white shadow-[0_12px_28px_rgba(17,24,39,0.14)] sm:px-10 sm:pt-10" style={{ backgroundImage: "radial-gradient(ellipse 32% 22% at 78% 100%, rgba(139,92,246,.18), transparent 100%), linear-gradient(135deg, #17171e 0%, #20202a 100%)" }}>
+        <header className="relative isolate mb-0 overflow-hidden rounded-[32px] px-6 pb-24 pt-8 text-white shadow-lg sm:px-10 sm:pt-10" style={{ backgroundImage: "radial-gradient(ellipse 32% 22% at 78% 100%, rgba(139,92,246,.18), transparent 100%), linear-gradient(135deg, #17171e 0%, #20202a 100%)" }}>
                     <div className="relative flex items-center gap-4">
             <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[24px] border border-white/30 bg-black/20 text-white sm:h-20 sm:w-20">
               <UserRound className="h-9 w-9 sm:h-11 sm:w-11" strokeWidth={1.7} />
@@ -182,28 +182,28 @@ export default function ClientAccountPage() {
 
         {account ? (
           <section className="space-y-4">
-            <div className="relative z-10 -mt-12 rounded-[28px] border border-neutral-200 bg-white p-5 shadow-[0_8px_22px_rgba(17,24,39,0.10)] sm:p-7">
+            <div className="relative z-10 -mt-12 rounded-[28px] border border-neutral-200 bg-white p-5 shadow-sm sm:p-7">
               <div className="flex items-start justify-between gap-3">
                 <div><p className="text-sm text-neutral-500">Bonjour,</p><h2 className="text-2xl font-extrabold tracking-tight text-black sm:text-3xl">{account.name}</h2><p className="mt-1 text-sm text-neutral-500">{account.whatsapp}</p></div>
                 <button type="button" onClick={handleDeconnexion} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-neutral-300 px-3 py-2 text-xs font-semibold text-black hover:bg-neutral-50 sm:px-4 sm:text-sm"><LogOut className="h-4 w-4" /> Déconnexion</button>
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3">
-                <button type="button" onClick={() => { setHistoryTab("purchases"); document.getElementById("reward-history")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="flex min-h-[92px] items-center justify-between gap-2 rounded-3xl border border-neutral-200 bg-white p-4 text-left shadow-[0_8px_22px_rgba(17,24,39,0.10)] transition hover:border-neutral-400">
+                <button type="button" onClick={() => { setHistoryTab("purchases"); document.getElementById("reward-history")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="flex min-h-[92px] items-center justify-between gap-2 rounded-3xl border border-neutral-200 bg-white p-4 text-left shadow-sm transition hover:border-neutral-400">
                   <span className="min-w-0 flex-1"><strong className="block text-xs leading-snug text-black sm:text-sm">Commandes enregistrées</strong><span className="mt-1 block text-2xl font-extrabold leading-none text-black">{orders.length + subscriptions.length}</span></span><ChevronRight className="h-5 w-5 shrink-0 text-neutral-500" />
                 </button>
-                <button type="button" onClick={() => document.getElementById("client-rewards-panel")?.scrollIntoView({ behavior: "smooth", block: "center" })} className="flex min-h-[92px] items-center justify-between gap-2 rounded-3xl border border-neutral-200 bg-white p-4 text-left shadow-[0_8px_22px_rgba(17,24,39,0.10)] transition hover:border-neutral-400">
+                <button type="button" onClick={() => document.getElementById("client-rewards-panel")?.scrollIntoView({ behavior: "smooth", block: "center" })} className="flex min-h-[92px] items-center justify-between gap-2 rounded-3xl border border-neutral-200 bg-white p-4 text-left shadow-sm transition hover:border-neutral-400">
                   <span className="min-w-0 flex-1"><strong className="block text-xs leading-snug text-black sm:text-sm">Récompense</strong><span className="mt-1 block whitespace-nowrap text-base font-extrabold leading-tight text-black sm:text-2xl">{formatPrice(rewards?.balance || 0)}</span></span><ChevronRight className="h-5 w-5 shrink-0 text-neutral-500" />
                 </button>
               </div>
             </div>
 
-            <section id="client-rewards-panel" aria-label="Mes récompenses" className="relative isolate overflow-hidden rounded-[28px] shadow-[0_12px_28px_rgba(17,24,39,0.14)]">
+            <section id="client-rewards-panel" aria-label="Mes récompenses" className="relative isolate overflow-hidden rounded-[28px] shadow-lg">
               <img src="/images/client-rewards-card.svg" alt="" aria-hidden="true" className="block h-auto w-full" />
                             <span className="absolute left-[34%] top-[70.5%] flex h-[15%] w-[33%] items-center overflow-hidden whitespace-nowrap bg-white pl-[1%] font-mono text-[clamp(.55rem,3.2vw,1.35rem)] font-extrabold leading-none tracking-tight text-black sm:text-[clamp(.7rem,2.1vw,1.35rem)]">{rewards?.referralCode || "…"}</span>
               <button type="button" onClick={copierCode} disabled={!rewards?.referralCode} aria-label="Copier votre code de parrainage" className="absolute left-[71.5%] top-[71.5%] h-[20%] w-[24%] cursor-pointer rounded-2xl bg-transparent focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600 disabled:cursor-default" />
             </section>
 
-            <section id="reward-history" className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-[0_8px_22px_rgba(17,24,39,0.10)] sm:p-6">
+            <section id="reward-history" className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="flex items-center gap-2 text-lg font-extrabold text-black sm:text-xl"><Clock3 className="h-6 w-6" /> Détail des récompenses</h3>
                 <label className="relative"><span className="sr-only">Filtrer l’historique</span><select value={historyFilter} onChange={(e) => setHistoryFilter(e.target.value)} className="appearance-none rounded-full border border-neutral-300 bg-white py-2 pl-3 pr-9 text-xs font-semibold text-neutral-800"><option value="all">Toutes les commandes</option><option value="earned">Récompenses validées</option><option value="pending">Sans récompense validée</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" /></label>
@@ -229,7 +229,7 @@ export default function ClientAccountPage() {
               </div>}
             </section>
 
-            <section className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-[0_8px_22px_rgba(17,24,39,0.10)] sm:p-6">
+            <section className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
               <h3 className="flex items-center gap-2 text-lg font-extrabold text-black sm:text-xl"><House className="h-6 w-6" /> Demande de retrait</h3>
               <form onSubmit={handleWithdrawal} className="mt-4 space-y-3">
                 <label className="flex items-center gap-3 rounded-2xl border border-neutral-300 px-4 py-3"><Coins className="h-5 w-5 shrink-0 text-neutral-800" /><input required min={2000} max={rewards?.balance || 0} type="number" step="1" placeholder="Montant (minimum 2 000 F)" value={withdrawalForm.amount} onChange={(e) => setWithdrawalForm((v) => ({ ...v, amount: e.target.value }))} className="min-w-0 flex-1 text-sm outline-none placeholder:text-neutral-500" /></label>
@@ -243,7 +243,7 @@ export default function ClientAccountPage() {
             {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
           </section>
         ) : (
-          <section className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-[0_8px_22px_rgba(17,24,39,0.10)] sm:p-8">
+          <section className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-neutral-950">{codeSent ? "Vérifiez votre numéro" : "Créer mon compte ou me connecter"}</h2>
               <p className="mt-1 text-sm leading-relaxed text-neutral-500">
