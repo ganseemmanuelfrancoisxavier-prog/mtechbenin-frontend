@@ -691,6 +691,8 @@ export const reparationAdminApi = {
 
 
 export const rewardsAdminApi = {
+  dashboard: (search = "") => apiFetch(`/api/rewards/admin/dashboard${search ? `?search=${encodeURIComponent(search)}` : ""}`),
+  trace: (whatsapp) => apiFetch(`/api/rewards/admin/clients/${encodeURIComponent(whatsapp)}`),
   withdrawals: (status = "REQUESTED") => apiFetch(`/api/rewards/admin/withdrawals?status=${encodeURIComponent(status)}`),
   processWithdrawal: (id, status, adminNote = "") => apiFetch(`/api/rewards/admin/withdrawals/${id}`, {
     method: "PATCH",
