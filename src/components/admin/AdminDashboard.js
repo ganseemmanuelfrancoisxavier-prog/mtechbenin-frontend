@@ -338,12 +338,16 @@ export default function AdminDashboard() {
             </div>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[860px] text-left text-[11px]">
-                <thead><tr className="border-b border-black/[0.07] text-apple-mid"><th className="px-2 py-2">Client / code</th><th className="px-2 py-2">Gagné</th><th className="px-2 py-2">Déjà versé</th><th className="px-2 py-2">Disponible</th><th className="px-2 py-2">En attente</th><th className="px-2 py-2">Reste à verser</th></tr></thead>
-                <tbody>{rewardData.clients.map((client) => <tr key={client.whatsapp} className="border-b border-black/[0.04] align-top">
-                  <td colSpan={6} className="p-0">
-                    <button type="button" onClick={() => ouvrirTraceRecompenses(client)} className="grid w-full grid-cols-[2fr_repeat(5,1fr)] items-center text-left hover:bg-black/[0.02]">
-                      <span className="px-2 py-3"><strong className="block text-[12px] text-apple-black">{client.name}</strong><span className="mt-0.5 block text-apple-mid">{client.whatsapp} · {client.referralCode || "code en attente"}</span><span className="block text-[10px] text-apple-mid">Compte depuis {new Date(client.accountCreatedAt).toLocaleDateString("fr-FR")}</span></span>
-                      <span className="px-2 py-3 font-medium">{formatPrice(client.earned)}</span><span className="px-2 py-3 font-medium text-emerald-700">{formatPrice(client.paid)}</span><span className="px-2 py-3 font-medium">{formatPrice(client.available)}</span><span className="px-2 py-3 font-medium text-amber-700">{formatPrice(client.pending)}</span><span className="px-2 py-3 font-bold">{formatPrice(client.due)}</span>
+                <thead className="hidden sm:table-header-group"><tr className="border-b border-black/[0.07] text-apple-mid"><th className="px-2 py-2">Client / code</th><th className="px-2 py-2">Gagné</th><th className="px-2 py-2">Déjà versé</th><th className="px-2 py-2">Disponible</th><th className="px-2 py-2">En attente</th><th className="px-2 py-2">Reste à verser</th></tr></thead>
+                <tbody>{rewardData.clients.map((client) => <tr key={client.whatsapp} className="mb-3 block overflow-hidden rounded-2xl border border-black/[0.06] bg-white align-top sm:mb-0 sm:table-row sm:rounded-none sm:border-x-0 sm:border-t-0 sm:border-b sm:border-black/[0.04] sm:bg-transparent">
+                  <td colSpan={6} className="block p-0 sm:table-cell">
+                    <button type="button" onClick={() => ouvrirTraceRecompenses(client)} className="grid w-full grid-cols-2 items-center text-left hover:bg-black/[0.02] sm:grid-cols-[2fr_repeat(5,1fr)]">
+                      <span className="col-span-2 px-3 py-3 sm:col-span-1 sm:px-2"><strong className="block text-[12px] text-apple-black">{client.name}</strong><span className="mt-0.5 block text-apple-mid">{client.whatsapp} · {client.referralCode || "code en attente"}</span><span className="block text-[10px] text-apple-mid">Compte depuis {new Date(client.accountCreatedAt).toLocaleDateString("fr-FR")}</span></span>
+                      <span className="px-3 py-2 font-medium sm:px-2 sm:py-3"><span className="block text-[10px] text-apple-mid sm:hidden">Gagné</span>{formatPrice(client.earned)}</span>
+                      <span className="px-3 py-2 font-medium text-emerald-700 sm:px-2 sm:py-3"><span className="block text-[10px] text-apple-mid sm:hidden">Déjà versé</span>{formatPrice(client.paid)}</span>
+                      <span className="px-3 py-2 font-medium sm:px-2 sm:py-3"><span className="block text-[10px] text-apple-mid sm:hidden">Disponible</span>{formatPrice(client.available)}</span>
+                      <span className="px-3 py-2 font-medium text-amber-700 sm:px-2 sm:py-3"><span className="block text-[10px] text-apple-mid sm:hidden">En attente</span>{formatPrice(client.pending)}</span>
+                      <span className="px-3 py-2 font-bold sm:px-2 sm:py-3"><span className="block text-[10px] text-apple-mid sm:hidden">Reste dû</span>{formatPrice(client.due)}</span>
                     </button>
                     {rewardSelected === client.whatsapp && <div className="border-t border-black/[0.05] bg-black/[0.02] p-4">
                       {!rewardTrace ? <p className="text-xs text-apple-mid">Chargement de la traçabilité…</p> : <>
