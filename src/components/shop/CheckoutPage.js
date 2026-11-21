@@ -142,6 +142,7 @@ export default function CheckoutPage() {
 
   const [form, setForm] = useState({
     firstName: "",
+    referralCode: "",
     whatsapp: "",
     dialCode: "+229",
     city: activeCities[0] || "",
@@ -256,6 +257,7 @@ export default function CheckoutPage() {
         giftWhatsapp: form.isGift ? fullGiftWhatsapp : "",
         coords: form.showMap ? coords : null,
         couponCode: appliedCoupon?.code || null,
+        referralCode: form.referralCode.trim().toUpperCase() || null,
         discount,
         deliveryFee,
         feeAmount,
@@ -302,6 +304,7 @@ export default function CheckoutPage() {
         feeAmount,
         total: grandTotal,
         couponCode: appliedCoupon?.code || null,
+        referralCode: form.referralCode.trim().toUpperCase() || null,
         items: items.map((item) => ({
           productSlug: item.slug || String(item.id),
           productName: item.name,
@@ -467,6 +470,9 @@ export default function CheckoutPage() {
                       placeholder="Jean Kouassi"
                       className={inputClass}
                     />
+                  </Field>
+                  <Field label="Code de parrainage (facultatif)" hint="Le client qui vous a recommandé recevra une récompense après votre paiement.">
+                    <input value={form.referralCode} onChange={(e) => updateForm("referralCode", e.target.value.toUpperCase())} placeholder="Ex. MTB1A2B3C4" className={inputClass} autoCapitalize="characters" />
                   </Field>
                   <Field label="Numéro WhatsApp" required hint="— sans le 01 si votre numéro n’en dispose pas">
                     <div className="flex gap-2">
