@@ -347,7 +347,7 @@ export default function AdminDashboard() {
                       <span className="px-3 py-2 font-medium text-emerald-700 sm:px-2 sm:py-3"><span className="block text-[10px] text-apple-mid sm:hidden">Déjà versé</span>{formatPrice(client.paid)}</span>
                       <span className="px-3 py-2 font-medium sm:px-2 sm:py-3"><span className="block text-[10px] text-apple-mid sm:hidden">Disponible</span>{formatPrice(client.available)}</span>
                       <span className="px-3 py-2 font-medium text-amber-700 sm:px-2 sm:py-3"><span className="block text-[10px] text-apple-mid sm:hidden">En attente</span>{formatPrice(client.pending)}</span>
-                      <span className="px-3 py-2 font-bold sm:px-2 sm:py-3"><span className="block text-[10px] text-apple-mid sm:hidden">Reste dû</span>{formatPrice(client.due)}</span>
+                      <span className="col-span-2 px-3 py-2 font-bold sm:col-span-1 sm:px-2 sm:py-3"><span className="block text-[10px] text-apple-mid sm:hidden">Reste dû</span>{formatPrice(client.due)}</span>
                     </button>
                     {rewardSelected === client.whatsapp && <div className="border-t border-black/[0.05] bg-black/[0.02] p-4">
                       {!rewardTrace ? <p className="text-xs text-apple-mid">Chargement de la traçabilité…</p> : <>
