@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, Clock3, LogOut, ShieldCheck, UserRound, Award, ChevronDown, ChevronRight, House, Coins, Smartphone } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, LogOut, ShieldCheck, UserRound, ChevronDown, ChevronRight, House, Coins, Smartphone } from "lucide-react";
 import { clientAccountApi } from "@/lib/clientAccountApi";
 
 const formatPrice = (value) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
