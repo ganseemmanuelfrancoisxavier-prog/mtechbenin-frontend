@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, Clock3, LogOut, Package, ShieldCheck, UserRound, Gift, Wallet, Copy, Award, Search, ChevronDown, ChevronRight, House, Coins, Smartphone, ShoppingBag } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, LogOut, ShieldCheck, UserRound, Gift, Copy, Award, ChevronDown, ChevronRight, House, Coins, Smartphone, ShoppingBag } from "lucide-react";
 import { clientAccountApi } from "@/lib/clientAccountApi";
 
 const formatPrice = (value) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
@@ -243,41 +243,6 @@ export default function ClientAccountPage() {
             </section>
             {notice && <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{notice}</p>}
             {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
-          </section>
-        ) : (
-                <div className="space-y-2">
-                  {orders.map((order) => (
-                    <article key={order.reference} className="rounded-2xl border border-neutral-200 p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-neutral-950">Commande {order.reference}</p>
-                          <p className="mt-1 text-xs text-neutral-500">{order.items.map((item) => `${item.productName} ×${item.quantity}`).join(", ")}</p>
-                          <p className="mt-1 text-xs text-neutral-500">{formatDate(order.createdAt)}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-neutral-950">{formatPrice(order.total)}</p>
-                          <span className="mt-1 inline-block rounded-full bg-neutral-100 px-2 py-1 text-[10px] font-medium text-neutral-600">{order.status}</span>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                  {subscriptions.map((order) => (
-                    <article key={order.id} className="rounded-2xl border border-neutral-200 p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-neutral-950">{order.service?.name || "Abonnement"} · {order.plan?.label || "Formule"}</p>
-                          <p className="mt-1 text-xs text-neutral-500">{formatDate(order.createdAt)}{order.expiresAt ? ` · expire le ${formatDate(order.expiresAt)}` : ""}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-neutral-950">{formatPrice(order.amount)}</p>
-                          <span className="mt-1 inline-block rounded-full bg-neutral-100 px-2 py-1 text-[10px] font-medium text-neutral-600">{order.status}</span>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </div>
           </section>
         ) : (
           <section className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
