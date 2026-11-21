@@ -11,9 +11,10 @@ import {
   Calendar,
   TrendingUp,
   RefreshCw,
+  Wallet,
 } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { clientsApi, ordersApi } from "@/lib/api";
+import { clientsApi, ordersApi, rewardsAdminApi } from "@/lib/api";
 
 const statusColors = {
   CONFIRMED: "bg-blue-50 text-blue-600",
@@ -52,6 +53,8 @@ export default function AdminClients() {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [withdrawalBusy, setWithdrawalBusy] = useState("");
 
   const fetchClients = async (q = "") => {
     setLoading(true);
@@ -68,6 +71,7 @@ export default function AdminClients() {
 
   useEffect(() => {
     fetchClients();
+    rewardsAdminApi.withdrawals().then((data) => setWithdrawals(data.withdrawals || [])).catch((err) => console.error("Erreur retraits récompenses", err.message));
   }, []);
 
   // Debounce recherche 400ms
@@ -131,6 +135,19 @@ export default function AdminClients() {
           <RefreshCw className="w-3.5 h-3.5" /> Actualiser
         </button>
       </div>
+
+      <section className="glass-card rounded-3xl p-5">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div><h2 className="flex items-center gap-2 text-lg font-bold text-apple-black"><Wallet className="h-5 w-5" /> Retraits des récompenses</h2><p className="mt-1 text-xs text-apple-mid">Après avoir envoyé l’argent manuellement au client, marquez la demande comme payée.</p></div>
+          <button type="button" onClick={() => rewardsAdminApi.withdrawals().then((data) => setWithdrawals(data.withdrawals || []))} className="rounded-xl border px-3 py-2 text-xs">Actualiser</button>
+        </div>
+        {!withdrawals.length ? <p className="rounded-xl bg-black/[0.03] p-4 text-sm text-apple-mid">Aucune demande en attente.</p> : <div className="space-y-3">
+          {withdrawals.map((w) => <article key={w.id} className="flex flex-col justify-between gap-3 rounded-2xl border border-black/[0.06] bg-white p-4 sm:flex-row sm:items-center">
+            <div><p className="font-semibold text-apple-black">{w.client?.name || "Client"} · {Number(w.amount).toLocaleString("fr-FR")} F CFA</p><p className="mt-1 text-sm text-apple-mid">{w.clientWhatsapp} → {w.payoutNumber}</p><p className="mt-1 text-xs text-apple-mid">{new Date(w.requestedAt).toLocaleString("fr-FR")} · {w.status === "REQUESTED" ? "En attente" : w.status === "PAID" ? "Payé" : "Refusé"}</p></div>
+            {w.status === "REQUESTED" && <div className="flex gap-2"><button disabled={!!withdrawalBusy} onClick={async () => { setWithdrawalBusy(w.id); try { await rewardsAdminApi.processWithdrawal(w.id, "PAID"); setWithdrawals((await rewardsAdminApi.withdrawals("REQUESTED")).withdrawals || []); } catch (e) { alert(e.message); } finally { setWithdrawalBusy(""); } }} className="rounded-xl bg-emerald-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">{withdrawalBusy === w.id ? "…" : "Marquer payé"}</button><button disabled={!!withdrawalBusy} onClick={async () => { const note = window.prompt("Motif du refus (facultatif)") || ""; setWithdrawalBusy(w.id); try { await rewardsAdminApi.processWithdrawal(w.id, "REJECTED", note); setWithdrawals((await rewardsAdminApi.withdrawals("REQUESTED")).withdrawals || []); } catch (e) { alert(e.message); } finally { setWithdrawalBusy(""); } }} className="rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 disabled:opacity-50">Refuser</button></div>}
+          </article>)}
+        </div>}
+      </section>
 
       <div className="glass-card rounded-3xl p-4">
         <div className="relative">
