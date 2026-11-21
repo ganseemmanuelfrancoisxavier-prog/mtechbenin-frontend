@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, Clock3, LogOut, Package, ShieldCheck, UserRound, Gift, Wallet, Copy } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, LogOut, Package, ShieldCheck, UserRound, Gift, Wallet, Copy, Award, Search, ChevronDown, ChevronRight, House, Coins, Smartphone, ShoppingBag } from "lucide-react";
 import { clientAccountApi } from "@/lib/clientAccountApi";
 
 const formatPrice = (value) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
@@ -109,6 +109,57 @@ export default function ClientAccountPage() {
     finally { setWithdrawalBusy(false); }
   };
 
+  const [historyTab, setHistoryTab] = useState("purchases");
+  const [historyFilter, setHistoryFilter] = useState("all");
+  const [expandedHistory, setExpandedHistory] = useState("");
+  const cashbackByOrder = new Map((rewards?.entries || []).filter((entry) => entry.type === "CASHBACK").map((entry) => [entry.orderRef, entry]));
+  const purchaseRows = [
+    ...orders.map((order) => {
+      const reward = cashbackByOrder.get(order.reference);
+      return {
+        id: order.reference,
+        reference: order.reference,
+        title: order.items?.map((item) => `${item.productName} ×${item.quantity}`).join(", ") || "Commande",
+        amount: reward?.saleAmount || order.total,
+        gain: reward?.amount || 0,
+        date: order.createdAt,
+        status: order.status,
+        details: reward?.details || "Récompense créditée après confirmation du paiement.",
+      };
+    }),
+    ...subscriptions.map((order) => {
+      const reward = cashbackByOrder.get(order.id);
+      return {
+        id: order.id,
+        reference: order.id,
+        title: `${order.service?.name || "Abonnement"} · ${order.plan?.label || "Formule"}`,
+        amount: reward?.saleAmount || order.amount,
+        gain: reward?.amount || 0,
+        date: order.createdAt,
+        status: order.status,
+        details: reward?.details || (order.expiresAt ? `Expiration : ${formatDate(order.expiresAt)}` : "Récompense créditée après confirmation du paiement."),
+      };
+    }),
+  ].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const referralRows = (rewards?.entries || []).filter((entry) => entry.type === "REFERRAL").map((entry) => ({
+    id: entry.id,
+    reference: entry.orderRef || entry.id,
+    title: "Achat effectué avec votre code",
+    amount: entry.saleAmount || 0,
+    gain: entry.amount,
+    date: entry.createdAt,
+    status: "CONFIRMED",
+    details: entry.details || "Commission de parrainage de 20 %.",
+  }));
+  const activeHistory = historyTab === "purchases" ? purchaseRows : referralRows;
+  const visibleHistory = activeHistory.filter((row) => historyFilter === "all" || (historyFilter === "earned" ? row.gain > 0 : row.gain === 0));
+  const copierCode = async () => {
+    try {
+      await navigator.clipboard.writeText(rewards.referralCode);
+      setNotice("Code de parrainage copié.");
+    } catch { setNotice("Votre code de parrainage : " + rewards.referralCode); }
+  };
+
   if (loading) {
     return <main className="min-h-[65vh] px-4 py-16 text-center text-sm text-neutral-500">Chargement de votre compte…</main>;
   }
@@ -127,57 +178,73 @@ export default function ClientAccountPage() {
         </div>
 
         {account ? (
-          <section className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="text-sm text-neutral-500">Bonjour</p>
-                <h2 className="mt-1 text-xl font-semibold text-neutral-950">{account.name}</h2>
-                <p className="mt-1 text-sm text-neutral-600">{account.whatsapp}</p>
+          <section className="space-y-4">
+            <div className="rounded-[28px] border border-neutral-200 bg-white p-5 shadow-sm sm:p-7">
+              <div className="flex items-start justify-between gap-3">
+                <div><p className="text-sm text-neutral-500">Bonjour,</p><h2 className="text-2xl font-extrabold tracking-tight text-black sm:text-3xl">{account.name}</h2><p className="mt-1 text-sm text-neutral-500">{account.whatsapp}</p></div>
+                <button type="button" onClick={handleDeconnexion} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-neutral-300 px-3 py-2 text-xs font-semibold text-black hover:bg-neutral-50 sm:px-4 sm:text-sm"><LogOut className="h-4 w-4" /> Déconnexion</button>
               </div>
-              <button type="button" onClick={handleDeconnexion} className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 px-3 py-2 text-sm text-neutral-600 transition hover:bg-neutral-50">
-                <LogOut className="h-4 w-4" /> Déconnexion
-              </button>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-neutral-50 p-4">
-                <p className="text-xs text-neutral-500">Commandes enregistrées</p>
-                <p className="mt-1 text-lg font-semibold text-neutral-950">{orders.length + subscriptions.length}</p>
-              </div>
-              <div className="rounded-2xl bg-neutral-50 p-4">
-                <p className="text-xs text-neutral-500">Points fidélité</p>
-                <p className="mt-1 text-lg font-semibold text-neutral-950">{account.points || 0}</p>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <button type="button" onClick={() => { setHistoryTab("purchases"); document.getElementById("reward-history")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="flex min-h-[92px] items-center gap-3 rounded-3xl border border-neutral-200 bg-white p-4 text-left shadow-sm transition hover:border-neutral-400">
+                  <ShoppingBag className="h-9 w-9 shrink-0 text-black" strokeWidth={1.6} /><span className="min-w-0"><strong className="block text-xs text-black sm:text-sm">Commandes enregistrées</strong><span className="mt-1 block text-2xl font-extrabold text-black">{orders.length + subscriptions.length}</span></span><ChevronRight className="ml-auto h-5 w-5 shrink-0 text-neutral-500" />
+                </button>
+                <button type="button" onClick={() => document.getElementById("client-rewards-panel")?.scrollIntoView({ behavior: "smooth", block: "center" })} className="flex min-h-[92px] items-center gap-3 rounded-3xl border border-neutral-200 bg-white p-4 text-left shadow-sm transition hover:border-neutral-400">
+                  <Award className="h-9 w-9 shrink-0 text-black" strokeWidth={1.6} /><span className="min-w-0"><strong className="block text-xs text-black sm:text-sm">Récompense</strong><span className="mt-1 block text-lg font-extrabold text-black sm:text-2xl">{formatPrice(rewards?.balance || 0)}</span></span><ChevronRight className="ml-auto h-5 w-5 shrink-0 text-neutral-500" />
+                </button>
               </div>
             </div>
 
-{rewards && (
-              <section className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 sm:p-5">
-                <div className="flex items-center gap-2 text-emerald-900"><Wallet className="h-5 w-5" /><h3 className="font-semibold">Mes récompenses</h3></div>
-                <p className="mt-3 text-2xl font-bold text-neutral-950">{formatPrice(rewards.balance)}</p>
-                <p className="mt-1 text-sm text-neutral-600">10 % de cashback sur vos achats confirmés. Gagnez aussi 20 % sur les achats effectués avec votre code.</p>
-                <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl bg-white p-3"><Gift className="h-4 w-4 text-emerald-700" /><span className="text-sm text-neutral-600">Votre code :</span><strong className="font-mono text-neutral-950">{rewards.referralCode}</strong><button type="button" onClick={() => navigator.clipboard?.writeText(rewards.referralCode)} className="ml-auto inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold"><Copy className="h-3.5 w-3.5" /> Copier</button></div>
-                <form onSubmit={handleWithdrawal} className="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-                  <input required min={2000} type="number" step="1" placeholder="Montant à retirer (min. 2 000 F)" value={withdrawalForm.amount} onChange={(e) => setWithdrawalForm((v) => ({ ...v, amount: e.target.value }))} className="rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm" />
-                  <input required inputMode="tel" placeholder="Numéro Mobile Money" value={withdrawalForm.payoutNumber} onChange={(e) => setWithdrawalForm((v) => ({ ...v, payoutNumber: e.target.value }))} className="rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm" />
-                  <button disabled={withdrawalBusy || (rewards.balance || 0) < 2000} className="rounded-xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50">{withdrawalBusy ? "Envoi…" : "Demander le retrait"}</button>
-                </form>
-                <p className="mt-2 text-xs text-neutral-500">Retrait possible dès 2 000 F. Le paiement est effectué après traitement de la demande.</p>
-                {!!rewards.withdrawals?.length && <div className="mt-4 space-y-2 border-t border-emerald-100 pt-3">{rewards.withdrawals.map((w) => <div key={w.id} className="flex justify-between gap-3 text-xs text-neutral-600"><span>{formatPrice(w.amount)} · {w.payoutNumber}</span><strong>{w.status === "REQUESTED" ? "En attente" : w.status === "PAID" ? "Payé" : "Refusé"}</strong></div>)}</div>}
-              </section>
-            )}
-
-
-            <div className="mt-7">
-              <div className="mb-3 flex items-center gap-2">
-                            <Package className="h-4 w-4 text-neutral-500" />
-                <h3 className="font-semibold text-neutral-950">Mes commandes</h3>
+            <section id="client-rewards-panel" className="overflow-hidden rounded-[28px] bg-gradient-to-br from-neutral-950 via-zinc-900 to-black p-5 text-white shadow-lg sm:p-7">
+              <div className="flex items-start justify-between gap-4">
+                <div className="max-w-[75%]"><h3 className="flex items-center gap-2 text-xl font-extrabold tracking-tight sm:text-2xl"><Gift className="h-7 w-7" /> Mes récompenses</h3><p className="mt-4 text-sm leading-relaxed text-neutral-200 sm:text-base">10 % de cashback sur vos achats confirmés. Gagnez aussi <strong className="text-white">20 %</strong> sur les achats effectués avec votre code.</p></div>
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-4xl sm:h-20 sm:w-20"><span aria-hidden="true">🎁</span></div>
               </div>
-              {orders.length + subscriptions.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-neutral-200 px-4 py-8 text-center">
-                  <p className="text-sm font-medium text-neutral-800">Aucune commande liée à ce numéro pour le moment.</p>
-                  <p className="mt-1 text-xs text-neutral-500">Utilisez le même numéro WhatsApp lors de vos prochains achats.</p>
-                </div>
-              ) : (
+              <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 text-neutral-950 sm:p-4">
+                <span className="flex min-w-0 flex-1 items-center gap-2"><Award className="h-5 w-5 shrink-0 text-neutral-700" /><span className="text-xs sm:text-sm">Votre code :</span><strong className="truncate font-mono text-sm font-extrabold sm:text-base">{rewards?.referralCode || "…"}</strong></span>
+                <button type="button" onClick={copierCode} disabled={!rewards?.referralCode} className="inline-flex items-center gap-2 rounded-xl border border-violet-200 px-3 py-2 text-xs font-bold text-violet-700 hover:bg-violet-50 disabled:opacity-50"><Copy className="h-4 w-4" /> Copier</button>
+              </div>
+            </section>
+
+            <section id="reward-history" className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h3 className="flex items-center gap-2 text-lg font-extrabold text-black sm:text-xl"><Clock3 className="h-6 w-6" /> Détail des récompenses</h3>
+                <label className="relative"><span className="sr-only">Filtrer l’historique</span><select value={historyFilter} onChange={(e) => setHistoryFilter(e.target.value)} className="appearance-none rounded-full border border-neutral-300 bg-white py-2 pl-3 pr-9 text-xs font-semibold text-neutral-800"><option value="all">Toutes les commandes</option><option value="earned">Récompenses validées</option><option value="pending">Sans récompense validée</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" /></label>
+              </div>
+              <div className="mt-4 grid grid-cols-2 rounded-full bg-neutral-100 p-1 text-center text-xs font-bold sm:text-sm">
+                <button type="button" onClick={() => { setHistoryTab("purchases"); setExpandedHistory(""); }} className={`rounded-full px-2 py-3 ${historyTab === "purchases" ? "bg-black text-white shadow" : "text-neutral-700"}`}>Mes commandes ({purchaseRows.length})</button>
+                <button type="button" onClick={() => { setHistoryTab("referrals"); setExpandedHistory(""); }} className={`rounded-full px-2 py-3 ${historyTab === "referrals" ? "bg-black text-white shadow" : "text-neutral-700"}`}>Avec mon code ({referralRows.length})</button>
+              </div>
+              <div className="mt-4 grid grid-cols-[48px_minmax(0,1fr)_auto] gap-2 border-b border-neutral-200 bg-neutral-50 px-3 py-2 text-[10px] font-bold text-neutral-500 sm:grid-cols-[70px_minmax(0,2fr)_1fr_1fr_1fr] sm:text-xs">
+                <span>#</span><span>Commande</span><span className="hidden sm:block">Montant</span><span className="hidden sm:block">Gain</span><span className="text-right sm:text-left">Date</span>
+              </div>
+              {!visibleHistory.length ? <div className="rounded-b-2xl border border-t-0 border-neutral-200 px-4 py-10 text-center"><p className="text-sm font-semibold text-neutral-800">Aucune opération dans cette sélection.</p><p className="mt-1 text-xs text-neutral-500">Vos gains apparaîtront ici après confirmation du paiement.</p></div> : <div className="divide-y divide-neutral-100">
+                {visibleHistory.map((row) => <div key={row.id}>
+                  <button type="button" onClick={() => setExpandedHistory(expandedHistory === row.id ? "" : row.id)} className="grid w-full grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-2 px-3 py-3 text-left transition hover:bg-neutral-50 sm:grid-cols-[70px_minmax(0,2fr)_1fr_1fr_1fr]">
+                    <span className="text-[10px] font-bold text-neutral-700 sm:text-xs">#{String(row.reference).slice(-6)}</span>
+                    <span className="flex min-w-0 items-center gap-2"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-neutral-950 text-xs font-bold text-white">{historyTab === "referrals" ? <Gift className="h-4 w-4" /> : <span>{String(row.title).trim().charAt(0).toUpperCase()}</span>}</span><span className="min-w-0"><strong className="block truncate text-[11px] font-semibold text-neutral-900 sm:text-sm">{row.title}</strong>{historyTab === "referrals" && <span className="mt-0.5 inline-block rounded-full bg-violet-50 px-2 py-0.5 text-[9px] font-semibold text-violet-700">Via votre code</span>}</span></span>
+                    <span className="hidden text-xs font-semibold text-neutral-900 sm:block">{row.amount ? formatPrice(row.amount) : "—"}</span><span className="hidden text-xs font-bold text-green-700 sm:block">{row.gain ? "+" + formatPrice(row.gain) : "—"}</span>
+                    <span className="flex items-center justify-end gap-1 text-right text-[10px] text-neutral-600 sm:justify-between sm:text-xs">{formatDate(row.date)}<ChevronRight className="h-4 w-4 shrink-0 text-neutral-500" /></span>
+                  </button>
+                  <div className="flex justify-between gap-2 px-[64px] pb-2 text-[10px] sm:hidden"><span className="text-neutral-500">Achat {row.amount ? formatPrice(row.amount) : "—"}</span><span className="font-bold text-green-700">Gain {row.gain ? "+" + formatPrice(row.gain) : "—"}</span></div>
+                  {expandedHistory === row.id && <div className="flex flex-wrap justify-between gap-2 bg-neutral-50 px-4 py-3 text-xs"><span className="text-neutral-700">{row.details} · Réf. {row.reference}</span><strong className="text-neutral-800">Statut : {row.gain ? "Récompense créditée" : row.status}</strong></div>}
+                </div>)}
+              </div>}
+            </section>
+
+            <section className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
+              <h3 className="flex items-center gap-2 text-lg font-extrabold text-black sm:text-xl"><House className="h-6 w-6" /> Demande de retrait</h3>
+              <form onSubmit={handleWithdrawal} className="mt-4 space-y-3">
+                <label className="flex items-center gap-3 rounded-2xl border border-neutral-300 px-4 py-3"><Coins className="h-5 w-5 shrink-0 text-neutral-800" /><input required min={2000} max={rewards?.balance || 0} type="number" step="1" placeholder="Montant (minimum 2 000 F)" value={withdrawalForm.amount} onChange={(e) => setWithdrawalForm((v) => ({ ...v, amount: e.target.value }))} className="min-w-0 flex-1 text-sm outline-none placeholder:text-neutral-500" /></label>
+                <label className="flex items-center gap-3 rounded-2xl border border-neutral-300 px-4 py-3"><Smartphone className="h-5 w-5 shrink-0 text-neutral-800" /><input required inputMode="tel" placeholder="Numéro Mobile Money pour recevoir" value={withdrawalForm.payoutNumber} onChange={(e) => setWithdrawalForm((v) => ({ ...v, payoutNumber: e.target.value }))} className="min-w-0 flex-1 text-sm outline-none placeholder:text-neutral-500" /></label>
+                <p className="text-xs text-neutral-500">Disponible : {formatPrice(rewards?.balance || 0)} · Minimum de retrait : 2 000 FCFA.</p>
+                <button disabled={withdrawalBusy || (rewards?.balance || 0) < 2000} className="w-full rounded-2xl bg-black px-5 py-4 text-sm font-extrabold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40">{withdrawalBusy ? "Envoi de la demande…" : "Demander le retrait"}</button>
+              </form>
+              {!!rewards?.withdrawals?.length && <div className="mt-4 space-y-2 border-t border-neutral-200 pt-4">{rewards.withdrawals.map((w) => <div key={w.id} className="flex flex-wrap justify-between gap-2 rounded-xl bg-neutral-50 p-3 text-xs text-neutral-700"><span>{formatPrice(w.amount)} · {w.payoutNumber}</span><strong>{w.status === "REQUESTED" ? "En attente" : w.status === "PAID" ? "Payé" : "Refusé"}</strong></div>)}</div>}
+            </section>
+            {notice && <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{notice}</p>}
+            {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+          </section>
+        ) : (
                 <div className="space-y-2">
                   {orders.map((order) => (
                     <article key={order.reference} className="rounded-2xl border border-neutral-200 p-4">
