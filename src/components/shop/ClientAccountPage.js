@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, Clock3, LogOut, ShieldCheck, UserRound, Award, ChevronDown, ChevronRight, House, Coins, Smartphone, ShoppingBag } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, LogOut, ShieldCheck, UserRound, Award, ChevronDown, ChevronRight, House, Coins, Smartphone } from "lucide-react";
 import { clientAccountApi } from "@/lib/clientAccountApi";
 
 const formatPrice = (value) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
@@ -185,11 +185,11 @@ export default function ClientAccountPage() {
                 <button type="button" onClick={handleDeconnexion} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-neutral-300 px-3 py-2 text-xs font-semibold text-black hover:bg-neutral-50 sm:px-4 sm:text-sm"><LogOut className="h-4 w-4" /> Déconnexion</button>
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3">
-                <button type="button" onClick={() => { setHistoryTab("purchases"); document.getElementById("reward-history")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="flex min-h-[92px] items-center gap-3 rounded-3xl border border-neutral-200 bg-white p-4 text-left shadow-sm transition hover:border-neutral-400">
-                  <ShoppingBag className="h-9 w-9 shrink-0 text-black" strokeWidth={1.6} /><span className="min-w-0"><strong className="block text-xs text-black sm:text-sm">Commandes enregistrées</strong><span className="mt-1 block text-2xl font-extrabold text-black">{orders.length + subscriptions.length}</span></span><ChevronRight className="ml-auto h-5 w-5 shrink-0 text-neutral-500" />
+                <button type="button" onClick={() => { setHistoryTab("purchases"); document.getElementById("reward-history")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="flex min-h-[92px] items-center justify-between gap-2 rounded-3xl border border-neutral-200 bg-white p-4 text-left shadow-sm transition hover:border-neutral-400">
+                  <span className="min-w-0 flex-1"><strong className="block text-xs leading-snug text-black sm:text-sm">Commandes enregistrées</strong><span className="mt-1 block text-2xl font-extrabold leading-none text-black">{orders.length + subscriptions.length}</span></span><ChevronRight className="h-5 w-5 shrink-0 text-neutral-500" />
                 </button>
-                <button type="button" onClick={() => document.getElementById("client-rewards-panel")?.scrollIntoView({ behavior: "smooth", block: "center" })} className="flex min-h-[92px] items-center gap-3 rounded-3xl border border-neutral-200 bg-white p-4 text-left shadow-sm transition hover:border-neutral-400">
-                  <Award className="h-9 w-9 shrink-0 text-black" strokeWidth={1.6} /><span className="min-w-0"><strong className="block text-xs text-black sm:text-sm">Récompense</strong><span className="mt-1 block text-lg font-extrabold text-black sm:text-2xl">{formatPrice(rewards?.balance || 0)}</span></span><ChevronRight className="ml-auto h-5 w-5 shrink-0 text-neutral-500" />
+                <button type="button" onClick={() => document.getElementById("client-rewards-panel")?.scrollIntoView({ behavior: "smooth", block: "center" })} className="flex min-h-[92px] items-center justify-between gap-2 rounded-3xl border border-neutral-200 bg-white p-4 text-left shadow-sm transition hover:border-neutral-400">
+                  <span className="min-w-0 flex-1"><strong className="block text-xs leading-snug text-black sm:text-sm">Récompense</strong><span className="mt-1 block whitespace-nowrap text-base font-extrabold leading-tight text-black sm:text-2xl">{formatPrice(rewards?.balance || 0)}</span></span><ChevronRight className="h-5 w-5 shrink-0 text-neutral-500" />
                 </button>
               </div>
             </div>
