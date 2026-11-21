@@ -28,17 +28,17 @@ async function refresh() {
   return true;
 }
 
-async function request(path, options = {}, retry = true) {
+async function request(path, options = {}, retry = true, basePath = "/api/client-account") {
   const headers = { "Content-Type": "application/json", ...options.headers };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
-  const response = await fetch(`${API_URL}/api/client-account${path}`, {
+  const response = await fetch(`${API_URL}${basePath}${path}`, {
     ...options,
     credentials: "include",
     headers,
   });
   if (response.status === 401 && retry && await refresh()) {
-    return request(path, options, false);
+    return request(path, options, false, basePath);
   }
   const data = await response.json();
   if (!response.ok) {
@@ -57,6 +57,8 @@ export const clientAccountApi = {
   verifyCode: (data) => post("/verify-code", data),
   me: () => request("/me"),
   orders: () => request("/orders"),
+  rewards: () => request("", {}, true, "/api/rewards"),
+  requestWithdrawal: (data) => request("/withdrawals", { method: "POST", body: JSON.stringify(data) }, true, "/api/rewards"),
   logout: async () => {
     try { await post("/logout", {}); } finally { setToken(null); }
   },

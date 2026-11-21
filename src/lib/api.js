@@ -688,3 +688,12 @@ export const reparationAdminApi = {
       body: JSON.stringify(cancelledRetained === undefined ? {} : { cancelledRetained }),
     }),
 };
+
+
+export const rewardsAdminApi = {
+  withdrawals: (status = "REQUESTED") => apiFetch(`/api/rewards/admin/withdrawals?status=${encodeURIComponent(status)}`),
+  processWithdrawal: (id, status, adminNote = "") => apiFetch(`/api/rewards/admin/withdrawals/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status, adminNote }),
+  }),
+};

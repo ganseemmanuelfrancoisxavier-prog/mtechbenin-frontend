@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, Clock3, LogOut, Package, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, LogOut, Package, ShieldCheck, UserRound, Gift, Wallet, Copy } from "lucide-react";
 import { clientAccountApi } from "@/lib/clientAccountApi";
 
 const formatPrice = (value) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
@@ -13,6 +13,9 @@ export default function ClientAccountPage() {
   const [account, setAccount] = useState(null);
   const [orders, setOrders] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [rewards, setRewards] = useState(null);
+  const [withdrawalForm, setWithdrawalForm] = useState({ amount: "", payoutNumber: "" });
+  const [withdrawalBusy, setWithdrawalBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -34,6 +37,7 @@ export default function ClientAccountPage() {
         const { client } = await clientAccountApi.me();
         if (!mounted) return;
         setAccount(client);
+        try { setRewards(await clientAccountApi.rewards()); } catch { /* Recharge possible après connexion. */ }
         try { await chargerHistorique(); } catch { /* Le compte reste accessible si l'historique ne répond pas. */ }
       } catch {
         // Le visiteur n'a pas encore ouvert de session.
@@ -73,6 +77,7 @@ export default function ClientAccountPage() {
     try {
       const result = await clientAccountApi.verifyCode({ whatsapp: form.whatsapp, code: form.code });
       setAccount(result.client);
+      await clientAccountApi.rewards().then(setRewards).catch(() => {});
       await chargerHistorique().catch(() => {});
       setNotice("Votre compte est prêt. Votre numéro WhatsApp est vérifié.");
     } catch (err) {
@@ -87,10 +92,21 @@ export default function ClientAccountPage() {
     setAccount(null);
     setOrders([]);
     setSubscriptions([]);
+    setRewards(null);
     setCodeSent(false);
     setForm({ name: "", whatsapp: "+229 ", email: "", code: "" });
     setNotice("Vous êtes déconnecté.");
     setError("");
+  };
+
+  const handleWithdrawal = async (event) => {
+    event.preventDefault(); setError(""); setNotice(""); setWithdrawalBusy(true);
+    try {
+      await clientAccountApi.requestWithdrawal({ amount: Number(withdrawalForm.amount), payoutNumber: withdrawalForm.payoutNumber });
+      setRewards(await clientAccountApi.rewards()); setWithdrawalForm({ amount: "", payoutNumber: "" });
+      setNotice("Votre demande de retrait a été envoyée.");
+    } catch (err) { setError(err.message); }
+    finally { setWithdrawalBusy(false); }
   };
 
   if (loading) {
@@ -136,6 +152,22 @@ export default function ClientAccountPage() {
 
             <div className="mt-7">
               <div className="mb-3 flex items-center gap-2">
+            {rewards && (
+              <section className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 sm:p-5">
+                <div className="flex items-center gap-2 text-emerald-900"><Wallet className="h-5 w-5" /><h3 className="font-semibold">Mes récompenses</h3></div>
+                <p className="mt-3 text-2xl font-bold text-neutral-950">{formatPrice(rewards.balance)}</p>
+                <p className="mt-1 text-sm text-neutral-600">10 % de cashback sur vos achats confirmés. Gagnez aussi 20 % sur les achats effectués avec votre code.</p>
+                <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl bg-white p-3"><Gift className="h-4 w-4 text-emerald-700" /><span className="text-sm text-neutral-600">Votre code :</span><strong className="font-mono text-neutral-950">{rewards.referralCode}</strong><button type="button" onClick={() => navigator.clipboard?.writeText(rewards.referralCode)} className="ml-auto inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold"><Copy className="h-3.5 w-3.5" /> Copier</button></div>
+                <form onSubmit={handleWithdrawal} className="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                  <input required min={2000} type="number" step="1" placeholder="Montant à retirer (min. 2 000 F)" value={withdrawalForm.amount} onChange={(e) => setWithdrawalForm((v) => ({ ...v, amount: e.target.value }))} className="rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm" />
+                  <input required inputMode="tel" placeholder="Numéro Mobile Money" value={withdrawalForm.payoutNumber} onChange={(e) => setWithdrawalForm((v) => ({ ...v, payoutNumber: e.target.value }))} className="rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm" />
+                  <button disabled={withdrawalBusy || (rewards.balance || 0) < 2000} className="rounded-xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50">{withdrawalBusy ? "Envoi…" : "Demander le retrait"}</button>
+                </form>
+                <p className="mt-2 text-xs text-neutral-500">Retrait possible dès 2 000 F. Le paiement est effectué après traitement de la demande.</p>
+                {!!rewards.withdrawals?.length && <div className="mt-4 space-y-2 border-t border-emerald-100 pt-3">{rewards.withdrawals.map((w) => <div key={w.id} className="flex justify-between gap-3 text-xs text-neutral-600"><span>{formatPrice(w.amount)} · {w.payoutNumber}</span><strong>{w.status === "REQUESTED" ? "En attente" : w.status === "PAID" ? "Payé" : "Refusé"}</strong></div>)}</div>}
+              </section>
+            )}
+
                 <Package className="h-4 w-4 text-neutral-500" />
                 <h3 className="font-semibold text-neutral-950">Mes commandes</h3>
               </div>
