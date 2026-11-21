@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, Clock3, LogOut, Package, ShieldCheck, UserRound } from "lucide-react";
 import { clientAccountApi } from "@/lib/clientAccountApi";
 
-const formatPrice = (value) => \`\${Number(value || 0).toLocaleString("fr-FR")} FCFA\`;
+const formatPrice = (value) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
 const formatDate = (value) => value
   ? new Date(value).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })
   : "";
@@ -58,7 +58,7 @@ export default function ClientAccountPage() {
         email: form.email,
       });
       setCodeSent(true);
-      setNotice(\`\${result.message} Saisissez le code à 6 chiffres reçu.\`);
+      setNotice(`${result.message} Saisissez le code à 6 chiffres reçu.`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -151,7 +151,7 @@ export default function ClientAccountPage() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold text-neutral-950">Commande {order.reference}</p>
-                          <p className="mt-1 text-xs text-neutral-500">{order.items.map((item) => \`\${item.productName} ×\${item.quantity}\`).join(", ")}</p>
+                          <p className="mt-1 text-xs text-neutral-500">{order.items.map((item) => `${item.productName} ×${item.quantity}`).join(", ")}</p>
                           <p className="mt-1 text-xs text-neutral-500">{formatDate(order.createdAt)}</p>
                         </div>
                         <div className="text-right">
@@ -166,7 +166,7 @@ export default function ClientAccountPage() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold text-neutral-950">{order.service?.name || "Abonnement"} · {order.plan?.label || "Formule"}</p>
-                          <p className="mt-1 text-xs text-neutral-500">{formatDate(order.createdAt)}{order.expiresAt ? \` · expire le \${formatDate(order.expiresAt)}\` : ""}</p>
+                          <p className="mt-1 text-xs text-neutral-500">{formatDate(order.createdAt)}{order.expiresAt ? ` · expire le ${formatDate(order.expiresAt)}` : ""}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-semibold text-neutral-950">{formatPrice(order.amount)}</p>

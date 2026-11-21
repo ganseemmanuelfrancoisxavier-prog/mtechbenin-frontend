@@ -14,7 +14,7 @@ function setToken(token) {
 }
 
 async function refresh() {
-  const response = await fetch(\`\${API_URL}/api/client-account/refresh\`, {
+  const response = await fetch(`${API_URL}/api/client-account/refresh`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -31,8 +31,8 @@ async function refresh() {
 async function request(path, options = {}, retry = true) {
   const headers = { "Content-Type": "application/json", ...options.headers };
   const token = getToken();
-  if (token) headers.Authorization = \`Bearer \${token}\`;
-  const response = await fetch(\`\${API_URL}/api/client-account\${path}\`, {
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const response = await fetch(`${API_URL}/api/client-account${path}`, {
     ...options,
     credentials: "include",
     headers,
