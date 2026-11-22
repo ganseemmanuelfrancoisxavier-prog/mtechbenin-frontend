@@ -36,7 +36,7 @@ function Sk({ w = "w-full", h = "h-3.5", rounded = "rounded-full" }) {
 
 function StatSkeleton() {
   return (
-    <div className="glass-card rounded-3xl p-5">
+    <div className="glass-card min-w-0 rounded-3xl p-4 sm:p-5">
       <div className="w-9 h-9 bg-black/[0.06] rounded-2xl animate-pulse mb-4" />
       <Sk w="w-20" h="h-6" rounded="rounded-xl" />
       <div className="mt-1.5">
@@ -182,17 +182,17 @@ export default function AdminDashboard() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid min-w-0 grid-cols-2 gap-3 lg:grid-cols-4">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <StatSkeleton key={i} />)
           : stats.map((stat) => {
               const Icon = stat.icon;
               return (
-                <div key={stat.label} className="glass-card rounded-3xl p-5">
+                <div key={stat.label} className="glass-card min-w-0 rounded-3xl p-4 sm:p-5">
                   <div className={`w-9 h-9 ${stat.bg} rounded-2xl flex items-center justify-center mb-4`}>
                     <Icon className={`w-4 h-4 ${stat.color}`} strokeWidth={1.8} />
                   </div>
-                  <p className="font-display font-black text-xl text-apple-black tracking-tight">
+                  <p className="break-words font-display text-lg font-black leading-tight text-apple-black tracking-tight sm:text-xl">
                     {stat.value}
                   </p>
                   <p className="text-apple-mid text-[12px] mt-0.5">{stat.label}</p>
@@ -201,9 +201,9 @@ export default function AdminDashboard() {
             })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-3">
         {/* Commandes récentes */}
-        <div className="lg:col-span-2 glass-card rounded-3xl p-5">
+        <div className="lg:col-span-2 glass-card min-w-0 rounded-3xl p-4 sm:p-5">
           <div className="flex items-center justify-between mb-5">
             <p className="font-display font-bold text-[15px] text-apple-black">
               Commandes récentes
@@ -261,7 +261,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top produits */}
-        <div className="glass-card rounded-3xl p-5">
+        <div className="glass-card min-w-0 rounded-3xl p-4 sm:p-5">
           <p className="font-display font-bold text-[15px] text-apple-black mb-5">
             Top produits
           </p>
@@ -312,7 +312,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Suivi détaillé des récompenses client */}
-      <section className="glass-card rounded-3xl p-5">
+      <section className="glass-card min-w-0 rounded-3xl p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="flex items-center gap-2 font-display text-[17px] font-bold text-apple-black"><Wallet className="h-5 w-5" /> Récompenses des clients inscrits</h2>
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
               <input value={rewardSearch} onChange={(e) => setRewardSearch(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") chargerSuiviRecompenses(); }} placeholder="Rechercher un nom, numéro ou code" className="w-full rounded-xl border border-black/[0.07] bg-white py-2.5 pl-9 pr-3 text-[12px]" />
             </div>
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[860px] text-left text-[11px]">
+              <table className="w-full min-w-0 text-left text-[11px] sm:min-w-[860px]">
                 <thead className="hidden sm:table-header-group"><tr className="border-b border-black/[0.07] text-apple-mid"><th className="px-2 py-2">Client / code</th><th className="px-2 py-2">Gagné</th><th className="px-2 py-2">Déjà versé</th><th className="px-2 py-2">Disponible</th><th className="px-2 py-2">En attente</th><th className="px-2 py-2">Reste à verser</th></tr></thead>
                 <tbody>{rewardData.clients.map((client) => <tr key={client.whatsapp} className="mb-3 block overflow-hidden rounded-2xl border border-black/[0.06] bg-white align-top sm:mb-0 sm:table-row sm:rounded-none sm:border-x-0 sm:border-t-0 sm:border-b sm:border-black/[0.04] sm:bg-transparent">
                   <td colSpan={6} className="block p-0 sm:table-cell">
@@ -368,7 +368,7 @@ export default function AdminDashboard() {
       </section>
 
       {/* Stock faible */}
-      <div className="glass-card rounded-3xl p-5">
+      <div className="glass-card min-w-0 rounded-3xl p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-4">
           {!loading && lowStockProducts.length > 0 && (
             <div className="w-1.5 h-1.5 bg-cta rounded-full animate-pulse" />
