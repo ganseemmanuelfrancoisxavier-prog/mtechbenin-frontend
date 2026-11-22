@@ -247,7 +247,7 @@ export default function AdminLayout({ children }) {
       )}
 
       {/* Zone principale */}
-      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 lg:ml-60 flex flex-col min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-xl border-b border-black/[0.06] px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -286,7 +286,7 @@ export default function AdminLayout({ children }) {
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-7">{children}</main>
+        <main className="min-w-0 flex-1 p-4 md:p-7">{children}</main>
       </div>
     </div>
   );
