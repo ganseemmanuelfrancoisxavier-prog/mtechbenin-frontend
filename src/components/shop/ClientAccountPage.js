@@ -198,7 +198,7 @@ export default function ClientAccountPage() {
 
             <section id="client-rewards-panel" aria-label="Mes récompenses" className="relative isolate overflow-hidden rounded-[28px] shadow-lg">
               <img src="/images/client-rewards-card.svg" alt="" aria-hidden="true" className="block h-auto w-full" />
-                            <span className="absolute left-[34%] top-[70.5%] flex h-[15%] w-[33%] items-center overflow-hidden whitespace-nowrap bg-white pl-[1%] font-mono text-[clamp(.55rem,3.2vw,1.35rem)] font-extrabold leading-none tracking-tight text-black sm:text-[clamp(.7rem,2.1vw,1.35rem)]">{rewards?.referralCode || "…"}</span>
+                            <span className="absolute left-[34%] top-[75%] flex h-[15%] w-[33%] items-center overflow-hidden whitespace-nowrap bg-white pl-[1%] font-mono text-[clamp(.55rem,3.2vw,1.35rem)] font-extrabold leading-none tracking-tight text-black sm:text-[clamp(.7rem,2.1vw,1.35rem)]">{rewards?.referralCode || "…"}</span>
               <button type="button" onClick={copierCode} disabled={!rewards?.referralCode} aria-label="Copier votre code de parrainage" className="absolute left-[71.5%] top-[71.5%] h-[20%] w-[24%] cursor-pointer rounded-2xl bg-transparent focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600 disabled:cursor-default" />
             </section>
 
