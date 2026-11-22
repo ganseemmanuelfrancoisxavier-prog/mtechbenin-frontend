@@ -2119,6 +2119,11 @@ export default function AdminAbonnements() {
                                             {order.clientEmail}
                                           </p>
                                         )}
+                                        <p className="mt-1 text-[10px] text-apple-mid">
+                                          {order.payment?.paidAt
+                                            ? `Payé le ${formatJourBenin(order.payment.paidAt)}`
+                                            : "Date de paiement indisponible"}
+                                        </p>
                                       </div>
                                       <span className={`flex-shrink-0 rounded-full px-2 py-1 text-[10px] font-medium ${
                                         commandesAvecAcces.has(order.id)
@@ -2375,6 +2380,11 @@ export default function AdminAbonnements() {
                                           <p className="text-[12px] font-semibold text-apple-black">
                                             {client.name}
                                           </p>
+                                          {client.paidAt && (
+                                            <p className="mt-0.5 text-[10px] text-apple-mid">
+                                              Payé le {formatJourBenin(client.paidAt)}
+                                            </p>
+                                          )}
                                           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                                             {client.whatsapp && (
                                               <p className="text-[10px] text-apple-mid font-mono">
