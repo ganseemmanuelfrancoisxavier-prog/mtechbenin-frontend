@@ -111,6 +111,7 @@ export default function ClientAccountPage() {
 
   const [historyTab, setHistoryTab] = useState("purchases");
   const [historyFilter, setHistoryFilter] = useState("all");
+  const [showAllHistory, setShowAllHistory] = useState(false);
   const [expandedHistory, setExpandedHistory] = useState("");
   const cashbackByOrder = new Map((rewards?.entries || []).filter((entry) => entry.type === "CASHBACK").map((entry) => [entry.orderRef, entry]));
   const purchaseRows = [
@@ -153,6 +154,7 @@ export default function ClientAccountPage() {
   }));
   const activeHistory = historyTab === "purchases" ? purchaseRows : referralRows;
   const visibleHistory = activeHistory.filter((row) => historyFilter === "all" || (historyFilter === "earned" ? row.gain > 0 : row.gain === 0));
+  const displayedHistory = showAllHistory ? visibleHistory : visibleHistory.slice(0, 4);
   const copierCode = async () => {
     try {
       await navigator.clipboard.writeText(rewards.referralCode);
@@ -203,17 +205,17 @@ export default function ClientAccountPage() {
             <section id="reward-history" className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="flex items-center gap-2 text-lg font-extrabold text-black sm:text-xl"><Clock3 className="h-6 w-6" /> Détail des récompenses</h3>
-                <label className="relative"><span className="sr-only">Filtrer l’historique</span><select value={historyFilter} onChange={(e) => setHistoryFilter(e.target.value)} className="appearance-none rounded-full border border-neutral-300 bg-white py-2 pl-3 pr-9 text-xs font-semibold text-neutral-800"><option value="all">Toutes les commandes</option><option value="earned">Récompenses validées</option><option value="pending">Sans récompense validée</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" /></label>
+                <label className="relative"><span className="sr-only">Filtrer l’historique</span><select value={historyFilter} onChange={(e) => { setHistoryFilter(e.target.value); setShowAllHistory(false); }} className="appearance-none rounded-full border border-neutral-300 bg-white py-2 pl-3 pr-9 text-xs font-semibold text-neutral-800"><option value="all">Toutes les commandes</option><option value="earned">Récompenses validées</option><option value="pending">Sans récompense validée</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" /></label>
               </div>
               <div className="mt-4 grid grid-cols-2 rounded-full bg-neutral-100 p-1 text-center text-xs font-bold sm:text-sm">
-                <button type="button" onClick={() => { setHistoryTab("purchases"); setExpandedHistory(""); }} className={`rounded-full px-2 py-3 ${historyTab === "purchases" ? "bg-black text-white shadow" : "text-neutral-700"}`}>Mes commandes ({purchaseRows.length})</button>
-                <button type="button" onClick={() => { setHistoryTab("referrals"); setExpandedHistory(""); }} className={`rounded-full px-2 py-3 ${historyTab === "referrals" ? "bg-black text-white shadow" : "text-neutral-700"}`}>Avec mon code ({referralRows.length})</button>
+                <button type="button" onClick={() => { setHistoryTab("purchases"); setExpandedHistory(""); setShowAllHistory(false); }} className={`rounded-full px-2 py-3 ${historyTab === "purchases" ? "bg-black text-white shadow" : "text-neutral-700"}`}>Mes commandes ({purchaseRows.length})</button>
+                <button type="button" onClick={() => { setHistoryTab("referrals"); setExpandedHistory(""); setShowAllHistory(false); }} className={`rounded-full px-2 py-3 ${historyTab === "referrals" ? "bg-black text-white shadow" : "text-neutral-700"}`}>Avec mon code ({referralRows.length})</button>
               </div>
               <div className="mt-4 grid grid-cols-[48px_minmax(0,1fr)_auto] gap-2 border-b border-neutral-200 bg-neutral-50 px-3 py-2 text-[10px] font-bold text-neutral-500 sm:grid-cols-[70px_minmax(0,2fr)_1fr_1fr_1fr] sm:text-xs">
                 <span>#</span><span>Commande</span><span className="hidden sm:block">Montant</span><span className="hidden sm:block">Gain</span><span className="text-right sm:text-left">Date</span>
               </div>
               {!visibleHistory.length ? <div className="rounded-b-2xl border border-t-0 border-neutral-200 px-4 py-10 text-center"><p className="text-sm font-semibold text-neutral-800">Aucune opération dans cette sélection.</p><p className="mt-1 text-xs text-neutral-500">Vos gains apparaîtront ici après confirmation du paiement.</p></div> : <div className="divide-y divide-neutral-100">
-                {visibleHistory.map((row) => <div key={row.id}>
+                {displayedHistory.map((row) => <div key={row.id}>
                   <button type="button" onClick={() => setExpandedHistory(expandedHistory === row.id ? "" : row.id)} className="grid w-full grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-2 px-3 py-3 text-left transition hover:bg-neutral-50 sm:grid-cols-[70px_minmax(0,2fr)_1fr_1fr_1fr]">
                     <span className="text-[10px] font-bold text-neutral-700 sm:text-xs">#{String(row.reference).slice(-6)}</span>
                     <span className="min-w-0"><strong className="block truncate text-[11px] font-semibold text-neutral-900 sm:text-sm">{row.title}</strong>{historyTab === "referrals" && <span className="mt-0.5 inline-block rounded-full bg-violet-50 px-2 py-0.5 text-[9px] font-semibold text-violet-700">Via votre code</span>}</span>
@@ -224,6 +226,13 @@ export default function ClientAccountPage() {
                   {expandedHistory === row.id && <div className="flex flex-wrap justify-between gap-2 bg-neutral-50 px-4 py-3 text-xs"><span className="text-neutral-700">{row.details} · Réf. {row.reference}</span><strong className="text-neutral-800">Statut : {row.gain ? "Récompense créditée" : row.status}</strong></div>}
                 </div>)}
               </div>}
+              {visibleHistory.length > 4 && (
+                <div className="border-t border-neutral-100 px-4 py-3 text-center">
+                  <button type="button" onClick={() => setShowAllHistory((value) => !value)} className="rounded-full border border-neutral-300 px-5 py-2 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+                    {showAllHistory ? "Voir moins" : "Voir plus"}
+                  </button>
+                </div>
+              )}
             </section>
 
             <section className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
