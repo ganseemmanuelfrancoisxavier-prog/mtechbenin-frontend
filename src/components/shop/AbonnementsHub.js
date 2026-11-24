@@ -11,6 +11,9 @@ import {
   VolumeX,
   Wrench,
   Clock,
+  Zap,
+  LockKeyhole,
+  MessageCircle,
 } from "lucide-react";
 import { formatPrice, prixDepart } from "@/lib/format";
 import useAbonnementStore from "@/store/abonnementStore";
@@ -371,17 +374,20 @@ export default function AbonnementsHub() {
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
             {
-              emoji: "⚡",
+              icon: Zap,
+              iconClass: "text-amber-500",
               title: "Activation rapide",
               desc: "Moins de 5 minutes après paiement",
             },
             {
-              emoji: "🔒",
+              icon: LockKeyhole,
+              iconClass: "text-emerald-600",
               title: "Paiement sécurisé",
               desc: "MTN MoMo, Moov Money, Wave",
             },
             {
-              emoji: "💬",
+              icon: MessageCircle,
+              iconClass: "text-slate-600",
               title: "Support 7j/7",
               desc: "Disponible via WhatsApp",
             },
@@ -394,7 +400,7 @@ export default function AbonnementsHub() {
                 border: "1px solid rgba(0,0,0,0.05)",
               }}
             >
-              <span className="text-2xl flex-shrink-0">{g.emoji}</span>
+              <g.icon className={`w-7 h-7 flex-shrink-0 ${g.iconClass}`} strokeWidth={1.8} aria-hidden="true" />
               <div>
                 <p className="font-semibold text-apple-black text-[13px] mb-0.5">
                   {g.title}
