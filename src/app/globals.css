@@ -669,3 +669,21 @@
     font-size: 16px !important;
   }
 }
+
+
+/* Allège les filtres qui coûtent cher au GPU des téléphones pendant le défilement. */
+@media (hover: none) and (pointer: coarse) {
+  .glass,
+  .glass-dark,
+  .glass-card,
+  .glass-admin,
+  .btn-glass,
+  .btn-glass-dark {
+    backdrop-filter: blur(8px) saturate(130%);
+    -webkit-backdrop-filter: blur(8px) saturate(130%);
+  }
+
+  .backdrop-blur-xl {
+    --tw-backdrop-blur: blur(10px) !important;
+  }
+}
