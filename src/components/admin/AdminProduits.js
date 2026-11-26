@@ -46,6 +46,8 @@ const emptyForm = {
   featured: false,
   media: emptyMediaSlots,
   model3dUrl: "",
+  model3dFrontTexture: "",
+  model3dBackTexture: "",
   specs: [],
 };
 
@@ -103,6 +105,11 @@ function buildMediaSlots(product) {
 
 function getModel3dUrl(raw) {
   const metadata = getInternalSpecs(raw).find((spec) => spec.label === "__mtech_model_3d_url");
+  return metadata?.value || "";
+}
+
+function getModel3dTexture(raw, side) {
+  const metadata = getInternalSpecs(raw).find((spec) => spec.label === `__mtech_model_3d_${side}_texture`);
   return metadata?.value || "";
 }
 
@@ -544,6 +551,8 @@ export default function AdminProduits({ smartphoneOnly = false }) {
       featured: product.featured || false,
       media: buildMediaSlots(product),
       model3dUrl: getModel3dUrl(product.specs),
+      model3dFrontTexture: getModel3dTexture(product.specs, "front"),
+      model3dBackTexture: getModel3dTexture(product.specs, "back"),
       specs: parseSpecs(product.specs),
     });
     setVariantTypes([]);
@@ -592,9 +601,19 @@ export default function AdminProduits({ smartphoneOnly = false }) {
       videoUrl: videoMedia ? videoMedia.url : null,
       specs: [
         ...(form.specs || []),
-        ...getInternalSpecs(editingProduct?.specs).filter((spec) => spec.label !== "__mtech_model_3d_url"),
+        ...getInternalSpecs(editingProduct?.specs).filter((spec) => ![
+          "__mtech_model_3d_url",
+          "__mtech_model_3d_front_texture",
+          "__mtech_model_3d_back_texture",
+        ].includes(spec.label)),
         ...(form.model3dUrl
           ? [{ label: "__mtech_model_3d_url", value: form.model3dUrl }]
+          : []),
+        ...(form.model3dFrontTexture
+          ? [{ label: "__mtech_model_3d_front_texture", value: form.model3dFrontTexture }]
+          : []),
+        ...(form.model3dBackTexture
+          ? [{ label: "__mtech_model_3d_back_texture", value: form.model3dBackTexture }]
           : []),
       ],
     };
@@ -981,6 +1000,28 @@ export default function AdminProduits({ smartphoneOnly = false }) {
                 label="Modèle 3D du produit (optionnel)"
                 model3d
               />
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <MediaUploader
+                  value={form.model3dFrontTexture}
+                  onChange={(url) => setForm((prev) => ({ ...prev, model3dFrontTexture: url }))}
+                  folder="mtechbenin/products"
+                  accept="image/*"
+                  label="Texture devant (optionnel)"
+                  hideUrlTab
+                />
+                <MediaUploader
+                  value={form.model3dBackTexture}
+                  onChange={(url) => setForm((prev) => ({ ...prev, model3dBackTexture: url }))}
+                  folder="mtechbenin/products"
+                  accept="image/*"
+                  label="Texture derrière (optionnel)"
+                  hideUrlTab
+                />
+              </div>
+              <p className="text-[11px] text-apple-mid">
+                Le modèle GLB doit contenir des matériaux texturés nommés front et back pour afficher les motifs séparément.
+              </p>
 
               <div>
                 <label className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1.5 block">
