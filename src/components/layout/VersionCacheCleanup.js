@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const BUILD_VERSION = "2026-11-18-live-media";
+const BUILD_VERSION = "2026-11-26-no-pwa-cache";
 
 export default function VersionCacheCleanup() {
   useEffect(() => {
