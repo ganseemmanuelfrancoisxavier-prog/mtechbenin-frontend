@@ -160,12 +160,11 @@ function CategoryRevealCard({ item }) {
 export default function CategoriesSection() {
   const [mounted, setMounted] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
-  const { getActiveCategories, fetchCategories } = useCategoryStore();
+  const { getActiveCategories } = useCategoryStore();
   const featuredProducts = useProductStore((state) => state.featuredProducts);
 
   useEffect(() => {
     setMounted(true);
-    fetchCategories();
   }, []);
 
   const activeCategories = mounted
