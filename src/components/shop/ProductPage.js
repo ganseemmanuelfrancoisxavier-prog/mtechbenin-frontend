@@ -518,17 +518,7 @@ export default function ProductPage({ slug }) {
 
         {/* Infos */}
         <div className="space-y-5">
-          <span
-            className={`inline-block ${
-              product.status === "En stock"
-                ? "badge-stock-ok"
-                : product.status === "Stock limité"
-                  ? "badge-stock-limited"
-                  : "badge-stock-out"
-            }`}
-          >
-            {product.status}
-          </span>
+
 
           <h1 className="font-display font-black text-2xl md:text-3xl text-apple-black leading-tight tracking-tight">
             {product.name}
