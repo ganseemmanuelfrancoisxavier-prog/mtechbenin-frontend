@@ -8,6 +8,7 @@ import {
   X,
   Check,
   Video,
+  Box,
   Image as ImageIcon,
 } from "lucide-react";
 import { uploadApi } from "@/lib/api";
@@ -28,6 +29,7 @@ export default function MediaUploader({
   // quelques partenaires). Une adresse tierce collée là produirait une image
   // cassée sur la page d'accueil — mieux vaut ne pas proposer le champ.
   hideUrlTab = false,
+  model3d = false,
 }) {
   const [mode, setMode] = useState(hideUrlTab ? "upload" : "url"); // "url" | "upload"
   const [urlInput, setUrlInput] = useState(value || "");
@@ -37,6 +39,7 @@ export default function MediaUploader({
 
   const isVideo = (src) =>
     /\.(mp4|mov|avi|webm)/i.test(src) || (src || "").startsWith("data:video");
+  const isModel3d = (src) => /\.(glb|gltf)(?:$|[?#])/i.test(src || "");
 
   // ── Upload fichier ──────────────────────────────────────────────────────
   const handleFile = async (e) => {
@@ -60,12 +63,17 @@ export default function MediaUploader({
       const videoFile =
         file.type.startsWith("video/") ||
         /\.(mp4|mov|avi|webm|m4v)$/i.test(file.name);
-      const res = videoFile
-        ? await uploadVideoDirectly(file, folder)
-        : await uploadApi.upload(await toBase64(file), folder);
+      const modelFile = /\.(glb|gltf)$/i.test(file.name);
+      if (model3d && !modelFile) throw new Error("Choisissez un fichier .glb ou .gltf.");
+      if (!model3d && modelFile) throw new Error("Ajoutez le modèle dans le champ Modèle 3D.");
+      const res = modelFile
+        ? await uploadModelDirectly(file, folder)
+        : videoFile
+          ? await uploadVideoDirectly(file, folder)
+          : await uploadApi.upload(await toBase64(file), folder);
       onChange(
         res.url,
-        res.resourceType || (videoFile || isVideo(res.url) ? "video" : "image"),
+        modelFile ? "model3d" : res.resourceType || (videoFile || isVideo(res.url) ? "video" : "image"),
       );
       setUrlInput(res.url);
     } catch (err) {
@@ -77,7 +85,10 @@ export default function MediaUploader({
   // ── URL externe ─────────────────────────────────────────────────────────
   const handleApplyUrl = () => {
     if (!urlInput.trim()) return;
-    onChange(urlInput.trim(), isVideo(urlInput.trim()) ? "video" : "image");
+    onChange(
+      urlInput.trim(),
+      isModel3d(urlInput.trim()) ? "model3d" : isVideo(urlInput.trim()) ? "video" : "image",
+    );
   };
 
   // ── Clear ───────────────────────────────────────────────────────────────
@@ -135,7 +146,7 @@ export default function MediaUploader({
           <input
             ref={fileRef}
             type="file"
-            accept={accept}
+            accept={model3d ? ".glb,.gltf,model/gltf-binary,model/gltf+json" : accept}
             onChange={handleFile}
             className="hidden"
           />
@@ -156,7 +167,9 @@ export default function MediaUploader({
             )}
           </button>
           <p className="text-[11px] text-apple-mid mt-1.5">
-            Images et vidéos acceptées — max {MAX_FILE_MB} Mo
+            {model3d
+              ? `Modèle 3D .glb ou .gltf accepté — max ${MAX_FILE_MB} Mo. Le format .glb est recommandé.`
+              : `Images et vidéos acceptées — max ${MAX_FILE_MB} Mo`}
           </p>
         </div>
       )}
@@ -171,7 +184,18 @@ export default function MediaUploader({
       {/* Prévisualisation */}
       {value && (
         <div className="relative rounded-2xl overflow-hidden bg-black/[0.04]">
-          {isVideo(value) ? (
+          {isModel3d(value) ? (
+            <div className="flex items-center gap-3 p-4">
+              <Box className="h-8 w-8 text-apple-mid" />
+              <div className="min-w-0">
+                <p className="truncate text-[13px] font-semibold text-apple-black">Modèle 3D prêt</p>
+                <p className="truncate text-[11px] text-apple-mid">{value.split("/").pop()}</p>
+              </div>
+              <div className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-semibold text-white">
+                <Box className="h-3 w-3" /> 3D
+              </div>
+            </div>
+          ) : isVideo(value) ? (
             <div className="relative">
               <video
                 src={urlVideoJouable(value)}
@@ -219,6 +243,32 @@ function toBase64(file) {
   });
 }
 
+
+async function uploadModelDirectly(file, folder) {
+  const signed = await uploadApi.createSignature(folder, "raw");
+  const form = new FormData();
+  form.append("file", file);
+  form.append("api_key", signed.apiKey);
+  form.append("timestamp", String(signed.timestamp));
+  form.append("folder", signed.folder);
+  form.append("signature", signed.signature);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${encodeURIComponent(signed.cloudName)}/raw/upload`,
+    { method: "POST", body: form },
+  );
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error(`Réponse Cloudinary invalide (HTTP ${response.status})`);
+  }
+  if (!response.ok) {
+    throw new Error(data.error?.message || `Échec Cloudinary (HTTP ${response.status})`);
+  }
+
+  return { url: data.secure_url, resourceType: "model3d" };
+}
 
 async function uploadVideoDirectly(file, folder) {
   const signed = await uploadApi.createSignature(folder, "video");
