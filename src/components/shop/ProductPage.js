@@ -29,11 +29,20 @@ import useProductStore from "@/store/productStore";
 import useReviewStore from "@/store/reviewStore";
 import ReviewPhotoPicker from "./ReviewPhotoPicker";
 import ReviewPhotos from "./ReviewPhotos";
-import Product3DViewer from "./Product3DViewer";
+import dynamic from "next/dynamic";
 import { urlVideoJouable, afficheVideo } from "@/lib/media";
 import useVisibleVideo from "@/hooks/useVisibleVideo";
 import { isIPhoneProduct } from "@/lib/iphoneProducts";
 import IPhoneSalesDetail from "./IPhoneSalesDetail";
+
+const Product3DViewer = dynamic(() => import("./Product3DViewer"), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 grid place-items-center bg-[#f6f6f6] text-sm text-neutral-500">
+      Chargement du modèle 3D…
+    </div>
+  ),
+});
 
 // ── Normalise images depuis l'API (JSON string ou array) ─────────────────────
 function parseImages(raw) {
