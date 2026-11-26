@@ -10,11 +10,10 @@ import { isIPhoneProduct } from "@/lib/iphoneProducts";
 export default function FeaturedProducts() {
   const [mounted, setMounted] = useState(false);
 
-  const { featuredProducts, fetchFeaturedProducts } = useProductStore();
+  const { featuredProducts } = useProductStore();
 
   useEffect(() => {
     setMounted(true);
-    fetchFeaturedProducts();
   }, []);
 
   const featured = featuredProducts.filter((p) => p.active && p.featured && !isIPhoneProduct(p));
