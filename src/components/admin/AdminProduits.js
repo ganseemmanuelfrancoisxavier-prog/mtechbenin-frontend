@@ -45,6 +45,7 @@ const emptyForm = {
   active: true,
   featured: false,
   media: emptyMediaSlots,
+  model3dUrl: "",
   specs: [],
 };
 
@@ -98,6 +99,11 @@ function buildMediaSlots(product) {
   }
   while (slots.length < 2) slots.push({ type: "image", url: "" });
   return slots.slice(0, 2);
+}
+
+function getModel3dUrl(raw) {
+  const metadata = getInternalSpecs(raw).find((spec) => spec.label === "__mtech_model_3d_url");
+  return metadata?.value || "";
 }
 
 function parseSpecs(raw) {
@@ -537,6 +543,7 @@ export default function AdminProduits({ smartphoneOnly = false }) {
       active: product.active,
       featured: product.featured || false,
       media: buildMediaSlots(product),
+      model3dUrl: getModel3dUrl(product.specs),
       specs: parseSpecs(product.specs),
     });
     setVariantTypes([]);
@@ -583,7 +590,13 @@ export default function AdminProduits({ smartphoneOnly = false }) {
       featured: form.featured,
       images: JSON.stringify(imageUrls),
       videoUrl: videoMedia ? videoMedia.url : null,
-      specs: [...(form.specs || []), ...getInternalSpecs(editingProduct?.specs)],
+      specs: [
+        ...(form.specs || []),
+        ...getInternalSpecs(editingProduct?.specs).filter((spec) => spec.label !== "__mtech_model_3d_url"),
+        ...(form.model3dUrl
+          ? [{ label: "__mtech_model_3d_url", value: form.model3dUrl }]
+          : []),
+      ],
     };
     try {
       if (editingProduct)
@@ -959,6 +972,15 @@ export default function AdminProduits({ smartphoneOnly = false }) {
                   }
                 />
               ))}
+
+              <MediaUploader
+                value={form.model3dUrl}
+                onChange={(url) => setForm((prev) => ({ ...prev, model3dUrl: url }))}
+                folder="mtechbenin/products"
+                accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+                label="Modèle 3D du produit (optionnel)"
+                model3d
+              />
 
               <div>
                 <label className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1.5 block">
