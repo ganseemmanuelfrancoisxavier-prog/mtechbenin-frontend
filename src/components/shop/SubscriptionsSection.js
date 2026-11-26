@@ -219,11 +219,10 @@ export default function SubscriptionsSection() {
   const scrollRef = useRef(null);
   const cardRefs = useRef({});
 
-  const { getActiveServices, fetchServices } = useAbonnementStore();
+  const { getActiveServices } = useAbonnementStore();
 
   useEffect(() => {
     setMounted(true);
-    fetchServices();
   }, []);
 
   const services = mounted
