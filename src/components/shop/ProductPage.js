@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import Script from "next/script";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -15,6 +16,7 @@ import {
   ArrowLeft,
   Zap,
   Video,
+  Box,
   Volume2,
   VolumeX,
   RotateCw,
@@ -58,6 +60,15 @@ function parseSpecs(raw) {
   } catch {
     return [];
   }
+}
+
+function getModel3dUrl(raw) {
+  let specs = raw;
+  if (typeof specs === "string") {
+    try { specs = JSON.parse(specs); } catch { return ""; }
+  }
+  if (!Array.isArray(specs)) return "";
+  return specs.find((spec) => spec.label === "__mtech_model_3d_url")?.value || "";
 }
 
 function parseColorImages(raw) {
@@ -242,6 +253,7 @@ export default function ProductPage({ slug }) {
   // Use its videoUrl in priority over the store cache which can be up to 5 min stale.
   // Galerie unifiée : les photos, puis la vidéo à la fin s'il y en a une —
   // activeImage indexe ce tableau, balayable comme les photos.
+  const model3dUrl = getModel3dUrl(productDetail?.specs ?? baseProduct?.specs);
   const media = [
     ...product.images.map((url, index) => ({
       type: "image",
@@ -252,6 +264,7 @@ export default function ProductPage({ slug }) {
         : url,
     })),
     ...(videoUrl ? [{ type: "video", url: videoUrl }] : []),
+    ...(model3dUrl ? [{ type: "model3d", url: model3dUrl }] : []),
   ];
   // Filet de sécurité : si les données du produit se rafraîchissent avec
   // moins de médias pendant qu'un index plus élevé était actif, on ne plante
@@ -419,7 +432,31 @@ export default function ProductPage({ slug }) {
             onMouseDown={handleSwipeStart}
             onMouseUp={handleSwipeEnd}
           >
-            {media[safeActiveImage].type === "video" ? (
+            {media[safeActiveImage].type === "model3d" ? (
+              <>
+                <Script
+                  src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js"
+                  type="module"
+                  strategy="afterInteractive"
+                />
+                <model-viewer
+                  key={media[safeActiveImage].url}
+                  src={media[safeActiveImage].url}
+                  alt={`Vue 3D de ${product.name}`}
+                  camera-controls=""
+                  auto-rotate=""
+                  touch-action="pan-y"
+                  interaction-prompt="none"
+                  shadow-intensity="1"
+                  exposure="1"
+                  className="absolute inset-0 h-full w-full rounded-3xl bg-neutral-50"
+                  style={{ "--poster-color": "#f5f5f5" }}
+                />
+                <span className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-apple-mid shadow-sm pointer-events-none">
+                  Faites glisser pour tourner
+                </span>
+              </>
+            ) : media[safeActiveImage].type === "video" ? (
               <video
                 key={media[safeActiveImage].url}
                 ref={productVideo.ref}
@@ -487,9 +524,13 @@ export default function ProductPage({ slug }) {
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
-                  className={`relative w-16 h-16 rounded-2xl overflow-hidden border-2 transition-all ${safeActiveImage === i ? "border-apple-black" : "border-transparent"}`}
+                  className={`relative w-16 h-16 rounded-2xl overflow-hidden border-2 transition-all ${safeActiveImage === i ? "border-apple-black" : "border-transparent"} ${m.type === "model3d" ? "bg-neutral-700" : ""}`}
                 >
-                  {m.type === "video" ? (
+                  {m.type === "model3d" ? (
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+                      <Box className="h-6 w-6 text-white drop-shadow" />
+                    </span>
+                  ) : m.type === "video" ? (
                     <>
                       <video
                         poster={afficheVideo(m.url)}
