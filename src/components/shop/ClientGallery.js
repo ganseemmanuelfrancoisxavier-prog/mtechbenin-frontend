@@ -109,7 +109,7 @@ function Tuile({ media, muted, suspendu, onOuvrir, onBasculerSon }) {
 }
 
 export default function ClientGallery() {
-  const { medias, fetchMedias } = useClientMediaStore();
+  const { medias } = useClientMediaStore();
   const [mounted, setMounted] = useState(false);
   const [inViewport, setInViewport] = useState(false);
   const [tabVisible, setTabVisible] = useState(true);
@@ -128,7 +128,6 @@ export default function ClientGallery() {
 
   useEffect(() => {
     setMounted(true);
-    fetchMedias();
   }, []);
 
   useEffect(() => {
