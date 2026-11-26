@@ -62,13 +62,38 @@ function parseSpecs(raw) {
   }
 }
 
-function getModel3dUrl(raw) {
+function getModel3dAssets(raw) {
   let specs = raw;
   if (typeof specs === "string") {
-    try { specs = JSON.parse(specs); } catch { return ""; }
+    try { specs = JSON.parse(specs); } catch { return {}; }
   }
-  if (!Array.isArray(specs)) return "";
-  return specs.find((spec) => spec.label === "__mtech_model_3d_url")?.value || "";
+  if (!Array.isArray(specs)) return {};
+  const valueFor = (label) => specs.find((spec) => spec.label === label)?.value || "";
+  return {
+    modelUrl: valueFor("__mtech_model_3d_url"),
+    frontTexture: valueFor("__mtech_model_3d_front_texture"),
+    backTexture: valueFor("__mtech_model_3d_back_texture"),
+  };
+}
+
+async function applyModelTextures(viewer, media) {
+  if (!viewer?.model || (!media.frontTexture && !media.backTexture)) return;
+  try {
+    const materials = viewer.model.materials || [];
+    const [frontTexture, backTexture] = await Promise.all([
+      media.frontTexture ? viewer.createTexture(media.frontTexture) : null,
+      media.backTexture ? viewer.createTexture(media.backTexture) : null,
+    ]);
+    for (const material of materials) {
+      const name = String(material.name || "").toLowerCase();
+      const textureInfo = material.pbrMetallicRoughness?.baseColorTexture;
+      if (!textureInfo) continue;
+      if (frontTexture && name.includes("front")) textureInfo.setTexture(frontTexture);
+      if (backTexture && name.includes("back")) textureInfo.setTexture(backTexture);
+    }
+  } catch (error) {
+    console.error("Impossible d’appliquer les textures du t-shirt", error);
+  }
 }
 
 function parseColorImages(raw) {
@@ -253,7 +278,7 @@ export default function ProductPage({ slug }) {
   // Use its videoUrl in priority over the store cache which can be up to 5 min stale.
   // Galerie unifiée : les photos, puis la vidéo à la fin s'il y en a une —
   // activeImage indexe ce tableau, balayable comme les photos.
-  const model3dUrl = getModel3dUrl(productDetail?.specs ?? baseProduct?.specs);
+  const model3dAssets = getModel3dAssets(productDetail?.specs ?? baseProduct?.specs);
   const media = [
     ...product.images.map((url, index) => ({
       type: "image",
@@ -264,7 +289,14 @@ export default function ProductPage({ slug }) {
         : url,
     })),
     ...(videoUrl ? [{ type: "video", url: videoUrl }] : []),
-    ...(model3dUrl ? [{ type: "model3d", url: model3dUrl }] : []),
+    ...(model3dAssets.modelUrl
+      ? [{
+          type: "model3d",
+          url: model3dAssets.modelUrl,
+          frontTexture: model3dAssets.frontTexture,
+          backTexture: model3dAssets.backTexture,
+        }]
+      : []),
   ];
   // Filet de sécurité : si les données du produit se rafraîchissent avec
   // moins de médias pendant qu'un index plus élevé était actif, on ne plante
@@ -443,6 +475,7 @@ export default function ProductPage({ slug }) {
                   key={media[safeActiveImage].url}
                   src={media[safeActiveImage].url}
                   alt={`Vue 3D de ${product.name}`}
+                  onLoad={(event) => applyModelTextures(event.currentTarget, media[safeActiveImage])}
                   camera-controls=""
                   auto-rotate=""
                   touch-action="pan-y"
