@@ -260,8 +260,11 @@ export default function ProductPage({ slug }) {
   // Galerie unifiée : les photos, puis la vidéo à la fin s'il y en a une —
   // activeImage indexe ce tableau, balayable comme les photos.
   const model3dAssets = getModel3dAssets(productDetail?.specs ?? baseProduct?.specs);
+  const productImageUrls = product.images.filter(
+    (url) => url && url !== "/placeholder.jpg",
+  );
   const media = [
-    ...product.images.map((url, index) => ({
+    ...productImageUrls.map((url, index) => ({
       type: "image",
       url: index === 0
         ? product.colorImages.find((item) => item.typeName
@@ -279,6 +282,7 @@ export default function ProductPage({ slug }) {
         }]
       : []),
   ];
+  if (media.length === 0) media.push({ type: "image", url: "/placeholder.jpg" });
   // Filet de sécurité : si les données du produit se rafraîchissent avec
   // moins de médias pendant qu'un index plus élevé était actif, on ne plante
   // pas sur un accès hors limites.
