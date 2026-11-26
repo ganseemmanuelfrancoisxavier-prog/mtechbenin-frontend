@@ -16,6 +16,7 @@ export default function Product3DViewer({ modelUrl, frontTexture, backTexture, p
     let disposed = false;
     let frameId = 0;
     let modelRoot = null;
+    let isInViewport = true;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#f6f6f6");
     const camera = new THREE.PerspectiveCamera(34, 1, 0.01, 100);
@@ -28,7 +29,8 @@ export default function Product3DViewer({ modelUrl, frontTexture, backTexture, p
       setError(true);
       return undefined;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouchDevice ? 1.5 : 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
@@ -111,18 +113,38 @@ export default function Product3DViewer({ modelUrl, frontTexture, backTexture, p
     });
     resizeObserver.observe(host);
 
-    const animate = () => {
-      if (disposed) return;
-      frameId = window.requestAnimationFrame(animate);
+    const renderFrame = () => {
+      frameId = 0;
+      if (disposed || !isInViewport) return;
       controls.update();
       renderer.render(scene, camera);
+      frameId = window.requestAnimationFrame(renderFrame);
     };
-    animate();
+    const startRenderLoop = () => {
+      if (!disposed && isInViewport && !frameId) {
+        frameId = window.requestAnimationFrame(renderFrame);
+      }
+    };
+    const visibilityObserver =
+      "IntersectionObserver" in window
+        ? new IntersectionObserver(([entry]) => {
+            isInViewport = entry.isIntersecting;
+            if (isInViewport) {
+              startRenderLoop();
+            } else if (frameId) {
+              window.cancelAnimationFrame(frameId);
+              frameId = 0;
+            }
+          }, { threshold: 0.01 })
+        : null;
+    visibilityObserver?.observe(host);
+    if (!visibilityObserver) startRenderLoop();
 
     return () => {
       disposed = true;
       window.cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
+      visibilityObserver?.disconnect();
       controls.dispose();
       modelRoot?.traverse((object) => {
         if (!object.isMesh) return;
