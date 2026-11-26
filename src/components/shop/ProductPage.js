@@ -122,6 +122,7 @@ export default function ProductPage({ slug }) {
   const lastTouchAt = useRef(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("reviews");
+  const reviewsSectionRef = useRef(null);
   const [liked, setLiked] = useState(false);
   const [added, setAdded] = useState(false);
   const [reviewForm, setReviewForm] = useState({
@@ -520,23 +521,38 @@ export default function ProductPage({ slug }) {
         <div className="space-y-5">
 
 
-          <h1 className="font-display font-black text-2xl md:text-3xl text-apple-black leading-tight tracking-tight">
-            {product.name}
-          </h1>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h1 className="font-display font-black text-2xl md:text-3xl text-apple-black leading-tight tracking-tight">
+              {product.name}
+            </h1>
 
-          <div className="flex items-center gap-2">
-            <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Star
-                  key={i}
-                  className={`w-3.5 h-3.5 ${i <= Math.round(mounted ? avgRating : 4) ? "fill-cta text-cta" : "text-neutral-200"}`}
-                />
-              ))}
-            </div>
-            <span className="text-apple-mid text-[13px]">
-              {mounted && avgRating > 0 ? avgRating.toFixed(1) : "—"} ·{" "}
-              {productReviews.length} avis
-            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("reviews");
+                window.setTimeout(() => {
+                  reviewsSectionRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }, 0);
+              }}
+              aria-label={`Voir les avis du produit ${product.name}`}
+              className="inline-flex items-center gap-2 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-apple-black/40"
+            >
+              <span className="flex gap-0.5" aria-hidden="true">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star
+                    key={i}
+                    className={`w-3.5 h-3.5 ${i <= Math.round(mounted ? avgRating : 4) ? "fill-cta text-cta" : "text-neutral-200"}`}
+                  />
+                ))}
+              </span>
+              <span className="text-apple-mid text-[13px]">
+                {mounted && avgRating > 0 ? avgRating.toFixed(1) : "—"} ·{" "}
+                {productReviews.length} avis
+              </span>
+            </button>
           </div>
 
           <div className="flex items-baseline gap-3">
@@ -804,7 +820,11 @@ export default function ProductPage({ slug }) {
         )}
 
         {activeTab === "reviews" && (
-          <div className="space-y-4 max-w-2xl">
+          <div
+            ref={reviewsSectionRef}
+            id="product-reviews"
+            className="scroll-mt-24 space-y-4 max-w-2xl"
+          >
             {productReviews.length > 0 && (
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-black/[0.02]">
                 <div className="text-center">
