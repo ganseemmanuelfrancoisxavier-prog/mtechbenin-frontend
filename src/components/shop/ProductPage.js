@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import Script from "next/script";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -30,6 +29,7 @@ import useProductStore from "@/store/productStore";
 import useReviewStore from "@/store/reviewStore";
 import ReviewPhotoPicker from "./ReviewPhotoPicker";
 import ReviewPhotos from "./ReviewPhotos";
+import Product3DViewer from "./Product3DViewer";
 import { urlVideoJouable, afficheVideo } from "@/lib/media";
 import useVisibleVideo from "@/hooks/useVisibleVideo";
 import { isIPhoneProduct } from "@/lib/iphoneProducts";
@@ -76,25 +76,6 @@ function getModel3dAssets(raw) {
   };
 }
 
-async function applyModelTextures(viewer, media) {
-  if (!viewer?.model || (!media.frontTexture && !media.backTexture)) return;
-  try {
-    const materials = viewer.model.materials || [];
-    const [frontTexture, backTexture] = await Promise.all([
-      media.frontTexture ? viewer.createTexture(media.frontTexture) : null,
-      media.backTexture ? viewer.createTexture(media.backTexture) : null,
-    ]);
-    for (const material of materials) {
-      const name = String(material.name || "").toLowerCase();
-      const textureInfo = material.pbrMetallicRoughness?.baseColorTexture;
-      if (!textureInfo) continue;
-      if (frontTexture && name.includes("front")) textureInfo.setTexture(frontTexture);
-      if (backTexture && name.includes("back")) textureInfo.setTexture(backTexture);
-    }
-  } catch (error) {
-    console.error("Impossible d’appliquer les textures du t-shirt", error);
-  }
-}
 
 function parseColorImages(raw) {
   let specs = raw;
@@ -465,30 +446,13 @@ export default function ProductPage({ slug }) {
             onMouseUp={handleSwipeEnd}
           >
             {media[safeActiveImage].type === "model3d" ? (
-              <>
-                <Script
-                  src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js"
-                  type="module"
-                  strategy="afterInteractive"
-                />
-                <model-viewer
-                  key={media[safeActiveImage].url}
-                  src={media[safeActiveImage].url}
-                  alt={`Vue 3D de ${product.name}`}
-                  onLoad={(event) => applyModelTextures(event.currentTarget, media[safeActiveImage])}
-                  camera-controls=""
-                  auto-rotate=""
-                  touch-action="pan-y"
-                  interaction-prompt="none"
-                  shadow-intensity="1"
-                  exposure="1"
-                  className="absolute inset-0 h-full w-full rounded-3xl bg-neutral-50"
-                  style={{ "--poster-color": "#f5f5f5" }}
-                />
-                <span className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-apple-mid shadow-sm pointer-events-none">
-                  Faites glisser pour tourner
-                </span>
-              </>
+              <Product3DViewer
+                key={media[safeActiveImage].url}
+                modelUrl={media[safeActiveImage].url}
+                frontTexture={media[safeActiveImage].frontTexture}
+                backTexture={media[safeActiveImage].backTexture}
+                productName={product.name}
+              />
             ) : media[safeActiveImage].type === "video" ? (
               <video
                 key={media[safeActiveImage].url}
