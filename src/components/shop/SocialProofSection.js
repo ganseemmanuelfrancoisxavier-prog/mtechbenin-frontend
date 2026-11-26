@@ -8,11 +8,10 @@ import ReviewPhotos from "./ReviewPhotos";
 
 export default function SocialProofSection() {
   const [mounted, setMounted] = useState(false);
-  const { getFeaturedReviews, fetchFeaturedReviews } = useReviewStore();
+  const { getFeaturedReviews } = useReviewStore();
 
   useEffect(() => {
     setMounted(true);
-    fetchFeaturedReviews(); // ← charge les avis featured depuis l'API
   }, []);
 
   const featured = mounted ? getFeaturedReviews() : [];
