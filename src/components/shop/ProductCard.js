@@ -28,10 +28,11 @@ function getProductStatus(product) {
   return "En stock";
 }
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, animate = true }) {
   const cardRef = useRef(null);
 
   useEffect(() => {
+    if (!animate) return undefined;
     const card = cardRef.current;
     if (!card) return undefined;
     if (!("IntersectionObserver" in window)) {
@@ -49,7 +50,7 @@ export default function ProductCard({ product }) {
     );
     observer.observe(card);
     return () => observer.disconnect();
-  }, []);
+  }, [animate]);
 
   const image = getProductImage(product);
   const status = getProductStatus(product);
@@ -62,7 +63,7 @@ export default function ProductCard({ product }) {
     <Link
       ref={cardRef}
       href={`/produit/${product.slug}`}
-      className="product-card-reveal catalogue-card-float group relative glass-card rounded-3xl transition-all duration-300 flex flex-col"
+      className={`${animate ? "product-card-reveal catalogue-card-float" : ""} group relative glass-card rounded-3xl transition-all duration-300 flex flex-col`}
     >
       {/* Image */}
       <div className="relative bg-neutral-100 aspect-square overflow-hidden rounded-t-3xl">
