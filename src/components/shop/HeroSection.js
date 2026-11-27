@@ -36,24 +36,10 @@ export default function HeroSection() {
       })
     : [];
 
-  // Ne plus présenter les anciens exemples locaux (AirPods/JBL/Abonnements)
-  // pendant que les vrais médias de la boutique se chargent.
-  const fallbackSlide = {
-    id: "mtechbenin-loading",
-    type: "gradient",
-    active: true,
-    title: "Votre univers tech",
-    subtitle: "",
-    description: "Smartphones, accessoires et abonnements au Bénin.",
-    cta: "Découvrir",
-    href: "/catalogue",
-    badge: "",
-    bg: "from-[#0A0A0A] via-[#1a1a2e] to-[#0f3460]",
-    tag: "MTECHBENIN",
-  };
-  const displayedSlides = slides.length > 0 ? slides : [fallbackSlide];
-  const safeIndex = current % displayedSlides.length;
-  const activeSlide = displayedSlides[safeIndex];
+  // Le bandeau configuré dans le panel peut prendre un instant à charger.
+  // Ne pas remplacer ce contenu par l'ancien visuel de démonstration.
+  const safeIndex = slides.length > 0 ? current % slides.length : 0;
+  const activeSlide = slides[safeIndex];
   const heroVideo = useVisibleVideo({
     enabled: mounted && slides.length > 0 && activeSlide?.type === "video",
     identity: activeSlide?.id ?? safeIndex,
@@ -76,7 +62,8 @@ export default function HeroSection() {
     return () => clearInterval(timer);
   }, [goNext, slides.length]);
 
-  const slide = displayedSlides[safeIndex];
+  const slide = activeSlide;
+  if (!slide) return null;
 
   return (
     <section className="relative flex min-h-[clamp(520px,calc(100svh-56px),800px)] w-full items-center overflow-hidden">
