@@ -71,6 +71,21 @@ function parseSpecs(raw) {
   }
 }
 
+function isTshirtProduct(product) {
+  const categoryNames = [
+    product?.categorySlug,
+    product?.category,
+    product?.categoryName,
+    product?.categoryLabel,
+  ].filter(Boolean).join(" ");
+  const normalized = categoryNames
+    .normalize("NFD")
+    .replace(/[\\u0300-\\u036f]/g, "")
+    .toLowerCase();
+  return /(?:^|[^a-z])(?:t[\\s-]?shirts?|tee[\\s-]?shirts?|vetements?|habillement)(?:$|[^a-z])/.test(normalized)
+    || /^(?:tshirts?|vetements?|habillement)$/.test(normalized.replace(/[^a-z]/g, ""));
+}
+
 function getModel3dAssets(raw) {
   let specs = raw;
   if (typeof specs === "string") {
@@ -268,7 +283,9 @@ export default function ProductPage({ slug }) {
   // Use its videoUrl in priority over the store cache which can be up to 5 min stale.
   // Galerie unifiée : les photos, puis la vidéo à la fin s'il y en a une —
   // activeImage indexe ce tableau, balayable comme les photos.
-  const model3dAssets = getModel3dAssets(productDetail?.specs ?? baseProduct?.specs);
+  const model3dAssets = isTshirtProduct(product)
+    ? {}
+    : getModel3dAssets(productDetail?.specs ?? baseProduct?.specs);
   const productImageUrls = product.images.filter(
     (url) => url && url !== "/placeholder.jpg",
   );
