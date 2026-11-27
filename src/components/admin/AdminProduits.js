@@ -54,6 +54,15 @@ const emptyForm = {
 const inputClass =
   "w-full bg-black/[0.03] text-apple-black text-[14px] placeholder-apple-mid/50 rounded-2xl px-4 py-3 border border-black/[0.07] focus:outline-none focus:border-black/20 transition";
 
+function isTshirtCategory(value) {
+  const normalized = String(value || "")
+    .normalize("NFD")
+    .replace(/[\\u0300-\\u036f]/g, "")
+    .toLowerCase();
+  return /(?:^|[^a-z])(?:t[\\s-]?shirts?|tee[\\s-]?shirts?|vetements?|habillement)(?:$|[^a-z])/.test(normalized)
+    || /^(?:tshirts?|vetements?|habillement)$/.test(normalized.replace(/[^a-z]/g, ""));
+}
+
 function generateSlug(name) {
   return name
     .toLowerCase()
@@ -601,18 +610,22 @@ export default function AdminProduits({ smartphoneOnly = false }) {
       videoUrl: videoMedia ? videoMedia.url : null,
       specs: [
         ...(form.specs || []),
-        ...getInternalSpecs(editingProduct?.specs).filter((spec) => ![
-          "__mtech_model_3d_url",
-          "__mtech_model_3d_front_texture",
-          "__mtech_model_3d_back_texture",
-        ].includes(spec.label)),
-        ...(form.model3dUrl
+        ...getInternalSpecs(editingProduct?.specs).filter((spec) =>
+          isTshirtCategory(form.category)
+            ? !spec.label?.startsWith("__mtech_model_3d_")
+            : ![
+                "__mtech_model_3d_url",
+                "__mtech_model_3d_front_texture",
+                "__mtech_model_3d_back_texture",
+              ].includes(spec.label),
+        ),
+        ...(!isTshirtCategory(form.category) && form.model3dUrl
           ? [{ label: "__mtech_model_3d_url", value: form.model3dUrl }]
           : []),
-        ...(form.model3dFrontTexture
+        ...(!isTshirtCategory(form.category) && form.model3dFrontTexture
           ? [{ label: "__mtech_model_3d_front_texture", value: form.model3dFrontTexture }]
           : []),
-        ...(form.model3dBackTexture
+        ...(!isTshirtCategory(form.category) && form.model3dBackTexture
           ? [{ label: "__mtech_model_3d_back_texture", value: form.model3dBackTexture }]
           : []),
       ],
@@ -992,6 +1005,8 @@ export default function AdminProduits({ smartphoneOnly = false }) {
                 />
               ))}
 
+              {!isTshirtCategory(form.category) && (
+                <>
               <MediaUploader
                 value={form.model3dUrl}
                 onChange={(url) => setForm((prev) => ({ ...prev, model3dUrl: url }))}
@@ -1022,6 +1037,8 @@ export default function AdminProduits({ smartphoneOnly = false }) {
               <p className="text-[11px] text-apple-mid">
                 Le modèle GLB doit contenir des matériaux texturés nommés front et back pour afficher les motifs séparément.
               </p>
+                </>
+              )}
 
               <div>
                 <label className="text-[11px] font-semibold text-apple-mid uppercase tracking-widest mb-1.5 block">
