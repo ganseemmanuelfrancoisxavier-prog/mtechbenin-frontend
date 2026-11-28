@@ -30,14 +30,8 @@ const CGR_CONTENT = `<h2>Article 1 – Dépôt et état de l’appareil</h2><ol>
 <p><strong>MTECHBENIN</strong><br>Votre technologie, notre expertise.<br>Site officiel : mtechbenin.com<br>Cotonou – République du Bénin.</p>`;
 
 async function fetchLegalPage(slug) {
-  if (slug === "conditions-reparation") {
-    return {
-      slug,
-      title: "Conditions générales de réparation",
-      content: CGR_CONTENT,
-      updatedAt: "2026-11-28T00:00:00.000Z",
-    };
-  }
+  const cgrFallback = slug === "conditions-reparation";
+  const cgrPublishedAt = Date.parse("2026-11-28T12:16:33.043Z");
 
   for (const origin of getApiOrigins()) {
     try {
@@ -47,12 +41,27 @@ async function fetchLegalPage(slug) {
       );
       if (!response.ok) continue;
       const data = await response.json();
-      if (data.page?.content) return data.page;
+      const page = data.page;
+      if (!page?.content) continue;
+
+      // Keep the supplied CGR as baseline; later panel edits remain effective.
+      if (
+        !cgrFallback ||
+        (page.updatedAt && Date.parse(page.updatedAt) > cgrPublishedAt)
+      ) return page;
     } catch {}
+  }
+
+  if (cgrFallback) {
+    return {
+      slug,
+      title: "Conditions générales de réparation",
+      content: CGR_CONTENT,
+      updatedAt: "2026-11-28T00:00:00.000Z",
+    };
   }
   return null;
 }
-
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
