@@ -17,7 +17,7 @@ const useSettingsStore = create(
       shopSlogan:
         "Votre boutique tech de confiance au Bénin. Livraison express à Cotonou.",
       shopEmail: "contact@mtechbenin.com",
-      shopWhatsapp: "+229 61 15 15 61",
+      shopWhatsapp: "+229 60 50 63 20",
       shopAddress: "Cotonou, Bénin",
       shopFacebook: "https://facebook.com/mtechbenin",
       shopInstagram: "https://instagram.com/mtechbenin",
