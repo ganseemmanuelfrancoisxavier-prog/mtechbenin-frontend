@@ -20,6 +20,9 @@ export default function AdminCaracteristiques() {
 
   const [newValueDrafts, setNewValueDrafts] = useState({});
   const [addingValueId, setAddingValueId] = useState(null);
+  const [editingValueId, setEditingValueId] = useState(null);
+  const [editingValueDraft, setEditingValueDraft] = useState("");
+  const [savingValueId, setSavingValueId] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -144,6 +147,40 @@ export default function AdminCaracteristiques() {
       showError(err, "Ajout impossible");
     }
     setAddingValueId(null);
+  };
+
+  const cancelEditValue = () => {
+    setEditingValueId(null);
+    setEditingValueDraft("");
+  };
+
+  const handleUpdateValue = async (v) => {
+    const value = editingValueDraft.trim();
+    if (!value) return;
+    if (value === v.value) {
+      cancelEditValue();
+      return;
+    }
+    const uses = Number(v._count?.usedBy || 0);
+    if (uses > 0 && !window.confirm(
+      `« ${v.value} » est utilisée dans ${uses} option${uses > 1 ? "s" : ""} de produit. La modification mettra à jour les produits liés. Les clients ayant déjà cette option dans leur panier devront recharger la page et refaire leur choix. Continuer ?`,
+    )) return;
+
+    setSavingValueId(v.id);
+    clearMessages();
+    try {
+      const result = await characteristicsApi.updateValue(v.id, { value });
+      const products = Number(result.produitsMisAJour || 0);
+      setNotice(products > 0
+        ? `« ${v.value} » remplacée par « ${value} » — ${products} produit${products > 1 ? "s" : ""} mis à jour.`
+        : `Valeur modifiée en « ${value} ».`);
+      cancelEditValue();
+      await load();
+    } catch (err) {
+      showError(err, "Modification impossible");
+    } finally {
+      setSavingValueId(null);
+    }
   };
 
   const handleRemoveValue = async (v) => {
@@ -295,16 +332,64 @@ export default function AdminCaracteristiques() {
                   c.values.map((v) => (
                     <span
                       key={v.id}
-                      className="flex items-center gap-1 bg-black/[0.04] rounded-full pl-3 pr-1.5 py-1 text-[12px] text-apple-black"
+                      className="inline-flex min-w-0 items-center gap-1 rounded-full bg-black/[0.04] px-2.5 py-1 text-[12px] text-apple-black"
                     >
-                      {v.value}
-                      <button
-                        onClick={() => handleRemoveValue(v)}
-                        aria-label={`Retirer ${v.value}`}
-                        className="p-0.5 rounded-full hover:bg-red-100 transition"
-                      >
-                        <X className="w-3 h-3 text-apple-mid hover:text-red-500" />
-                      </button>
+                      {editingValueId === v.id ? (
+                        <>
+                          <input
+                            autoFocus
+                            value={editingValueDraft}
+                            onChange={(event) => setEditingValueDraft(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") handleUpdateValue(v);
+                              if (event.key === "Escape") cancelEditValue();
+                            }}
+                            aria-label={`Nouvelle valeur pour ${v.value}`}
+                            className="w-28 min-w-0 bg-transparent outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateValue(v)}
+                            disabled={savingValueId === v.id || !editingValueDraft.trim()}
+                            aria-label={`Enregistrer ${v.value}`}
+                            className="rounded-full p-0.5 transition hover:bg-green-100 disabled:opacity-40"
+                          >
+                            <Check className="h-3.5 w-3.5 text-green-700" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelEditValue}
+                            aria-label="Annuler la modification"
+                            className="rounded-full p-0.5 transition hover:bg-black/[0.08]"
+                          >
+                            <X className="h-3.5 w-3.5 text-apple-mid" />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="min-w-0">{v.value}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              clearMessages();
+                              setEditingValueId(v.id);
+                              setEditingValueDraft(v.value);
+                            }}
+                            aria-label={`Modifier ${v.value}`}
+                            className="rounded-full p-0.5 transition hover:bg-black/[0.08]"
+                          >
+                            <Pencil className="h-3 w-3 text-apple-mid" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveValue(v)}
+                            aria-label={`Retirer ${v.value}`}
+                            className="rounded-full p-0.5 transition hover:bg-red-100"
+                          >
+                            <X className="h-3 w-3 text-apple-mid hover:text-red-500" />
+                          </button>
+                        </>
+                      )}
                     </span>
                   ))
                 )}
