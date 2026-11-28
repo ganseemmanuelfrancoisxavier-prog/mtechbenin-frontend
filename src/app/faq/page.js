@@ -11,7 +11,7 @@ const STATIC_FAQS = [
   { id: "s6", category: "Livraison", question: "Dans quelles villes livrez-vous ?", answer: "Nous livrons à Cotonou (1 000 FCFA, 2-4h), Abomey-Calavi (1 500 FCFA, 3-6h), Porto-Novo (2 000 FCFA, 24h) et d'autres villes sur devis." },
   { id: "s7", category: "Abonnements Digitaux", question: "Comment reçois-je mes identifiants après achat ?", answer: "Après confirmation du paiement, vous recevez automatiquement vos identifiants (email, mot de passe, profil) par WhatsApp et email en moins de 5 minutes." },
   { id: "s8", category: "Abonnements Digitaux", question: "Que se passe-t-il si Netflix envoie un code de vérification ?", answer: "Vous devez d'abord nous le demander : écrivez « CODE » sur notre WhatsApp, ou saisissez votre numéro sur la page « Demander mon code » du site. Nous transmettons alors sur votre WhatsApp le prochain code reçu pour votre abonnement. Une demande reste valable 15 minutes ; si vous ne recevez rien, refaites-en une." },
-  { id: "s9", category: "Retours", question: "Quelle est votre politique de retour ?", answer: "Vous disposez de 7 jours après réception pour demander un retour. Le produit doit être non utilisé et dans son emballage d'origine. Contactez-nous sur WhatsApp avant tout renvoi." },
+  { id: "s9", category: "Retours", question: "Quelle est votre politique de retour ?", answer: "Vous disposez de 3 jours après réception pour demander un retour. Le produit doit être non utilisé et dans son emballage d'origine. Contactez-nous sur WhatsApp avant tout renvoi." },
 ];
 
 export const metadata = { title: "FAQ | MTECHBENIN" };
