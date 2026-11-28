@@ -169,7 +169,7 @@ export default function AdminLegal() {
             </label>
             <div>
               <p className="mb-2 text-sm font-semibold text-neutral-700">Contenu</p>
-              <RichEditor content={draft.content} onChange={(content) => setDraft((value) => ({ ...value, content }))} placeholder="Rédige le contenu de cette page…" />
+              <RichEditor key={draft.slug || "new"} content={draft.content} onChange={(content) => setDraft((value) => ({ ...value, content }))} placeholder="Rédige le contenu de cette page…" />
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-black/5 pt-4">
               <p className="text-xs text-neutral-400">Après publication, le lien apparaît dans la rubrique Légal du site.</p>
