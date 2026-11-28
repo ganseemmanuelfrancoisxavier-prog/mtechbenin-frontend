@@ -155,6 +155,8 @@ export default function ClientAccountPage() {
   const activeHistory = historyTab === "purchases" ? purchaseRows : referralRows;
   const visibleHistory = activeHistory.filter((row) => historyFilter === "all" || (historyFilter === "earned" ? row.gain > 0 : row.gain === 0));
   const displayedHistory = showAllHistory ? visibleHistory : visibleHistory.slice(0, 4);
+  const completedWithdrawals = (rewards?.withdrawals || []).filter((withdrawal) => withdrawal.status === "PAID");
+  const completedWithdrawalTotal = completedWithdrawals.reduce((total, withdrawal) => total + Number(withdrawal.amount || 0), 0);
   const copierCode = async () => {
     try {
       await navigator.clipboard.writeText(rewards.referralCode);
@@ -244,6 +246,10 @@ export default function ClientAccountPage() {
                 <button disabled={withdrawalBusy || (rewards?.balance || 0) < 2000} className="w-full rounded-2xl bg-black px-5 py-4 text-sm font-extrabold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40">{withdrawalBusy ? "Envoi de la demande…" : "Demander le retrait"}</button>
               </form>
               {!!rewards?.withdrawals?.length && <div className="mt-4 space-y-2 border-t border-neutral-200 pt-4">{rewards.withdrawals.map((w) => <div key={w.id} className="flex flex-wrap justify-between gap-2 rounded-xl bg-neutral-50 p-3 text-xs text-neutral-700"><span>{formatPrice(w.amount)} · {w.payoutNumber}</span><strong>{w.status === "REQUESTED" ? "En attente" : w.status === "PAID" ? "Payé" : "Refusé"}</strong></div>)}</div>}
+              <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+                <p className="text-xs font-medium text-neutral-500">Retraits effectués</p>
+                <p className="mt-1 text-sm font-bold text-neutral-900">{completedWithdrawals.length} retrait{completedWithdrawals.length > 1 ? "s" : ""} · {formatPrice(completedWithdrawalTotal)}</p>
+              </div>
             </section>
             {notice && <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{notice}</p>}
             {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
