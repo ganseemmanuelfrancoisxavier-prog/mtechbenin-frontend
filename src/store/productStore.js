@@ -145,15 +145,8 @@ const useProductStore = create(
     }),
     {
       name: "mtechbenin-products",
-      // v1 : ajout de `hasRequiredVariants` sur chaque produit normalisé. Un
-      // cache antérieur à cette version n'a pas ce champ (donc `undefined`,
-      // traité comme `false` par ProductCard) — sans ce bump, un visiteur
-      // dont le cache a moins de 5 min réhydrate l'ancienne liste après un
-      // déploiement, et les vignettes à caractéristique obligatoire
-      // réaffichent des boutons d'achat direct. Pas de `migrate` : on veut
-      // que ce cache soit jeté, pas transformé — les vraies données n'ont
-      // de toute façon jamais été perdues, elles vivent en base.
-      version: 1,
+      // Bumped to v2 to clear old local product snapshots after catalog filtering changes.
+      version: 2,
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
