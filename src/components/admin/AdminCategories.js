@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Plus,
   Edit,
@@ -12,6 +13,7 @@ import {
   RefreshCw,
   ArrowUp,
   ArrowDown,
+  Package,
 } from "lucide-react";
 import { categoriesApi } from "@/lib/api";
 import useCategoryStore from "@/store/categoryStore";
@@ -317,6 +319,14 @@ export default function AdminCategories() {
                     /{cat.slug}
                   </p>
                 </div>
+                <Link
+                  href={`/admin/produits?categorie=${encodeURIComponent(cat.slug)}`}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-black/[0.06] bg-white px-3 py-2 text-xs font-semibold text-apple-black hover:bg-apple-gray transition"
+                  aria-label={`Voir les produits de ${cat.label || cat.name}`}
+                >
+                  <Package className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Voir produits</span>
+                </Link>
                 <span
                   className={`text-xs font-medium px-2.5 py-1 rounded-full hidden sm:block ${
                     cat.active
