@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   Plus,
@@ -331,12 +330,10 @@ function VariantOptionPriceInput({ productId, option, basePrice, onSaved }) {
 }
 
 export default function AdminProduits({ smartphoneOnly = false }) {
-  const searchParams = useSearchParams();
-  const categoryFromUrl = searchParams.get("categorie") || "";
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
-  const [filterCat, setFilterCat] = useState(smartphoneOnly ? "smartphone-tablette" : categoryFromUrl || "tous");
+  const [filterCat, setFilterCat] = useState(smartphoneOnly ? "smartphone-tablette" : "tous");
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -395,8 +392,10 @@ export default function AdminProduits({ smartphoneOnly = false }) {
   };
 
   useEffect(() => {
-    if (!smartphoneOnly && categoryFromUrl) setFilterCat(categoryFromUrl);
-  }, [categoryFromUrl, smartphoneOnly]);
+    if (smartphoneOnly) return;
+    const category = new URLSearchParams(window.location.search).get("categorie");
+    if (category) setFilterCat(category);
+  }, [smartphoneOnly]);
 
   useEffect(() => {
     loadAll();
