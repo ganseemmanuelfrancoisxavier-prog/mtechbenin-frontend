@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   Plus,
@@ -330,10 +331,12 @@ function VariantOptionPriceInput({ productId, option, basePrice, onSaved }) {
 }
 
 export default function AdminProduits({ smartphoneOnly = false }) {
+  const searchParams = useSearchParams();
+  const categoryFromUrl = searchParams.get("categorie") || "";
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
-  const [filterCat, setFilterCat] = useState(smartphoneOnly ? "smartphone-tablette" : "tous");
+  const [filterCat, setFilterCat] = useState(smartphoneOnly ? "smartphone-tablette" : categoryFromUrl || "tous");
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -390,6 +393,10 @@ export default function AdminProduits({ smartphoneOnly = false }) {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (!smartphoneOnly && categoryFromUrl) setFilterCat(categoryFromUrl);
+  }, [categoryFromUrl, smartphoneOnly]);
 
   useEffect(() => {
     loadAll();
@@ -718,7 +725,7 @@ export default function AdminProduits({ smartphoneOnly = false }) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display font-black text-2xl text-apple-black tracking-tight">
-            {smartphoneOnly ? "Téléphones et tablettes" : "Produits"}
+            {smartphoneOnly ? "Téléphones et tablettes" : filterCat === "tous" ? "Produits" : getCategoryLabel(filterCat)}
           </h1>
           <p className="text-apple-mid text-[13px] mt-1">
             {smartphoneOnly ? `${filtered.length} téléphones et tablettes` : `${products.length} produits au total`}
